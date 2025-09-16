@@ -14,17 +14,18 @@ type NewStockDeliveryProps = {
 
 const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, stockItems, onAdd, onRemove, disabled = false }) => {
   const [itemName, setItemName] = useState(stockItems[0] || '');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
 
   const handleAddItem = () => {
-    if (itemName.trim() && quantity > 0) {
+    const numQuantity = parseInt(quantity, 10);
+    if (itemName.trim() && !isNaN(numQuantity) && numQuantity > 0) {
       onAdd({
         id: new Date().toISOString(), // simple unique id
         name: itemName.trim(),
-        quantity,
+        quantity: numQuantity,
       });
       setItemName(stockItems[0] || '');
-      setQuantity(1);
+      setQuantity('1');
     }
   };
 
@@ -48,12 +49,12 @@ const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, stockIt
           <NumericInput
             placeholder="Quantity"
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value, 10) || 1)}
+            onChange={(e) => setQuantity(e.target.value)}
             min={1}
             className="w-full sm:w-32"
             disabled={disabled}
           />
-          <Button onClick={handleAddItem} disabled={disabled || !itemName.trim() || quantity <= 0}>
+          <Button onClick={handleAddItem} disabled={disabled || !itemName.trim() || !(parseInt(quantity, 10) > 0)}>
             Add
           </Button>
         </div>

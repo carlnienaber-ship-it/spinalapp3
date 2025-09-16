@@ -168,7 +168,7 @@ const App: React.FC = () => {
               onRemove={handleRemoveDelivery}
               disabled={isGeoDisabled}
             />
-            <Button onClick={() => setStep('motivational')} className="mt-8 w-full" size="lg" variant="secondary">Back to Mid-Shift Hub</Button>
+            <Button onClick={() => setStep('motivational')} className="mt-8 w-full" size="lg">Back to Mid-Shift Hub</Button>
           </>
         );
       case 'closing_stock':

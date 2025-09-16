@@ -141,3 +141,9 @@
 ## Phase 13: Final UI Refinements
 - [x] **Task 13.1: Further Refine Opening Tasks List**
   > Further streamline the opening workflow by removing the "Unlock back door" task from the checklist. This reflects the latest operational procedure changes.
+
+## Phase 14: Final Polish 2
+- [x] **Task 14.1: Fix Bug in New Stock Delivery Quantity Input**
+  > Fixed a bug where the quantity input would reset to '1' when cleared. The component's state was changed to store the quantity as a string, allowing for an empty input field. The value is now parsed into a number only upon submission, making the component more robust.
+- [x] **Task 14.2: Unify "Back to Mid-Shift Hub" Button Style**
+  > Updated the "Back to Mid-Shift Hub" button on the New Stock Delivery screen to use the primary style by removing the `variant="secondary"` prop. This ensures its appearance is consistent with other main navigation buttons.
