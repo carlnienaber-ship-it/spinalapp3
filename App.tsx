@@ -1,11 +1,15 @@
 
 
+
+
+
+
 import React, { useState, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
 import { useGeolocation } from './src/hooks/useGeolocation';
 import { useApiClient } from './src/hooks/useApiClient';
-import { initialShiftState } from './src/data/mockData';
+import { initialShiftState, stockTemplate } from './src/data/mockData';
 import { ShiftState, ShiftStep, Task, StockCategory, StockItem, NewStockDeliveryItem } from './src/types';
 
 import Header from './src/components/ui/Header';
@@ -18,6 +22,8 @@ import NewStockDelivery from './src/components/stock/NewStockDelivery';
 import Feedback from './src/components/ui/Feedback';
 import CompletionScreen from './src/components/ui/CompletionScreen';
 import MotivationalScreen from './src/components/ui/MotivationalScreen';
+
+const allStockItems = stockTemplate.flatMap(cat => cat.items.map(item => item.name));
 
 const App: React.FC = () => {
   const { user, logout } = useAuth0();
@@ -58,12 +64,15 @@ const App: React.FC = () => {
     setShiftState(prev => {
       const stock = stockType === 'opening' ? prev.openingStock : prev.closingStock;
       const newStock = JSON.parse(JSON.stringify(stock)) as StockCategory[];
-      // FIX: The 'field' parameter is of type `keyof StockItem`, which includes the 'name' property (a string).
-      // Assigning a number value to it directly would be a type error. This guard ensures we only assign to number-like properties.
       const itemToUpdate = newStock[categoryIndex].items[itemIndex];
+      
+      // FIX: This type assertion resolves the TypeScript error. It informs the compiler that within this block,
+      // we are only assigning numeric values to fields that are expected to be numbers, not the 'name' field.
       if (field !== 'name') {
-        itemToUpdate[field] = value;
+        type WritableStockItem = Omit<StockItem, 'name'>;
+        (itemToUpdate as WritableStockItem)[field as keyof WritableStockItem] = value;
       }
+      
       return stockType === 'opening'
         ? { ...prev, openingStock: newStock }
         : { ...prev, closingStock: newStock };
@@ -106,9 +115,10 @@ const App: React.FC = () => {
   const renderCurrentStep = () => {
     switch (shiftState.currentStep) {
       case 'welcome':
+        const welcomeName = user?.given_name || (user?.name && !user.name.includes('@') ? user.name.split(' ')[0] : '');
         return (
           <div className="text-center bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
-            <Header title="Welcome to Shift Handover" subtitle={`Logged in as ${user?.name || user?.email}`} />
+            <Header title={`Welcome${welcomeName ? ` ${welcomeName}` : ''}`} subtitle={`Logged in as ${user?.email}`} />
             <div className="my-6 flex justify-center"><GeoStatus /></div>
             <Button 
               onClick={handleStartShift}
@@ -123,10 +133,20 @@ const App: React.FC = () => {
           </div>
         );
       case 'opening_tasks':
+        const areOpeningTasksComplete = shiftState.openingTasks.every(task => task.completed);
         return (
           <>
             <TaskList title="Opening Tasks" tasks={shiftState.openingTasks} onTaskChange={(task) => handleTaskChange(task, 'opening')} />
-            <Button onClick={() => setStep('opening_stock')} className="mt-8 w-full" size="lg">Continue to Opening Stocktake</Button>
+            <div className="mt-8 text-center">
+              <Button onClick={() => setStep('opening_stock')} className="w-full" size="lg" disabled={!areOpeningTasksComplete}>
+                Continue to Opening Stocktake
+              </Button>
+              {!areOpeningTasksComplete && (
+                <p className="text-yellow-400 mt-4">
+                  All opening tasks must be completed before you can proceed.
+                </p>
+              )}
+            </div>
           </>
         );
       case 'opening_stock':
@@ -142,7 +162,8 @@ const App: React.FC = () => {
         return (
           <>
             <NewStockDelivery 
-              deliveries={shiftState.newStockDeliveries} 
+              deliveries={shiftState.newStockDeliveries}
+              stockItems={allStockItems} 
               onAdd={handleAddDelivery}
               onRemove={handleRemoveDelivery}
               disabled={isGeoDisabled}
@@ -182,13 +203,15 @@ const App: React.FC = () => {
   const progressSteps = [
       { id: 'opening_tasks' as ShiftStep, title: 'Opening Tasks' },
       { id: 'opening_stock' as ShiftStep, title: 'Opening Stock' },
+      { id: 'on_shift' as ShiftStep, title: 'On Shift' },
       { id: 'closing_stock' as ShiftStep, title: 'Closing Stock' },
       { id: 'closing_tasks' as ShiftStep, title: 'Closing Tasks' },
   ];
   
   const getProgressStepId = (): ShiftStep => {
-    // Map non-linear/hub steps back to their place in the linear flow for the progress bar
-    if (shiftState.currentStep === 'motivational' || shiftState.currentStep === 'new_stock_delivery') return 'opening_stock';
+    if (shiftState.currentStep === 'motivational' || shiftState.currentStep === 'new_stock_delivery') {
+      return 'on_shift' as ShiftStep;
+    }
     return shiftState.currentStep;
   }
 
@@ -196,7 +219,7 @@ const App: React.FC = () => {
     <div className="bg-gray-900 text-white min-h-screen font-sans">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-100">Shift Handover</h1>
+          <h1 className="text-2xl font-bold text-gray-100">Spinäl Äpp</h1>
           <div className="flex items-center gap-4">
             <span className="text-gray-400 text-sm hidden sm:inline">{user?.email}</span>
             <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })} variant="secondary" size="sm">

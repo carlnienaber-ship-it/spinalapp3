@@ -6,13 +6,14 @@ import NumericInput from '../ui/NumericInput';
 
 type NewStockDeliveryProps = {
   deliveries: NewStockDeliveryItem[];
+  stockItems: string[];
   onAdd: (item: NewStockDeliveryItem) => void;
   onRemove: (id: string) => void;
   disabled?: boolean;
 };
 
-const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, onAdd, onRemove, disabled = false }) => {
-  const [itemName, setItemName] = useState('');
+const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, stockItems, onAdd, onRemove, disabled = false }) => {
+  const [itemName, setItemName] = useState(stockItems[0] || '');
   const [quantity, setQuantity] = useState(1);
 
   const handleAddItem = () => {
@@ -22,7 +23,7 @@ const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, onAdd, 
         name: itemName.trim(),
         quantity,
       });
-      setItemName('');
+      setItemName(stockItems[0] || '');
       setQuantity(1);
     }
   };
@@ -33,14 +34,17 @@ const NewStockDelivery: React.FC<NewStockDeliveryProps> = ({ deliveries, onAdd, 
       <div className="space-y-4 mb-6">
         <h3 className="text-lg font-semibold text-gray-200">Add New Item</h3>
         <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Item Name"
+          <select
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
-            className="flex-grow rounded-md bg-gray-900 border-gray-600 px-4 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-grow rounded-md bg-gray-900 border border-gray-700 px-4 py-2 text-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
             disabled={disabled}
-          />
+            aria-label="Select stock item"
+          >
+            {stockItems.map(item => (
+                <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
           <NumericInput
             placeholder="Quantity"
             value={quantity}

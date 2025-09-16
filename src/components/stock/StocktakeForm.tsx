@@ -28,7 +28,7 @@ const StocktakeForm: React.FC<StocktakeFormProps> = ({ title, stockData, onStock
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
               {category.items.map((item, itemIndex) => (
                 <div key={item.name} className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-400">{item.name}</label>
+                  <label className="block text-sm font-semibold text-gray-200">{item.name}</label>
                   <div className="flex space-x-2">
                     {category.headers.map(header => {
                       const key = headerToKeyMap[header];

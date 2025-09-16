@@ -2,14 +2,15 @@ import { ShiftState, StockCategory, Task } from '../types';
 
 const openingTasks: Task[] = [
     { id: 'open_sign', text: 'Change window sign to "Open"', type: 'toggle', completed: false },
-    { id: 'a_frame', text: 'Bring A-frame sign inside', type: 'toggle', completed: false },
+    { id: 'a_frame', text: 'Take Happy Hour sign outside', type: 'toggle', completed: false },
     { id: 'back_door_unlock', text: 'Unlock back door', type: 'toggle', completed: false },
     { id: 'bathroom_unlock', text: 'Unlock bathroom', type: 'toggle', completed: false },
     { id: 'storeroom_unlock', text: 'Unlock store room', type: 'toggle', completed: false },
     { id: 'electricity_meter_check_open', text: 'Check prepaid electricity meter', type: 'toggle', completed: false },
     { id: 'plug_in_devices_open', text: 'Plug in iPad and Yoco', type: 'toggle', completed: false },
     { id: 'menu_board_check', text: 'Check menu board', type: 'radio', options: ['OK', 'Needs Update'], completed: false, value: '' },
-    { id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention'], completed: false, value: '', notes: '' },
+    { id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention', 'Other'], completed: false, value: '', notes: '' },
+    { id: 'ac_on_open', text: 'Turn on airconditioner', type: 'toggle', completed: false },
 ];
 
 const closingTasks: Task[] = [
@@ -27,7 +28,7 @@ const closingTasks: Task[] = [
     { id: 'ac_off', text: 'Switch off airconditioner', type: 'toggle', completed: false },
 ];
 
-const stockTemplate: StockCategory[] = [
+export const stockTemplate: StockCategory[] = [
   {
     title: 'Spirits',
     headers: ['FOH', 'Store Room', 'Open Bottle Weight'],

@@ -9,7 +9,7 @@ const LoginScreen: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
       <div className="w-full max-w-md text-center">
-        <Header title="Shift Handover" subtitle="Please log in to continue" />
+        <Header title="Welcome to Spinäl Äpp" subtitle="Please log in to continue" />
         <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
           <p className="text-gray-400 mb-6">You will be redirected to a secure login page to sign in to your account.</p>
           <Button 

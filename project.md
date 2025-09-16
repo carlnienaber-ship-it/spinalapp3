@@ -33,9 +33,11 @@ To develop a robust, secure, and intuitive web application that assists bartende
     - `-33.933441524533194, 18.46671777285557`
     - `-34.010195862993506, 18.462161989876357`
 
-### 3.1. Critical Constraint: No Import Maps
+### 3.1. Architectural Note: Required Import Map Workaround
 
-- **Absolute Prohibition:** The generated `index.html` file **MUST NOT** contain a `<script type="importmap">` block under any circumstances. Its presence indicates a fundamental misunderstanding of the project's Vite-based architecture.
+- **Environmental Constraint:** The development environment (Gemini AI Studio) automatically injects a `<script type="importmap">` block into the `index.html` file.
+- **Persistence:** This block is a persistent artifact of the environment and cannot be manually removed from the source file, as it will be re-inserted.
+- **Required Workaround:** To ensure a clean and valid production build, a custom Vite plugin is included in `vite.config.ts`. This plugin's sole purpose is to programmatically remove the `importmap` block during the build process (`npm run build`). This is the accepted and necessary solution for this project.
 
 ### 3.2. Environment Variables
 
@@ -47,6 +49,7 @@ The application requires the following environment variables to be set up in the
 ## 4. Authentication & Access Control (Auth0 Integration)
 
 - **SDK:** User authentication will be managed by Auth0, integrated via the `@auth0/auth0-react` SDK.
+- **Persistent Sessions:** The application should maintain user login sessions across browser restarts. This will be achieved by configuring the Auth0 SDK to use refresh tokens and local storage for session caching.
 - **Security Model:** The application will enforce a "Deny by Default" model. Access is forbidden unless explicitly granted.
 - **Role-Based Access Control (RBAC):**
   - The application must inspect the authenticated user's ID token for a custom claim: `https://spinalapp.com/roles`.
@@ -61,16 +64,17 @@ The application is a linear workflow. State will manage the current step.
 1.  **Login Screen:** For unauthenticated users. A "Login / Sign Up" button.
 2.  **Account Not Activated Screen:** For authenticated but unauthorized users.
 3.  **Welcome Screen:** For approved users. Welcomes them and provides a "Clock In" button.
-4.  **Opening Tasks Screen:** A checklist of opening tasks.
-    - `{ id: 'open_sign', text: 'Change window sign to "Open"', type: 'toggle' }`
-    - `{ id: 'a_frame', text: 'Bring A-frame sign inside', type: 'toggle' }`
-    - `{ id: 'back_door_unlock', text: 'Unlock back door', type: 'toggle' }`
-    - `{ id: 'bathroom_unlock', text: 'Unlock bathroom', type: 'toggle' }`
-    - `{ id: 'storeroom_unlock', text: 'Unlock store room', type: 'toggle' }`
-    - `{ id: 'electricity_meter_check_open', text: 'Check prepaid electricity meter', type: 'toggle' }`
-    - `{ id: 'plug_in_devices_open', text: 'Plug in iPad and Yoco', type: 'toggle' }`
-    - `{ id: 'menu_board_check', text: 'Check menu board', type: 'radio', options: ['OK', 'Needs Update'] }`
-    - `{ id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention'] }`
+4.  **Opening Tasks Screen:** A checklist of opening tasks. **Completion of all tasks is mandatory before proceeding to the opening stocktake.**
+    - `Task 1: Change window sign to "Open".` (Input Method: Toggle button)
+    - `Task 2: Take Happy Hour sign outside.` (Input Method: Toggle button)
+    - `Task 3: Unlock back door.` (Input Method: Toggle button)
+    - `Task 4: Unlock bathroom.` (Input Method: Toggle button)
+    - `Task 5: Unlock store room.` (Input Method: Toggle button)
+    - `Task 6: Check prepaid electricity meter.` (Input Method: Toggle button)
+    - `Task 7: Plug in iPad and Yoco.` (Input Method: Toggle button)
+    - `Task 8: Check menu board.` (Input Method: Radio buttons, options TBD)
+    - `Task 9: Check beer quality.` (Input Method: Radio buttons with an optional text input for "Other", options TBD)
+    - `Task 10: Turn on airconditioner.` (Input Method: Toggle button)
 5.  **Opening Stocktake Screen:** A form to record initial stock levels. All screens from this point on will be disabled if the user is outside the geofenced area.
     - **Section: Spirits:** `FOH (bottles)`, `Store Room (bottles)`, `Open Bottle Weight (g)`
         - African Dry Gin, Aperol, Bain's, Die Mas 5y/o Brandy, El Jimador, Floating Dutchman, Jägermeister, Jameson, Johnnie Walker Black, Olmeca, Rooster, Stolichnaya, Tanqueray, Ugly Gin
@@ -83,19 +87,18 @@ The application is a linear workflow. State will manage the current step.
 7.  **New Stock Delivery Screen:** A dynamic form to record new stock deliveries.
 8.  **Closing Stocktake Screen:** The same stocktake form from the opening.
 9.  **Closing Tasks Screen:** Final checklist.
-    - **Tasks:**
-        - `{ id: 'closed_sign', text: 'Change window sign to "Closed"', type: 'toggle' }`
-        - `{ id: 'happy_hour_sign', text: 'Bring Happy Hour sign inside', type: 'toggle' }`
-        - `{ id: 'notify_shortages', text: 'Notify Carl about shortages', type: 'toggle' }`
-        - `{ id: 'close_tabs', text: 'Close all outstanding bar tabs', type: 'toggle_text' }`
-        - `{ id: 'clean_glassware', text: 'Clean all glassware and dishes', type: 'toggle' }`
-        - `{ id: 'plug_in_devices_close', text: 'Plug in iPad and Yoco', type: 'toggle' }`
-        - `{ id: 'storeroom_lock', text: 'Lock store room', type: 'toggle' }`
-        - `{ id: 'electricity_meter_check_close', text: 'Check prepaid electricity meter', type: 'toggle' }`
-        - `{ id: 'bathroom_lock', text: 'Lock bathroom', type: 'toggle' }`
-        - `{ id: 'back_door_lock', text: 'Lock back door', type: 'toggle' }`
-        - `{ id: 'lights_off', text: 'Switch off lamps and under bar lights', type: 'toggle' }`
-        - `{ id: 'ac_off', text: 'Switch off airconditioner', type: 'toggle' }`
+    - `Task 1: Change window sign to "Closed".` (Input Method: Toggle button)
+    - `Task 2: Bring Happy Hour sign inside.` (Input Method: Toggle button)
+    - `Task 3: Notify Carl about shortages.` (Input Method: Toggle button)
+    - `Task 4: Close all outstanding bar tabs.` (Input Method: Toggle with notes)
+    - `Task 5: Clean all glassware and dishes.` (Input Method: Toggle button)
+    - `Task 6: Plug in iPad and Yoco.` (Input Method: Toggle button)
+    - `Task 7: Lock store room.` (Input Method: Toggle button)
+    - `Task 8: Check prepaid electricity meter.` (Input Method: Toggle button)
+    - `Task 9: Lock bathroom.` (Input Method: Toggle button)
+    - `Task 10: Lock back door.` (Input Method: Toggle button)
+    - `Task 11: Switch off lamps and under bar lights.` (Input Method: Toggle button)
+    - `Task 12: Switch off airconditioner.` (Input Method: Toggle button)
     - **Shift Feedback:**
         - Heading: "How was your shift?"
         - Options: Emoji buttons for "Great" (smiling), "Normal" (neutral), "Bad" (sad).

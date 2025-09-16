@@ -28,7 +28,7 @@
 - [x] **Task 3.2: Create Mock Data**
   > Created `src/data/mockData.ts` to export an `initialShiftState` object. This object is pre-populated with all the opening and closing tasks and serves as the default state for the application, enabling UI development without a backend.
 - [x] **Task 3.3: Build Task Rendering Components (`TaskList.tsx`, `TaskItem.tsx`)**
-  > Created `TaskList.tsx` to display a list of tasks under a title. It maps over an array of `Task` objects and renders a `TaskItem` for each one. The `TaskItem.tsx` component is responsible for rendering the correct interactive control (e.g., a toggle, radio buttons) based on the task's `type` property.
+  > Created `TaskList.tsx` to display a list of tasks under a title. It maps over an array of `Task` objects and renders a `TaskItem` for each one. The `TaskItem` component is responsible for rendering the correct interactive control (e.g., a toggle, radio buttons) based on the task's `type` property.
 - [x] **Task 3.4: Render Initial Screen in `App.tsx`**
   > The main `App.tsx` component was updated to import the `initialShiftState` and render the opening tasks using the `TaskList` component. State management for task updates was implemented via a handler function.
 
@@ -89,3 +89,29 @@
   > Created the `ProgressIndicator` component, which displays a visual step-by-step progress bar at the top of the screen, showing the user where they are in the linear workflow.
 - [x] **Task 8.4: Implement Completion Screen**
   > Created a final `CompletionScreen` to confirm a successful shift submission. It provides options to log out or start a new shift, which clears the previous state from `localStorage`.
+
+## Phase 9: Post testing tweaks
+- [x] **Task 9.1: Update Login Screen Title**
+  > Modified `src/components/auth/LoginScreen.tsx` to change the main header title from "Shift Handover" to "Welcome to Spinäl Äpp" to align with the new branding.
+- [x] **Task 9.2: Implement Persistent Login Sessions**
+  > Configured the `Auth0Provider` in `index.tsx` to use `useRefreshTokens={true}` and `cacheLocation="localstorage"`. This ensures users remain logged in across browser restarts, improving the user experience by eliminating the need for frequent logins.
+- [x] **Task 9.3: Personalize Welcome Message**
+  > Updated `App.tsx` to display a personalized welcome message. The app now greets users with "Welcome <First Name>" using the `given_name` from their Auth0 profile. Also updated the main app title to "Spinäl Äpp". To support this, updated `Auth0Provider` to request the `profile` scope.
+- [x] **Task 9.4: Refine Opening Tasks and Add Completion Logic**
+  > Updated the opening task list in `src/data/mockData.ts` based on user feedback. Implemented logic in `App.tsx` to disable the "Continue" button on the opening tasks screen until all tasks have been marked as complete, enforcing the new business rule. Also modified `TaskItem.tsx` to support the "Other" option text field for the beer quality check.
+- [x] **Task 9.5: Resolve TypeScript Error in `handleStockChange`**
+  > Resolved the static type error in `App.tsx` by using a type assertion on the `itemToUpdate` object. This ensures TypeScript understands that only number-compatible properties of the `StockItem` are being updated, resulting in a clean, type-safe build.
+- [x] **Task 9.6: Correct Opening Task 2 Text**
+  > Updated the text for the second opening task in `src/data/mockData.ts` from "Bring A-frame sign inside" to "Take Happy Hour sign outside" as requested by the user.
+- [x] **Task 9.7: Improve Stocktake Screen UI/UX**
+  > Enhanced the UI of the stocktake screens. Product names in `StocktakeForm.tsx` are now more prominent. The `NumericInput.tsx` component was updated with smaller placeholder text to prevent truncation, a subtler default border, and a more distinct focus ring, improving overall usability and visual feedback.
+- [x] **Task 9.8: Update Motivational Screen Content**
+  > Updated `MotivationalScreen.tsx` with the new inspirational text and the revised list of six company core values. The component's grid layout was adjusted to responsively display the new content.
+- [x] **Task 9.9: Add "On Shift" Step to Progress Bar**
+  > Modified the workflow logic in `App.tsx` to include a new "On Shift" step in the `ProgressIndicator`. This step is now correctly displayed when the user is on the mid-shift hub or new stock delivery screens, providing better context within the overall shift timeline.
+- [x] **Task 9.10: Enhance New Stock Delivery UI**
+  > Refactored the `NewStockDelivery.tsx` component to replace the text input with a `<select>` dropdown populated with all available stock items, improving data consistency. The styling of the adjacent quantity input in `NumericInput.tsx` was also unified for a cleaner appearance.
+- [x] **Task 9.11: Add "Turn on airconditioner" to Opening Tasks**
+  > Added a new task, "Turn on airconditioner", to the `openingTasks` array in `src/data/mockData.ts` as the tenth item in the checklist.
+- [x] **Task 9.12: Align Closing Tasks Data with Documentation**
+  > Reviewed the `closingTasks` array in `src/data/mockData.ts` against the `project.md` documentation. Confirmed that the data model is already fully aligned with the documented requirements; therefore, no code changes were necessary for this task.
