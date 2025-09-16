@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useState } from 'react';
-import { ShiftState, StockCategory, StockItem } from '../types';
+import { ShiftState, StockCategory } from '../types';
 
 const API_ENDPOINT = "/.netlify/functions/submit-shift"; // Correct endpoint for Netlify functions
 
