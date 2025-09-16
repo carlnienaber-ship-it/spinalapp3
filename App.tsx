@@ -216,7 +216,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen font-sans">
+    <div className="bg-gray-900 text-white min-h-screen font-sans overflow-x-hidden">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-100">Spinäl Äpp</h1>

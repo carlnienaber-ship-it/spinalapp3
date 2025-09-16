@@ -44,7 +44,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onChange, disabled = false })
                 </label>
               ))}
             </div>
-            {task.type === 'radio_text' && task.value === 'Other' && (
+            {task.type === 'radio_text' && task.value === 'Needs Attention' && (
               <textarea
                 placeholder="Please specify..."
                 value={task.notes || ''}

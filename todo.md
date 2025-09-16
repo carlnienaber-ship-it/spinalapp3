@@ -115,3 +115,11 @@
   > Added a new task, "Turn on airconditioner", to the `openingTasks` array in `src/data/mockData.ts` as the tenth item in the checklist.
 - [x] **Task 9.12: Align Closing Tasks Data with Documentation**
   > Reviewed the `closingTasks` array in `src/data/mockData.ts` against the `project.md` documentation. Confirmed that the data model is already fully aligned with the documented requirements; therefore, no code changes were necessary for this task.
+
+## Phase 10: Post testing tweaks 2
+- [x] **Task 10.1: Refine "Check Beer Quality" Task UI**
+  > Based on user feedback, the `beer_quality_check` task was simplified. The 'Other' radio option was removed from `mockData.ts`. The `TaskItem.tsx` component was updated so the text input field now appears only when 'Needs Attention' is selected.
+- [x] **Task 10.2: Further Reduce Placeholder Font Size in Stocktake Inputs**
+  > To prevent placeholder text like "Store Room" from being truncated, the font size was further reduced. The `NumericInput.tsx` component was updated to use a smaller, arbitrary text size (`placeholder:text-[11px]`) for better visibility.
+- [x] **Task 10.3: Prevent Horizontal Scrolling on Mobile**
+  > Resolved the issue of horizontal overflow on mobile devices. The `overflow-x-hidden` utility class was added to the main container div in `App.tsx`, which prevents the entire page from scrolling sideways and creating unwanted blank space.

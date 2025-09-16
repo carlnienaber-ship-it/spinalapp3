@@ -9,7 +9,7 @@ const openingTasks: Task[] = [
     { id: 'electricity_meter_check_open', text: 'Check prepaid electricity meter', type: 'toggle', completed: false },
     { id: 'plug_in_devices_open', text: 'Plug in iPad and Yoco', type: 'toggle', completed: false },
     { id: 'menu_board_check', text: 'Check menu board', type: 'radio', options: ['OK', 'Needs Update'], completed: false, value: '' },
-    { id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention', 'Other'], completed: false, value: '', notes: '' },
+    { id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention'], completed: false, value: '', notes: '' },
     { id: 'ac_on_open', text: 'Turn on airconditioner', type: 'toggle', completed: false },
 ];
 
