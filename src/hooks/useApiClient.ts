@@ -2,7 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback, useState } from 'react';
 import { ShiftState, StockCategory, StockItem } from '../types';
 
-const API_ENDPOINT = "/api/submit-shift"; // Example endpoint
+const API_ENDPOINT = "/.netlify/functions/submit-shift"; // Correct endpoint for Netlify functions
 
 const performPreSubmissionCalculations = (shiftData: ShiftState): ShiftState => {
   const calculatedState = JSON.parse(JSON.stringify(shiftData)) as ShiftState;
@@ -60,14 +60,8 @@ export function useApiClient() {
     try {
       const finalData = performPreSubmissionCalculations(shiftData);
       
-      console.log("Submitting final calculated data:", finalData);
+      console.log("Submitting final calculated data to endpoint:", API_ENDPOINT);
       
-      // MOCK: This section simulates an API call.
-      // In a real application, you would uncomment and use the fetch logic.
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-      
-      /*
-      // REAL API CALL LOGIC
       const token = await getAccessTokenSilently();
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
@@ -79,9 +73,9 @@ export function useApiClient() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit shift report.');
+        const errorBody = await response.json();
+        throw new Error(errorBody.error || 'Failed to submit shift report.');
       }
-      */
 
       setIsSubmitting(false);
       return true; // Indicate success

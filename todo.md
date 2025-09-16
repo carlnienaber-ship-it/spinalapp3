@@ -93,7 +93,7 @@
 - [COMPLETED] **Task 7.2: Implement Pre-Submission Calculations**
   - [COMPLETED] Inside `handleClockOut`, write the logic to perform the two required calculations: adjusting the opening stock with new deliveries and calculating `fullBottlesTotal` for spirits in both opening and closing stock takes.
 - [COMPLETED] **Task 7.3: Implement API Call**
-  - [COMPLETED] Use the `fetch` API to `POST` the final, calculated JSON payload to the designated Netlify Function endpoint (e.g., `/.netlify/functions/submit-shift`).
+  - [COMPLETED] Use the `fetch` API to `POST` the final, calculated JSON payload to the designated Netlify Function endpoint. **This is now live.**
 - [COMPLETED] **Task 7.4: Handle API Response**
   - [COMPLETED] On a successful response from the API, proceed with clearing the local state and navigating to the Summary screen.
   - [COMPLETED] On a failed response, display an error message to the user and do not clear the local state, allowing them to retry.
