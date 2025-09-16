@@ -2,6 +2,7 @@
 export type Task = {
   id: string;
   text: string;
+  description?: string;
   type: 'toggle' | 'radio' | 'radio_text' | 'toggle_text';
   completed: boolean;
   options?: string[];

@@ -10,6 +10,15 @@ type TaskItemProps = {
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onChange, disabled = false }) => {
   const renderTaskControl = () => {
+    const taskLabelWithDescription = (
+      <div>
+        {task.text}
+        {task.description && (
+          <p className="text-xs text-gray-400 mt-1">{task.description}</p>
+        )}
+      </div>
+    );
+
     switch (task.type) {
       case 'toggle':
         return (
@@ -17,7 +26,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onChange, disabled = false })
           <div className={disabled ? 'cursor-not-allowed' : ''}>
              <Toggle
               id={task.id}
-              label={task.text}
+              label={taskLabelWithDescription}
               checked={task.completed}
               onChange={(checked) => !disabled && onChange({ ...task, completed: checked })}
             />
@@ -61,7 +70,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onChange, disabled = false })
             <div className={disabled ? 'cursor-not-allowed' : ''}>
               <Toggle
                 id={task.id}
-                label={task.text}
+                label={taskLabelWithDescription}
                 checked={task.completed}
                 onChange={(checked) => !disabled && onChange({ ...task, completed: checked })}
               />

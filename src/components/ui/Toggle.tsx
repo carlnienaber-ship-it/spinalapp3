@@ -4,7 +4,7 @@ type ToggleProps = {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
-  label: string;
+  label: React.ReactNode;
 };
 
 const Toggle: React.FC<ToggleProps> = ({ id, checked, onChange, label }) => {

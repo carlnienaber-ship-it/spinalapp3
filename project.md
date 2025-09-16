@@ -12,6 +12,8 @@ To develop a robust, secure, and intuitive web application that assists bartende
 - **Data Persistence:** The entire shift state will be saved locally in the browser.
 - **Responsive Design:** The application will be fully functional and visually appealing on all devices.
 - **Geolocation Verification:** All task-related actions are disabled unless the user is physically within a 100-meter radius of the business premises.
+- **Geofence-Exit Notifications (Foreground Only):** If the application is open and the user leaves the geofenced area without having clocked out, the application will trigger a browser notification and an audible prompt ("It looks like you have left work without clocking out. Please return to the bar to clock out"). 
+  - **Limitation:** Due to browser restrictions, this feature only functions when the app is the active tab and cannot run reliably in the background.
 - **Shift Feedback Collection:** A simple, emoji-based feedback mechanism on the closing screen to gather qualitative data on each shift.
 
 ## 3. Technical Architecture & Build Environment
@@ -65,16 +67,14 @@ The application is a linear workflow. State will manage the current step.
 2.  **Account Not Activated Screen:** For authenticated but unauthorized users.
 3.  **Welcome Screen:** For approved users. Welcomes them and provides a "Clock In" button.
 4.  **Opening Tasks Screen:** A checklist of opening tasks. **Completion of all tasks is mandatory before proceeding to the opening stocktake.**
-    - `Task 1: Change window sign to "Open".` (Input Method: Toggle button)
-    - `Task 2: Take Happy Hour sign outside.` (Input Method: Toggle button)
-    - `Task 3: Unlock back door.` (Input Method: Toggle button)
-    - `Task 4: Unlock bathroom.` (Input Method: Toggle button)
-    - `Task 5: Unlock store room.` (Input Method: Toggle button)
-    - `Task 6: Check prepaid electricity meter.` (Input Method: Toggle button)
-    - `Task 7: Plug in iPad and Yoco.` (Input Method: Toggle button)
-    - `Task 8: Check menu board.` (Input Method: Radio buttons, options TBD)
-    - `Task 9: Check beer quality.` (Input Method: Radio buttons with an optional text input for "Other", options TBD)
-    - `Task 10: Turn on airconditioner.` (Input Method: Toggle button)
+    - `Task 1: Turn on airconditioner.` (Input Method: Toggle button)
+    - `Task 2: Change window sign to "Open".` (Input Method: Toggle button)
+    - `Task 3: Take Happy Hour sign outside.` (Input Method: Toggle button)
+    - `Task 4: Unlock back door.` (Input Method: Toggle button)
+    - `Task 5: Unlock bathroom.` (Input Method: Toggle button)
+    - `Task 6: Check menu board.` (Input Method: Radio buttons, options TBD)
+    - `Task 7: Check beer quality.` (Input Method: Radio buttons with an optional text input for "Other", options TBD)
+    - `Task 8: Turn on lamps and under bar lights.` (Input Method: Toggle button)
 5.  **Opening Stocktake Screen:** A form to record initial stock levels. All screens from this point on will be disabled if the user is outside the geofenced area.
     - **Section: Spirits:** `FOH (bottles)`, `Store Room (bottles)`, `Open Bottle Weight (g)`
         - African Dry Gin, Aperol, Bain's, Die Mas 5y/o Brandy, El Jimador, Floating Dutchman, Jägermeister, Jameson, Johnnie Walker Black, Olmeca, Rooster, Stolichnaya, Tanqueray, Ugly Gin
@@ -86,15 +86,17 @@ The application is a linear workflow. State will manage the current step.
 6.  **Motivational Screen:** A mid-shift hub displaying company Core Values. Serves as the navigation point for non-linear tasks. The "New Stock Delivery" screen is only accessible from here.
 7.  **New Stock Delivery Screen:** A dynamic form to record new stock deliveries.
 8.  **Closing Stocktake Screen:** The same stocktake form from the opening.
-9.  **Closing Tasks Screen:** Final checklist.
+9.  **Closing Tasks Screen:** Final checklist. **Completion of all tasks is mandatory before clocking out.**
     - `Task 1: Change window sign to "Closed".` (Input Method: Toggle button)
     - `Task 2: Bring Happy Hour sign inside.` (Input Method: Toggle button)
     - `Task 3: Notify Carl about shortages.` (Input Method: Toggle button)
     - `Task 4: Close all outstanding bar tabs.` (Input Method: Toggle with notes)
+      - *Note: Notify Carl if any tabs remain open.*
     - `Task 5: Clean all glassware and dishes.` (Input Method: Toggle button)
     - `Task 6: Plug in iPad and Yoco.` (Input Method: Toggle button)
     - `Task 7: Lock store room.` (Input Method: Toggle button)
     - `Task 8: Check prepaid electricity meter.` (Input Method: Toggle button)
+      - *Note: Notify Carl if under 30 units.*
     - `Task 9: Lock bathroom.` (Input Method: Toggle button)
     - `Task 10: Lock back door.` (Input Method: Toggle button)
     - `Task 11: Switch off lamps and under bar lights.` (Input Method: Toggle button)
@@ -102,7 +104,7 @@ The application is a linear workflow. State will manage the current step.
     - **Shift Feedback:**
         - Heading: "How was your shift?"
         - Options: Emoji buttons for "Great" (smiling), "Normal" (neutral), "Bad" (sad).
-        - A text input for comments is mandatory and must appear if the user selects "Great" or "Bad".
+        - A text input for comments is **mandatory** and will appear if the user selects "Great" or "Bad".
     - **Final Action:** Contains the "Clock Out" button.
 10. **Summary Screen:** Displayed after clocking out, confirming data submission.
 

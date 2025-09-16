@@ -123,3 +123,17 @@
   > To prevent placeholder text like "Store Room" from being truncated, the font size was further reduced. The `NumericInput.tsx` component was updated to use a smaller, arbitrary text size (`placeholder:text-[11px]`) for better visibility.
 - [x] **Task 10.3: Prevent Horizontal Scrolling on Mobile**
   > Resolved the issue of horizontal overflow on mobile devices. The `overflow-x-hidden` utility class was added to the main container div in `App.tsx`, which prevents the entire page from scrolling sideways and creating unwanted blank space.
+
+## Phase 11: Final Polish
+- [x] **Task 11.1: Revise Opening Tasks List**
+  > Updated the opening tasks list in `src/data/mockData.ts` based on user feedback. Removed 'Unlock store room', 'Plug in Yoco and iPad', and 'Check prepaid electricity meter'. Added 'Turn on lamps and under bar lights', and moved 'Turn on airconditioner' to be the first task. This refines the opening workflow to better match operational procedures.
+- [x] **Task 11.2: Unify Mid-Shift Button Styles**
+  > Updated the "Log New Stock Delivery" button on the Motivational Screen to use the primary style, matching the "Proceed to Closing" button for visual consistency.
+- [x] **Task 11.3: Add Explanatory Text to Closing Tasks**
+  > Added an optional `description` field to the `Task` type and updated the `TaskItem` component to render this supplementary text. This provides clearer guidance to the user for specific closing tasks, as requested.
+- [x] **Task 11.4: Implement Mandatory Closing Tasks**
+  > Implemented logic in `App.tsx` to enforce the completion of all closing tasks and required shift feedback before the "Clock Out" button is enabled. This ensures all required data is collected before a shift can be submitted.
+
+## Phase 12: Advanced Features
+- [ ] **Task 12.1: Implement Geofence-Exit Notification**
+  > Implement a feature to detect when a user leaves the geofence while still clocked in. This will trigger a browser notification and an audible text-to-speech prompt to remind them to clock out. The implementation will include requesting user permissions for notifications and managing state to prevent repeated notifications. Note: This feature will only work when the app is in the foreground.

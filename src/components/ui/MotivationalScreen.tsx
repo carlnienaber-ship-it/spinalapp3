@@ -31,7 +31,7 @@ const MotivationalScreen: React.FC<MotivationalScreenProps> = ({ onNewDelivery, 
         ))}
       </div>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button onClick={onNewDelivery} size="lg" variant="secondary" disabled={disabled}>
+        <Button onClick={onNewDelivery} size="lg" disabled={disabled}>
           Log New Stock Delivery
         </Button>
         <Button onClick={onProceed} size="lg" disabled={disabled}>

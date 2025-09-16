@@ -179,6 +179,13 @@ const App: React.FC = () => {
           </>
         );
       case 'closing_tasks':
+        const areClosingTasksComplete = shiftState.closingTasks.every(task => task.completed);
+        const isFeedbackComplete = !(
+          (shiftState.shiftFeedback.rating === 'Great' || shiftState.shiftFeedback.rating === 'Bad') &&
+          !shiftState.shiftFeedback.comment.trim()
+        );
+        const canSubmit = areClosingTasksComplete && isFeedbackComplete;
+
         return (
           <>
             <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={(task) => handleTaskChange(task, 'closing')} disabled={isGeoDisabled} />
@@ -186,10 +193,15 @@ const App: React.FC = () => {
             <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold text-gray-200 mb-4">Ready to Clock Out?</h3>
               <p className="text-gray-400 mb-6">This will finalize and submit your shift report. It cannot be changed after submission.</p>
-              <Button onClick={handleSubmitShift} disabled={isSubmitting || isGeoDisabled} className="w-full" size="lg">
+              <Button onClick={handleSubmitShift} disabled={isSubmitting || isGeoDisabled || !canSubmit} className="w-full" size="lg">
                 {isSubmitting ? 'Submitting...' : 'Clock Out'}
               </Button>
               {submissionError && <p className="text-red-400 mt-4 text-center">{submissionError}</p>}
+              {!canSubmit && (
+                <p className="text-yellow-400 mt-4 text-center">
+                  All closing tasks and required shift feedback must be completed before you can clock out.
+                </p>
+              )}
             </div>
           </>
         );
