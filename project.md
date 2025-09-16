@@ -70,11 +70,10 @@ The application is a linear workflow. State will manage the current step.
     - `Task 1: Turn on airconditioner.` (Input Method: Toggle button)
     - `Task 2: Change window sign to "Open".` (Input Method: Toggle button)
     - `Task 3: Take Happy Hour sign outside.` (Input Method: Toggle button)
-    - `Task 4: Unlock back door.` (Input Method: Toggle button)
-    - `Task 5: Unlock bathroom.` (Input Method: Toggle button)
-    - `Task 6: Check menu board.` (Input Method: Radio buttons, options TBD)
-    - `Task 7: Check beer quality.` (Input Method: Radio buttons with an optional text input for "Other", options TBD)
-    - `Task 8: Turn on lamps and under bar lights.` (Input Method: Toggle button)
+    - `Task 4: Unlock bathroom.` (Input Method: Toggle button)
+    - `Task 5: Check menu board.` (Input Method: Radio buttons, options TBD)
+    - `Task 6: Check beer quality.` (Input Method: Radio buttons with an optional text input for "Other", options TBD)
+    - `Task 7: Turn on lamps and under bar lights.` (Input Method: Toggle button)
 5.  **Opening Stocktake Screen:** A form to record initial stock levels. All screens from this point on will be disabled if the user is outside the geofenced area.
     - **Section: Spirits:** `FOH (bottles)`, `Store Room (bottles)`, `Open Bottle Weight (g)`
         - African Dry Gin, Aperol, Bain's, Die Mas 5y/o Brandy, El Jimador, Floating Dutchman, Jägermeister, Jameson, Johnnie Walker Black, Olmeca, Rooster, Stolichnaya, Tanqueray, Ugly Gin

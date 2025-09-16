@@ -52,7 +52,7 @@
 - [x] **Task 5.4: Integrate Geolocation into `App.tsx`**
   > The `useGeolocation` hook is now called in the main `App.tsx` component to get the user's live location status.
 - [x] **Task 5.5: Conditionally Disable UI**
-  > The boolean `isWithinFence` state from the hook is now used to conditionally disable UI elements. A prominent warning message is displayed, and key components and action buttons are disabled with `opacity-50` and `pointer-events-none` when the user is outside the geofence, fulfilling the security requirement.
+  > The boolean `isWithinFence` state from the hook is used to conditionally disable UI elements. A prominent warning message is displayed, and key components and action buttons are disabled with `opacity-50` and `pointer-events-none` when the user is outside the geofence, fulfilling the security requirement.
 - [x] **Task 5.6: Build `GeoStatus.tsx` Component**
   > Created the `GeoStatus.tsx` component, which consumes the `useGeolocation` hook to provide clear, real-time visual feedback to the user about their location status (Checking, Verified, Outside Zone, Error).
 
@@ -137,3 +137,7 @@
 ## Phase 12: Advanced Features
 - [ ] **Task 12.1: Implement Geofence-Exit Notification**
   > Implement a feature to detect when a user leaves the geofence while still clocked in. This will trigger a browser notification and an audible text-to-speech prompt to remind them to clock out. The implementation will include requesting user permissions for notifications and managing state to prevent repeated notifications. Note: This feature will only work when the app is in the foreground.
+
+## Phase 13: Final UI Refinements
+- [x] **Task 13.1: Further Refine Opening Tasks List**
+  > Further streamline the opening workflow by removing the "Unlock back door" task from the checklist. This reflects the latest operational procedure changes.

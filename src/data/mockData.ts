@@ -4,7 +4,6 @@ const openingTasks: Task[] = [
     { id: 'ac_on_open', text: 'Turn on airconditioner', type: 'toggle', completed: false },
     { id: 'open_sign', text: 'Change window sign to "Open"', type: 'toggle', completed: false },
     { id: 'a_frame', text: 'Take Happy Hour sign outside', type: 'toggle', completed: false },
-    { id: 'back_door_unlock', text: 'Unlock back door', type: 'toggle', completed: false },
     { id: 'bathroom_unlock', text: 'Unlock bathroom', type: 'toggle', completed: false },
     { id: 'menu_board_check', text: 'Check menu board', type: 'radio', options: ['OK', 'Needs Update'], completed: false, value: '' },
     { id: 'beer_quality_check', text: 'Check beer quality', type: 'radio_text', options: ['Good', 'Needs Attention'], completed: false, value: '', notes: '' },
