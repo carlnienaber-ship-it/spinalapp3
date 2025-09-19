@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Auth0Provider } from '@auth0/auth0-react';
-import App from './App';
-// FIX: Correct the import path for AuthWrapper to point to the src directory.
+import App from './src/App';
 import AuthWrapper from './src/components/auth/AuthWrapper';
-import './index.css';
+import './src/index.css';
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN;
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
