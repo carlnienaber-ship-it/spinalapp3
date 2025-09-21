@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React, { useState, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
@@ -22,6 +16,7 @@ import NewStockDelivery from './src/components/stock/NewStockDelivery';
 import Feedback from './src/components/ui/Feedback';
 import CompletionScreen from './src/components/ui/CompletionScreen';
 import MotivationalScreen from './src/components/ui/MotivationalScreen';
+import AdminGeoOverrideIndicator from './src/components/ui/AdminGeoOverrideIndicator';
 
 const allStockItems = stockTemplate.flatMap(cat => cat.items.map(item => item.name));
 
@@ -32,7 +27,12 @@ const App: React.FC = () => {
 
   const [shiftState, setShiftState] = useLocalStorage<ShiftState>('shiftState', initialShiftState);
 
-  const isGeoDisabled = !isWithinFence && shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'opening_tasks';
+  // Check for Admin role to bypass geofence
+  const roles = user?.['https://spinalapp.com/roles'] as string[] | undefined;
+  const isAdmin = roles?.includes('Admin') || false;
+
+  // Geofence is disabled if the user is off-site AND not an admin
+  const isGeoDisabled = !isWithinFence && !isAdmin && shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'opening_tasks';
 
   const setStep = (step: ShiftStep) => {
     setShiftState((prev) => ({ ...prev, currentStep: step }));
@@ -66,8 +66,6 @@ const App: React.FC = () => {
       const newStock = JSON.parse(JSON.stringify(stock)) as StockCategory[];
       const itemToUpdate = newStock[categoryIndex].items[itemIndex];
       
-      // FIX: This type assertion resolves the TypeScript error. It informs the compiler that within this block,
-      // we are only assigning numeric values to fields that are expected to be numbers, not the 'name' field.
       if (field !== 'name') {
         type WritableStockItem = Omit<StockItem, 'name'>;
         (itemToUpdate as WritableStockItem)[field as keyof WritableStockItem] = value;
@@ -122,14 +120,14 @@ const App: React.FC = () => {
             <div className="my-6 flex justify-center"><GeoStatus /></div>
             <Button 
               onClick={handleStartShift}
-              disabled={!isWithinFence || geoLoading} 
+              disabled={(!isWithinFence && !isAdmin) || geoLoading} 
               className="mt-4"
               size="lg"
             >
               {geoLoading ? 'Verifying Location...' : 'Clock In'}
             </Button>
             {geoError && <p className="text-red-400 mt-4">Could not verify location: {geoError.message}</p>}
-            {!geoLoading && !isWithinFence && <p className="text-yellow-400 mt-4">You must be at the approved location to start a shift.</p>}
+            {!geoLoading && !isWithinFence && !isAdmin && <p className="text-yellow-400 mt-4">You must be at the approved location to start a shift.</p>}
           </div>
         );
       case 'opening_tasks':
@@ -240,6 +238,10 @@ const App: React.FC = () => {
           </div>
         </div>
         
+        {isAdmin && !isWithinFence && (
+            <AdminGeoOverrideIndicator />
+        )}
+
         {isGeoDisabled && (
           <div className="bg-yellow-900 border-l-4 border-yellow-500 text-yellow-100 p-4 mb-6 rounded-r-lg" role="alert">
             <p className="font-bold">Functionality Disabled</p>

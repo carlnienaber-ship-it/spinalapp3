@@ -7,10 +7,11 @@ To develop a robust, secure, and intuitive web application that assists bartende
 ## 2. Core Features
 
 - **Authentication:** Secure user login and sign-up handled by Auth0. Users require a specific role (`Normal User` or `Admin`) to access the application, which is configured in the Auth0 dashboard. Sessions are persistent.
-- **Geofencing:** Critical application functionality is locked to approved physical locations. A user must be within a 100-meter radius of a registered location to start a shift or submit data.
+- **Geofencing:** Critical application functionality is locked to approved physical locations. A user must be within a 100-meter radius of a registered location to start a shift or submit data. **Users with the `Admin` role are exempt from this restriction.**
 - **Guided Shift Workflow:** A step-by-step process that ensures all tasks are completed in the correct order. The workflow progresses from opening to closing, with stocktakes and mid-shift tasks in between.
 - **Data Persistence:** The application state is saved to the browser's local storage, allowing a user to refresh the page or close the browser without losing their progress during a shift.
 - **Data Submission:** At the end of a shift, a comprehensive report is calculated and submitted to a secure backend for storage and later analysis.
+- **Admin Dashboard:** A secure, role-protected area for users with the `Admin` role to view and analyze submitted shift reports.
 
 ## 3. Technical Architecture & Build Environment
 
@@ -46,7 +47,7 @@ The application follows a linear progression through the following screens:
 - Displays a welcome message personalized with the user's first name.
 - Shows the user's logged-in email address.
 - Contains the master "Clock In" button.
-- **Behavior:** The "Clock In" button is disabled until the geofence check confirms the user is at an approved location.
+- **Behavior:** The "Clock In" button is disabled until the geofence check confirms the user is at an approved location. Admins can bypass this.
 
 ### 5.2. Opening Tasks Screen
 - Presents a mandatory checklist of tasks that must be completed to start the day.
@@ -63,7 +64,7 @@ The application follows a linear progression through the following screens:
 ### 5.3. Opening Stocktake Screen
 - A form for inputting the initial stock levels for all items, categorized for clarity.
 - **Input Fields:** FOH, Store Room, Open Bottle Weight, Quantity.
-- **Behavior:** All fields are disabled if the user is outside the geofence.
+- **Behavior:** All fields are disabled if the user is outside the geofence (unless they are an Admin).
 
 ### 5.4. Mid-Shift Hub (Motivational Screen)
 - A central screen for mid-shift actions.
@@ -71,7 +72,7 @@ The application follows a linear progression through the following screens:
 - **Actions:**
   - "Log New Stock Delivery"
   - "Proceed to Closing"
-- **Behavior:** All buttons are disabled if the user is outside the geofence.
+- **Behavior:** All buttons are disabled if the user is outside the geofence (unless they are an Admin).
 
 ### 5.5. New Stock Delivery Screen
 - Allows users to log deliveries received during their shift.
@@ -81,7 +82,7 @@ The application follows a linear progression through the following screens:
 ### 5.6. Closing Stocktake Screen
 - A form for inputting the final stock levels at the end of the shift.
 - Structure is identical to the Opening Stocktake screen.
-- **Behavior:** All fields are disabled if the user is outside the geofence.
+- **Behavior:** All fields are disabled if the user is outside the geofence (unless they are an Admin).
 
 ### 5.7. Closing Tasks Screen
 - Presents a mandatory checklist of tasks to close the bar.
@@ -91,10 +92,18 @@ The application follows a linear progression through the following screens:
   - Check prepaid electricity meter (with optional notes: "Notify Carl if under 30 units.")
   - ...and other cleaning/locking tasks.
 - Includes a feedback section ("How was your shift?").
-- **Behavior:** The final "Clock Out" button is disabled until all tasks are complete and any required feedback is provided. It is also disabled if the user is outside the geofence.
+- **Behavior:** The final "Clock Out" button is disabled until all tasks are complete and any required feedback is provided. It is also disabled if the user is outside the geofence (unless they are an Admin).
 
 ### 5.8. Completion Screen
 - A confirmation screen shown after the shift report has been successfully submitted.
+
+### 5.9. Admin Dashboard Screen
+- A secure, read-only view for users with the `Admin` role to review submitted shift data.
+- **Entry Point:** A conditionally rendered button on the Welcome Screen, visible only to admins.
+- **Features:**
+  - **Shift History List:** A list of all submitted shifts, showing key details like date and feedback rating.
+  - **Shift Detail View:** A detailed breakdown of a single, selected shift report, displaying all captured tasks and stocktake data.
+- **Security:** Data for this view is fetched from a new, secure Netlify Function (`get-shifts.ts`) that **must** validate the user's JWT and verify they have the `Admin` role before returning any data.
 
 ## 6. State Management & Data Persistence
 
@@ -127,5 +136,6 @@ The application follows a linear progression through the following screens:
 
 - **`netlify.toml` Management:** This file cannot be created or modified by the AI assistant. It must be managed manually by the developer to ensure correct deployment settings.
 - **`package.json` Management:** This file cannot be modified by the AI assistant. Dependency changes, such as downgrading React to v18 for deployment compatibility, must be performed manually.
+- **`index.tsx` Management:** This file cannot be reliably modified by the AI assistant. Changes, especially to import paths, often result in build errors and must be performed manually.
 - **AI Output Requirement:** The AI assistant must always output the full, readable content of `project.md` and `todo.md`. It is absolutely critical to not replace the contents of these files with placeholder text like "full contents of...", as this is considered a critical failure that erases project history.
 - **Workflow Mandate: Execute from `todo.md` Only.** The AI assistant is strictly prohibited from implementing code changes directly from user prompts. All implementation work must correspond to a specific, pre-existing task in the `todo.md` file. The workflow must be: 1) User prompt leads to an update in `todo.md` or `project.md`. 2) A separate, explicit user prompt must be given to execute a task from `todo.md`.

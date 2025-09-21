@@ -155,3 +155,16 @@
 ---
 ### Phase 15: Backend Implementation
 - **[COMPLETED]** 15.1: Create serverless function and connect to Firebase to store shift data.
+
+---
+### Phase 16: Admin Dashboard Implementation
+- **[TODO]** 16.1 (Manual): Create an `Admin` role in the Auth0 dashboard and assign it to the appropriate user(s).
+- **[TODO]** 16.2: Create a new serverless function (`get-shifts.ts`) to fetch shift data from Firestore.
+- **[TODO]** 16.3: Secure the `get-shifts.ts` endpoint, ensuring it's only accessible to users with the `Admin` role.
+- **[TODO]** 16.4: Implement the frontend UI for the Admin Dashboard, including:
+  - [TODO] A conditionally rendered "Admin Dashboard" button on the Welcome Screen.
+  - [TODO] A new `AdminDashboard.tsx` component to act as the main view.
+  - [TODO] A `ShiftHistoryList.tsx` component to display a summary of all shifts.
+  - [TODO] A `ShiftDetailView.tsx` component to show the full data for a selected shift.
+- **[TODO]** 16.5: Create or extend an API client hook to fetch data from the new secure endpoint.
+- **[COMPLETED]** 16.6: Implement Admin Geofence Bypass. Modified the application logic to check for the 'Admin' role and disable geofence checks. Added a new UI indicator component to clearly show when the override is active.
