@@ -1,17 +1,20 @@
-// FIX: Implemented the ShiftDetail component to display shift data.
 import React from 'react';
 import { ShiftRecord } from '../../types';
 import TaskList from '../tasks/TaskList';
 import StocktakeForm from '../stock/StocktakeForm';
 import NewStockDelivery from '../stock/NewStockDelivery';
-import Feedback from '../ui/Feedback';
 
 type ShiftDetailProps = {
   shift: ShiftRecord;
 };
 
+const ratingEmojis = {
+  Great: '😊 Great',
+  Normal: '😐 Normal',
+  Bad: '😞 Bad',
+};
+
 const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
-  // Extract all unique stock item names for the NewStockDelivery component dropdown
   const allStockItems = Array.from(new Set(shift.openingStock.flatMap(cat => cat.items.map(item => item.name)))).sort();
 
   return (
@@ -21,7 +24,11 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="font-semibold text-gray-400">Employee:</p>
-            <p className="text-gray-100">{shift.user?.name || shift.user?.email || 'N/A'}</p>
+            <p className="text-gray-100">{shift.user?.email || shift.user?.name || 'N/A'}</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-400">Shift Feedback:</p>
+            <p className="text-gray-100">{shift.shiftFeedback.rating ? ratingEmojis[shift.shiftFeedback.rating] : 'N/A'}</p>
           </div>
           <div>
             <p className="font-semibold text-gray-400">Shift Start:</p>
@@ -31,48 +38,48 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
             <p className="font-semibold text-gray-400">Shift End:</p>
             <p className="text-gray-100">{shift.endTime ? new Date(shift.endTime).toLocaleString() : 'N/A'}</p>
           </div>
+           {shift.shiftFeedback.comment && (
+            <div className="md:col-span-2">
+              <p className="font-semibold text-gray-400">Feedback Comment:</p>
+              <p className="text-gray-100 whitespace-pre-wrap bg-gray-700 p-2 rounded-md">{shift.shiftFeedback.comment}</p>
+            </div>
+          )}
         </div>
       </div>
-
-      <TaskList
-        title="Opening Tasks"
-        tasks={shift.openingTasks}
-        onTaskChange={() => {}} // Not needed in disabled mode
-        disabled={true}
-      />
 
       <StocktakeForm
         title="Opening Stocktake"
         stockData={shift.openingStock}
-        onStockChange={() => {}} // Not needed in disabled mode
+        onStockChange={() => {}} 
         disabled={true}
       />
       
       <NewStockDelivery
         deliveries={shift.newStockDeliveries}
         stockItems={allStockItems}
-        onAdd={() => {}} // Not needed in disabled mode
-        onRemove={() => {}} // Not needed in disabled mode
-        disabled={true}
-      />
-
-      <TaskList
-        title="Closing Tasks"
-        tasks={shift.closingTasks}
-        onTaskChange={() => {}} // Not needed in disabled mode
+        onAdd={() => {}} 
+        onRemove={() => {}}
         disabled={true}
       />
 
       <StocktakeForm
         title="Closing Stocktake"
         stockData={shift.closingStock}
-        onStockChange={() => {}} // Not needed in disabled mode
+        onStockChange={() => {}}
         disabled={true}
       />
       
-      <Feedback
-        feedback={shift.shiftFeedback}
-        onFeedbackChange={() => {}} // Not needed in disabled mode
+       <TaskList
+        title="Opening Tasks"
+        tasks={shift.openingTasks}
+        onTaskChange={() => {}}
+        disabled={true}
+      />
+
+      <TaskList
+        title="Closing Tasks"
+        tasks={shift.closingTasks}
+        onTaskChange={() => {}}
         disabled={true}
       />
     </div>

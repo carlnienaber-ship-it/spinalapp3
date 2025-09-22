@@ -1,141 +1,81 @@
-# Project: Spinäl Äpp - Shift Handover Application
+# Project Plan: Spinäl Äpp Handover
 
 ## 1. Objective
 
-To develop a robust, secure, and intuitive web application that assists bartenders in managing and tracking their daily tasks. The application will provide structured checklists for opening, mid-shift, and closing duties, ensuring consistency and accountability in bar operations.
+To develop a robust, secure, and intuitive web application that assists staff in managing and tracking their daily tasks. The application will provide a linear workflow for opening, mid-shift, and closing duties, ensuring consistency, accountability, and data integrity in bar operations.
 
 ## 2. Core Features
 
-- **Authentication:** Secure user login and sign-up handled by Auth0. Users require a specific role (`Normal User` or `Admin`) to access the application, which is configured in the Auth0 dashboard. Sessions are persistent.
-- **Geofencing:** Critical application functionality is locked to approved physical locations. A user must be within a 100-meter radius of a registered location to start a shift or submit data. **Users with the `Admin` role are exempt from this restriction.**
-- **Guided Shift Workflow:** A step-by-step process that ensures all tasks are completed in the correct order. The workflow progresses from opening to closing, with stocktakes and mid-shift tasks in between.
-- **Data Persistence:** The application state is saved to the browser's local storage, allowing a user to refresh the page or close the browser without losing their progress during a shift.
-- **Data Submission:** At the end of a shift, a comprehensive report is calculated and submitted to a secure backend for storage and later analysis.
-- **Admin Dashboard:** A secure, role-protected area for users with the `Admin` role to view and analyze submitted shift reports.
+- **Linear Workflow:** A guided, step-by-step process for all shift-related tasks.
+- **Task Checklists:** Structured checklists for opening and closing duties with various input types (toggles, radio buttons, text).
+- **Stocktake Management:** Detailed forms for recording opening and closing stock levels across multiple categories.
+- **Mid-Shift Actions:** Functionality to log new stock deliveries.
+- **Authentication & Authorization:** Secure login via Auth0 with role-based access control (RBAC) for `Normal User` and `Admin` roles.
+- **Geofencing:** Core application functionality is restricted to a physical location, with an override for `Admin` users.
+- **Data Persistence:** Full shift state is saved to `localStorage` to allow for session restoration.
+- **Data Submission:** All shift data is submitted to a secure serverless backend upon clock-out.
+- **Admin Dashboard:** A secure, read-only interface for `Admin` users to review, filter, and analyze past shift reports.
+- **Stock Variance Calculation:** Business logic to calculate stock consumption and variance for review.
 
-## 3. Technical Architecture & Build Environment
+## 3. Technical Architecture
 
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS.
-- **Authentication:** Auth0 using the `@auth0/auth0-react` SDK.
-- **Backend:** Serverless architecture using Netlify Functions.
-- **Database:** Firebase Firestore for storing final shift report data.
-- **Styling:** Tailwind CSS for a utility-first approach. The application must have a professional, dark-themed aesthetic (e.g., `#111827` background, light-gray/white text).
-- **Dependency Management:** All dependencies will be managed via npm and listed in `package.json`.
+- **Framework:** React 18 with TypeScript.
+- **Build Tool:** Vite.
+- **Styling:** Tailwind CSS with a professional dark theme.
+- **Backend:** Serverless functions hosted on Netlify.
+- **Database:** Firebase Firestore for storing shift data.
+- **Authentication:** Auth0 for user management and authentication.
 
-### 3.1. Build Environment Note: Import Map Workaround
+## 4. Application Screens & Workflow
 
-- **Context:** Ideally, Vite projects handle all module resolution via the build tool, making browser-native import maps unnecessary and often problematic.
-- **Constraint:** The current development environment unavoidably injects a `<script type="importmap">` block into `index.html`. This is a known, hard-coded limitation.
-- **Solution:** To ensure a clean and valid production build, a custom Vite plugin has been implemented (`vite.config.ts`). This plugin automatically removes the injected import map script during the `npm run build` process, allowing the project to function correctly despite the environmental constraint.
+1.  **Login Screen:** Auth0 login for unauthenticated users.
+2.  **Account Not Activated:** A screen for authenticated users who lack an approved role.
+3.  **Welcome Screen:** Greets the user by name. Provides "Clock In" button for regular users and an additional "Admin Dashboard" button for admins.
+4.  **Opening Tasks Screen:** A mandatory checklist of opening duties.
+5.  **Opening Stocktake Screen:** Form to record initial stock levels.
+6.  **Mid-Shift Hub:** A central screen with company values and options to log deliveries or proceed.
+7.  **New Stock Delivery Screen:** Accessible from the hub, allows for logging new inventory.
+8.  **Closing Stocktake Screen:** Form to record final stock levels.
+9.  **Closing Tasks Screen:** A mandatory checklist of closing duties.
+10. **Feedback Screen:** A final mandatory step to provide feedback on the shift.
+11. **Completion Screen:** Confirms successful submission and allows starting a new shift.
+12. **Admin Dashboard:** An admin-only screen to view and filter all submitted shift reports.
 
-## 4. Authentication & Access Control (Auth0 Integration)
+## 5. Known Development Constraints
 
-- **SDK:** User authentication will be managed by Auth0, integrated via the `@auth0/auth0-react` SDK.
-- **Security Model:** The application will enforce a "Deny by Default" model. Access to the core application is forbidden unless explicitly granted.
-- **Role-Based Access Control (RBAC):**
-  - New users upon signup will have no assigned roles and will be denied access by default.
-  - The application must inspect the authenticated user's ID token for a custom claim: `https://spinalapp.com/roles`.
-  - This claim is expected to be an array of strings (e.g., `['Normal User']`).
-  - **Access is granted ONLY to users with a role of either `Normal User` or `Admin`** in this array.
-- **Unauthorized Access Screen:** If a user is successfully authenticated with Auth0 but does not possess an approved role, they must be presented with a dedicated "Account Not Activated" screen. This screen will inform them of their status and provide a "Sign Out" button as the only action.
+- **Manual File Management:** Due to a persistent environmental issue with the AI assistant, the following files **must be managed manually by the user**. The AI cannot reliably create or modify them.
+    - `package.json`
+    - `index.tsx`
+    - `netlify.toml`
+    - `App.tsx`
+- **Import Map Workaround:** While not ideal for Vite projects, an environmental constraint forces the use of an `importmap` in `index.html`. A custom Vite plugin is required as a workaround to remove it during the build process.
+- **Strict Workflow Protocol:** The AI assistant is **only** to implement code changes based on tasks explicitly listed in `todo.md`. New features or changes must first be added to the to-do list from a direct prompt before implementation can be requested.
+- **No Placeholder Content:** It is a critical failure for the AI assistant to replace the contents of `project.md` or `todo.md` with placeholder text like "full contents of...". These files must always be output in their complete, readable form.
 
-## 5. Screen Flow & Specifications
+## 6. Geofencing
 
-The application follows a linear progression through the following screens:
+- **Restriction:** Core application functionality (clocking in, proceeding through shift steps) is disabled if the user is outside a 100-meter radius of predefined GPS coordinates.
+- **Admin Bypass:** Users with the `Admin` role are exempt from all geofence restrictions. A clear UI indicator is displayed for admins when the override is active.
 
-### 5.1. Welcome Screen
-- Displays a welcome message personalized with the user's first name.
-- Shows the user's logged-in email address.
-- Contains the master "Clock In" button.
-- **Behavior:** The "Clock In" button is disabled until the geofence check confirms the user is at an approved location. Admins can bypass this.
+## 7. Data & Calculations
 
-### 5.2. Opening Tasks Screen
-- Presents a mandatory checklist of tasks that must be completed to start the day.
-- **Tasks List:**
-  1.  **Turn on airconditioner** (Toggle)
-  2.  **Change window sign to "Open"** (Toggle)
-  3.  **Take Happy Hour sign outside** (Toggle)
-  4.  **Unlock bathroom** (Toggle)
-  5.  **Check menu board** (Radio: 'OK', 'Needs Update')
-  6.  **Check beer quality** (Radio: 'Good', 'Needs Attention' with optional text)
-  7.  **Turn on lamps and under bar lights** (Toggle)
-- **Behavior:** The "Continue" button is disabled until all tasks are marked as complete.
+### 7.1. Data Submission
+- All shift data is compiled into a single JSON object and POSTed to a secure Netlify Function (`submit-shift`).
+- Pre-submission calculations are performed on the client to adjust `openingStock` with deliveries and calculate `fullBottlesTotal`.
 
-### 5.3. Opening Stocktake Screen
-- A form for inputting the initial stock levels for all items, categorized for clarity.
-- **Input Fields:** FOH, Store Room, Open Bottle Weight, Quantity.
-- **Behavior:** All fields are disabled if the user is outside the geofence (unless they are an Admin).
+### 7.2. Stock Variance Calculation
+- **Simple Stock (Cans, Food):** `Variance = (Opening Count + Deliveries) - Closing Count`.
+- **Spirits (Liquid Mass Method):** To accurately account for partially used bottles, variance is calculated based on total mass.
+    - **Required Data:** A static `fullBottleWeight` must be defined for each spirit.
+    - **Formula:** `Variance (grams) = ((Opening Full Bottles * fullBottleWeight) + Opening Open Bottle Weight + (Deliveries * fullBottleWeight)) - ((Closing Full Bottles * fullBottleWeight) + Closing Open Bottle Weight)`.
+    - **Tolerance Rule:** To account for minor scale inaccuracies, any final calculated variance between **-7g and +7g** (inclusive) will be treated as a variance of **0g**.
+    - **Shots Calculation:** The final gram variance will be converted into the number of shots poured using the formula: `NumberOfShots = VarianceInGrams / 23.5`. This will be the primary metric displayed.
+- **Yoco API Integration (Future):** The calculated variance will eventually be compared against sales data fetched from the Yoco POS API to identify discrepancies.
 
-### 5.4. Mid-Shift Hub (Motivational Screen)
-- A central screen for mid-shift actions.
-- Displays the company's core values.
-- **Actions:**
-  - "Log New Stock Delivery"
-  - "Proceed to Closing"
-- **Behavior:** All buttons are disabled if the user is outside the geofence (unless they are an Admin).
+## 8. Backend & Data Storage
 
-### 5.5. New Stock Delivery Screen
-- Allows users to log deliveries received during their shift.
-- **Inputs:** A dropdown of all existing stock items and a quantity field.
-- **Behavior:** The submitted data is used to adjust the opening stock count before the final report is submitted.
-
-### 5.6. Closing Stocktake Screen
-- A form for inputting the final stock levels at the end of the shift.
-- Structure is identical to the Opening Stocktake screen.
-- **Behavior:** All fields are disabled if the user is outside the geofence (unless they are an Admin).
-
-### 5.7. Closing Tasks Screen
-- Presents a mandatory checklist of tasks to close the bar.
-- **Tasks include:**
-  - Change window sign to "Closed"
-  - Close all outstanding bar tabs (with optional notes: "Notify Carl if any tabs remain open.")
-  - Check prepaid electricity meter (with optional notes: "Notify Carl if under 30 units.")
-  - ...and other cleaning/locking tasks.
-- Includes a feedback section ("How was your shift?").
-- **Behavior:** The final "Clock Out" button is disabled until all tasks are complete and any required feedback is provided. It is also disabled if the user is outside the geofence (unless they are an Admin).
-
-### 5.8. Completion Screen
-- A confirmation screen shown after the shift report has been successfully submitted.
-
-### 5.9. Admin Dashboard Screen
-- A secure, read-only view for users with the `Admin` role to review submitted shift data.
-- **Entry Point:** A conditionally rendered button on the Welcome Screen, visible only to admins.
-- **Features:**
-  - **Shift History List:** A list of all submitted shifts, showing key details like date and feedback rating.
-  - **Shift Detail View:** A detailed breakdown of a single, selected shift report, displaying all captured tasks and stocktake data.
-- **Security:** Data for this view is fetched from a new, secure Netlify Function (`get-shifts.ts`) that **must** validate the user's JWT and verify they have the `Admin` role before returning any data.
-
-## 6. State Management & Data Persistence
-
-- **State Hooks:** Use standard React hooks (`useState`, `useEffect`, `useContext`).
-- **Persistence:** The entire shift state must be persisted to `localStorage`. This includes the user's current screen, clock-in time, task status, and all stocktake data.
-- **Session Restoration:** If an approved user refreshes the page or closes and re-opens the browser, their entire session and progress must be fully and automatically restored from `localStorage`.
-- **State Reset:** The `localStorage` state should **only** be cleared when a user successfully clocks out.
-
-## 7. Data Submission Logic
-
-- **Trigger:** Data submission is triggered when the user clicks the final "Clock Out" button on the Closing Tasks screen.
-- **Mechanism:** The application will POST a single, comprehensive JSON object to a secure backend endpoint (a Netlify Function).
-- **Pre-Submission Calculations:** Before sending the payload, two critical client-side calculations must be performed:
-  1.  **Adjust Opening Stock:** The final `openingStock` object must be an adjusted version that reflects the initial stock *plus* any quantities from `newStockDeliveries`.
-  2.  **Calculate Bottle Totals:** For both `openingStock` and `closingStock`, a `fullBottlesTotal` field must be calculated for spirits by summing the `FOH` and `Store Room` counts.
-
-## 8. Reusable UI Components
-
-- **Directory:** `src/components/ui`
-- **Component List:** `Button.tsx`, `Header.tsx`, `Toggle.tsx`, `NumericInput.tsx`
-
-## 9. Development Principles
-
-- **Stability & Security:** Prioritize creating a stable application with no data loss.
-- **Code Quality:** Adhere to clean code principles, including clear naming conventions and modularity.
-- **Accessibility (A11y):** Ensure the application is usable by following WCAG guidelines and using semantic HTML and ARIA attributes.
-- **Performance:** Optimize for fast load times and a smooth user experience.
-
-## 10. Known Development Constraints
-
-- **`netlify.toml` Management:** This file cannot be created or modified by the AI assistant. It must be managed manually by the developer to ensure correct deployment settings.
-- **`package.json` Management:** This file cannot be modified by the AI assistant. Dependency changes, such as downgrading React to v18 for deployment compatibility, must be performed manually.
-- **`index.tsx` Management:** This file cannot be reliably modified by the AI assistant. Changes, especially to import paths, often result in build errors and must be performed manually.
-- **AI Output Requirement:** The AI assistant must always output the full, readable content of `project.md` and `todo.md`. It is absolutely critical to not replace the contents of these files with placeholder text like "full contents of...", as this is considered a critical failure that erases project history.
-- **Workflow Mandate: Execute from `todo.md` Only.** The AI assistant is strictly prohibited from implementing code changes directly from user prompts. All implementation work must correspond to a specific, pre-existing task in the `todo.md` file. The workflow must be: 1) User prompt leads to an update in `todo.md` or `project.md`. 2) A separate, explicit user prompt must be given to execute a task from `todo.md`.
+- **Serverless Functions:** Netlify Functions are used for all backend logic.
+  - `submit-shift`: Receives shift data, validates the user token (TODO), and saves the data to Firestore.
+  - `get-shifts`: Receives a request, validates that the user has the `Admin` role, and fetches all shift reports from Firestore.
+- **Database:** Firebase Firestore is used to store shift report documents in a `shifts` collection.
+- **Security:** Backend functions are secured by validating the Auth0 JWT sent with each request. Access to shift data is restricted to users with the `Admin` role.
