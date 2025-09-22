@@ -1,262 +1,300 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useLocalStorage } from './src/hooks/useLocalStorage';
-import { useGeolocation } from './src/hooks/useGeolocation';
-import { useApiClient } from './src/hooks/useApiClient';
-import { initialShiftState, stockTemplate } from './src/data/mockData';
-import { ShiftState, ShiftStep, Task, StockCategory, StockItem, NewStockDeliveryItem } from './src/types';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import { useApiClient } from './hooks/useApiClient';
+import { initialShiftState, stockTemplate } from './data/mockData';
+import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem, ShiftRecord } from './types';
 
-import Header from './src/components/ui/Header';
-import GeoStatus from './src/components/ui/GeoStatus';
-import Button from './src/components/ui/Button';
-import ProgressIndicator from './src/components/ui/ProgressIndicator';
-import TaskList from './src/components/tasks/TaskList';
-import StocktakeForm from './src/components/stock/StocktakeForm';
-import NewStockDelivery from './src/components/stock/NewStockDelivery';
-import Feedback from './src/components/ui/Feedback';
-import CompletionScreen from './src/components/ui/CompletionScreen';
-import MotivationalScreen from './src/components/ui/MotivationalScreen';
-import AdminGeoOverrideIndicator from './src/components/ui/AdminGeoOverrideIndicator';
-
-const allStockItems = stockTemplate.flatMap(cat => cat.items.map(item => item.name));
+// Components
+import Header from './components/ui/Header';
+import Button from './components/ui/Button';
+import TaskList from './components/tasks/TaskList';
+import StocktakeForm from './components/stock/StocktakeForm';
+import Feedback from './components/ui/Feedback';
+import GeoStatus from './components/ui/GeoStatus';
+import AdminGeoOverrideIndicator from './components/ui/AdminGeoOverrideIndicator';
+import { useGeolocation } from './hooks/useGeolocation';
+import ProgressIndicator from './components/ui/ProgressIndicator';
+import MotivationalScreen from './components/ui/MotivationalScreen';
+import NewStockDelivery from './components/stock/NewStockDelivery';
+import CompletionScreen from './components/ui/CompletionScreen';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 const App: React.FC = () => {
   const { user, logout } = useAuth0();
-  const { isWithinFence, loading: geoLoading, error: geoError } = useGeolocation();
-  const { postData, isSubmitting, error: submissionError } = useApiClient();
-
+  const { isWithinFence, loading: geoLoading } = useGeolocation();
   const [shiftState, setShiftState] = useLocalStorage<ShiftState>('shiftState', initialShiftState);
-
-  // Check for Admin role to bypass geofence
-  const roles = user?.['https://spinalapp.com/roles'] as string[] | undefined;
-  const isAdmin = roles?.includes('Admin') || false;
-
-  // Geofence is disabled if the user is off-site AND not an admin
-  const isGeoDisabled = !isWithinFence && !isAdmin && shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'opening_tasks';
-
-  const setStep = (step: ShiftStep) => {
-    setShiftState((prev) => ({ ...prev, currentStep: step }));
-  };
-
-  const handleStartShift = () => {
-    setShiftState({
-      ...initialShiftState,
-      startTime: new Date().toISOString(),
-      currentStep: 'opening_tasks',
-    });
-  };
+  const { submitShift, getShifts, loading: apiLoading, error: apiError } = useApiClient();
   
-  const handleStartNewShift = () => {
-    setShiftState(initialShiftState); 
+  const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+  const [showNewDelivery, setShowNewDelivery] = useState(false);
+
+  const isAdmin = useMemo(() => {
+    const roles = user?.['https://spinalapp.com/roles'] as string[] | undefined;
+    return roles?.includes('Admin') ?? false;
+  }, [user]);
+
+  const canProceed = isAdmin || isWithinFence;
+  const isGeoDisabled = !canProceed && shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'admin_dashboard' && shiftState.currentStep !== 'complete';
+
+
+  const steps: { id: ShiftStep; title: string }[] = [
+    { id: 'openingTasks', title: 'Opening' },
+    { id: 'openingStock', title: 'Stocktake' },
+    { id: 'midShift', title: 'On Shift' },
+    { id: 'closingStock', title: 'Stocktake' },
+    { id: 'closingTasks', title: 'Closing' },
+    { id: 'feedback', title: 'Feedback' },
+  ];
+
+  const handleNextStep = (nextStep: ShiftStep) => {
+    let updates: Partial<ShiftState> = { currentStep: nextStep };
+    if (nextStep === 'openingTasks') {
+      updates.startTime = new Date().toISOString();
+    }
+    setShiftState(prev => ({ ...prev, ...updates }));
+    window.scrollTo(0, 0);
   };
 
-  const handleTaskChange = useCallback((updatedTask: Task, taskType: 'opening' | 'closing') => {
+  const handleReset = () => {
+    setShiftState(initialShiftState);
+    setShowNewDelivery(false);
+  };
+
+  const handleTaskChange = (list: 'openingTasks' | 'closingTasks') => (updatedTask: Task) => {
+    setShiftState(prev => ({
+      ...prev,
+      [list]: prev[list].map(task => (task.id === updatedTask.id ? updatedTask : task)),
+    }));
+  };
+
+  const handleStockChange = (
+    list: 'openingStock' | 'closingStock'
+  ) => (categoryIndex: number, itemIndex: number, field: Exclude<keyof StockItem, 'name'>, value: number) => {
     setShiftState(prev => {
-      const tasks = taskType === 'opening' ? prev.openingTasks : prev.closingTasks;
-      const newTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
-      return taskType === 'opening'
-        ? { ...prev, openingTasks: newTasks }
-        : { ...prev, closingTasks: newTasks };
-    });
-  }, [setShiftState]);
-  
-  const handleStockChange = useCallback((categoryIndex: number, itemIndex: number, field: keyof StockItem, value: number, stockType: 'opening' | 'closing') => {
-    setShiftState(prev => {
-      const stock = stockType === 'opening' ? prev.openingStock : prev.closingStock;
-      const newStock = JSON.parse(JSON.stringify(stock)) as StockCategory[];
+      const newStock = JSON.parse(JSON.stringify(prev[list]));
       const itemToUpdate = newStock[categoryIndex].items[itemIndex];
-      
       if (field !== 'name') {
-        type WritableStockItem = Omit<StockItem, 'name'>;
-        (itemToUpdate as WritableStockItem)[field as keyof WritableStockItem] = value;
+        itemToUpdate[field] = value;
       }
-      
-      return stockType === 'opening'
-        ? { ...prev, openingStock: newStock }
-        : { ...prev, closingStock: newStock };
+      return { ...prev, [list]: newStock };
     });
-  }, [setShiftState]);
+  };
   
-  const handleAddDelivery = (item: NewStockDeliveryItem) => {
-    setShiftState(prev => ({
-      ...prev,
-      newStockDeliveries: [...prev.newStockDeliveries, item]
-    }));
-  };
-
-  const handleRemoveDelivery = (id: string) => {
-    setShiftState(prev => ({
-      ...prev,
-      newStockDeliveries: prev.newStockDeliveries.filter(item => item.id !== id)
-    }));
-  };
-
   const handleFeedbackChange = (rating: 'Great' | 'Normal' | 'Bad' | null, comment: string) => {
     setShiftState(prev => ({
       ...prev,
-      shiftFeedback: { rating, comment }
+      shiftFeedback: { rating, comment },
     }));
   };
 
-  const handleSubmitShift = async () => {
-    const finalState: ShiftState = {
+  const handleNewDeliveryAdd = (item: NewStockDeliveryItem) => {
+    setShiftState(prev => ({
+      ...prev,
+      newStockDeliveries: [...prev.newStockDeliveries, item],
+    }));
+  };
+
+  const handleNewDeliveryRemove = (id: string) => {
+    setShiftState(prev => ({
+      ...prev,
+      newStockDeliveries: prev.newStockDeliveries.filter(d => d.id !== id),
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (shiftState.shiftFeedback.rating && (shiftState.shiftFeedback.rating !== 'Normal' && !shiftState.shiftFeedback.comment)) {
+      alert("Please add a comment for 'Great' or 'Bad' feedback.");
+      return;
+    }
+    
+    handleNextStep('submitting');
+    
+    const finalShiftData: ShiftState = {
       ...shiftState,
       endTime: new Date().toISOString(),
+      user: {
+        name: user?.name,
+        email: user?.email,
+        picture: user?.picture,
+      }
     };
-    const success = await postData(finalState);
-    if (success) {
-        setShiftState(finalState);
-        setStep('complete');
+
+    try {
+      await submitShift(finalShiftData);
+      handleNextStep('complete');
+    } catch (e) {
+      console.error("Submission failed:", e);
+      handleNextStep('feedback'); // Revert on failure
     }
   };
 
-  const renderCurrentStep = () => {
+  const handleViewAdminDashboard = async () => {
+    try {
+      const data = await getShifts();
+      setShifts(data);
+      handleNextStep('admin_dashboard');
+    } catch (err) {
+      alert(`Failed to load admin data: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const allStockItems = useMemo(() => {
+    const itemSet = new Set<string>();
+    stockTemplate.forEach(category => {
+      category.items.forEach(item => {
+        itemSet.add(item.name);
+      });
+    });
+    return Array.from(itemSet).sort();
+  }, []);
+  
+  const areOpeningTasksComplete = useMemo(() => shiftState.openingTasks.every(t => t.completed), [shiftState.openingTasks]);
+  const areClosingTasksComplete = useMemo(() => shiftState.closingTasks.every(t => t.completed), [shiftState.closingTasks]);
+
+  const renderStepContent = () => {
     switch (shiftState.currentStep) {
       case 'welcome':
-        const welcomeName = user?.given_name || (user?.name && !user.name.includes('@') ? user.name.split(' ')[0] : '');
         return (
-          <div className="text-center bg-gray-800 p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
-            <Header title={`Welcome${welcomeName ? ` ${welcomeName}` : ''}`} subtitle={`Logged in as ${user?.email}`} />
-            <div className="my-6 flex justify-center"><GeoStatus /></div>
-            <Button 
-              onClick={handleStartShift}
-              disabled={(!isWithinFence && !isAdmin) || geoLoading} 
-              className="mt-4"
-              size="lg"
-            >
-              {geoLoading ? 'Verifying Location...' : 'Clock In'}
-            </Button>
-            {geoError && <p className="text-red-400 mt-4">Could not verify location: {geoError.message}</p>}
-            {!geoLoading && !isWithinFence && !isAdmin && <p className="text-yellow-400 mt-4">You must be at the approved location to start a shift.</p>}
+          <div className="text-center">
+            <Header title={`Welcome, ${user?.given_name || user?.name}!`} subtitle={`Logged in as ${user?.email}`} />
+            <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md mx-auto">
+              {!isWithinFence && !isAdmin && <GeoStatus />}
+              {isWithinFence && <GeoStatus />}
+              {isAdmin && !isWithinFence && <AdminGeoOverrideIndicator />}
+              <Button onClick={() => handleNextStep('openingTasks')} size="lg" className="mt-6 w-full" disabled={!canProceed || geoLoading}>
+                {geoLoading ? 'Verifying Location...' : 'Clock In & Start Shift'}
+              </Button>
+              {isAdmin && (
+                <Button onClick={handleViewAdminDashboard} variant="secondary" className="mt-4 w-full" disabled={apiLoading}>
+                  {apiLoading ? 'Loading...' : 'Admin Dashboard'}
+                </Button>
+              )}
+            </div>
           </div>
         );
-      case 'opening_tasks':
-        const areOpeningTasksComplete = shiftState.openingTasks.every(task => task.completed);
-        return (
-          <>
-            <TaskList title="Opening Tasks" tasks={shiftState.openingTasks} onTaskChange={(task) => handleTaskChange(task, 'opening')} />
-            <div className="mt-8 text-center">
-              <Button onClick={() => setStep('opening_stock')} className="w-full" size="lg" disabled={!areOpeningTasksComplete}>
-                Continue to Opening Stocktake
-              </Button>
-              {!areOpeningTasksComplete && (
-                <p className="text-yellow-400 mt-4">
-                  All opening tasks must be completed before you can proceed.
-                </p>
-              )}
-            </div>
-          </>
-        );
-      case 'opening_stock':
-         return (
-          <>
-            <StocktakeForm title="Opening Stocktake" stockData={shiftState.openingStock} onStockChange={(catIdx, itemIdx, field, val) => handleStockChange(catIdx, itemIdx, field, val, 'opening')} disabled={isGeoDisabled} />
-            <Button onClick={() => setStep('motivational')} className="mt-8 w-full" size="lg" disabled={isGeoDisabled}>Finish Opening Handover</Button>
-          </>
-        );
-      case 'motivational':
-        return <MotivationalScreen onNewDelivery={() => setStep('new_stock_delivery')} onProceed={() => setStep('closing_stock')} disabled={isGeoDisabled} />;
-      case 'new_stock_delivery':
-        return (
-          <>
-            <NewStockDelivery 
-              deliveries={shiftState.newStockDeliveries}
-              stockItems={allStockItems} 
-              onAdd={handleAddDelivery}
-              onRemove={handleRemoveDelivery}
-              disabled={isGeoDisabled}
-            />
-            <Button onClick={() => setStep('motivational')} className="mt-8 w-full" size="lg">Back to Mid-Shift Hub</Button>
-          </>
-        );
-      case 'closing_stock':
-        return (
-          <>
-            <StocktakeForm title="Closing Stocktake" stockData={shiftState.closingStock} onStockChange={(catIdx, itemIdx, field, val) => handleStockChange(catIdx, itemIdx, field, val, 'closing')} disabled={isGeoDisabled}/>
-            <Button onClick={() => setStep('closing_tasks')} className="mt-8 w-full" size="lg" disabled={isGeoDisabled}>Continue to Closing Tasks</Button>
-          </>
-        );
-      case 'closing_tasks':
-        const areClosingTasksComplete = shiftState.closingTasks.every(task => task.completed);
-        const isFeedbackComplete = !(
-          (shiftState.shiftFeedback.rating === 'Great' || shiftState.shiftFeedback.rating === 'Bad') &&
-          !shiftState.shiftFeedback.comment.trim()
-        );
-        const canSubmit = areClosingTasksComplete && isFeedbackComplete;
 
+      case 'admin_dashboard':
+        return <AdminDashboard shifts={shifts} onBack={() => handleNextStep('welcome')} />;
+
+      case 'openingTasks':
         return (
           <>
-            <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={(task) => handleTaskChange(task, 'closing')} disabled={isGeoDisabled} />
-            <Feedback feedback={shiftState.shiftFeedback} onFeedbackChange={handleFeedbackChange} disabled={isGeoDisabled}/>
-            <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h3 className="text-xl font-semibold text-gray-200 mb-4">Ready to Clock Out?</h3>
-              <p className="text-gray-400 mb-6">This will finalize and submit your shift report. It cannot be changed after submission.</p>
-              <Button onClick={handleSubmitShift} disabled={isSubmitting || isGeoDisabled || !canSubmit} className="w-full" size="lg">
-                {isSubmitting ? 'Submitting...' : 'Clock Out'}
-              </Button>
-              {submissionError && <p className="text-red-400 mt-4 text-center">{submissionError}</p>}
-              {!canSubmit && (
-                <p className="text-yellow-400 mt-4 text-center">
-                  All closing tasks and required shift feedback must be completed before you can clock out.
-                </p>
-              )}
-            </div>
+            <TaskList title="Opening Tasks" tasks={shiftState.openingTasks} onTaskChange={handleTaskChange('openingTasks')} disabled={isGeoDisabled} />
+            <Button onClick={() => handleNextStep('openingStock')} className="mt-8 w-full" size="lg" disabled={!areOpeningTasksComplete || isGeoDisabled}>
+              Continue to Opening Stocktake
+            </Button>
+            {!areOpeningTasksComplete && <p className="text-center text-sm text-yellow-400 mt-2">All tasks must be completed to continue.</p>}
           </>
         );
+
+      case 'openingStock':
+        return (
+          <>
+            <StocktakeForm title="Opening Stocktake" stockData={shiftState.openingStock} onStockChange={handleStockChange('openingStock')} disabled={isGeoDisabled} />
+            <Button onClick={() => handleNextStep('midShift')} className="mt-8 w-full" size="lg" disabled={isGeoDisabled}>
+              Continue to Mid-Shift
+            </Button>
+          </>
+        );
+      
+      case 'midShift':
+        return (
+          <MotivationalScreen
+            onNewDelivery={() => setShowNewDelivery(true)}
+            onProceed={() => handleNextStep('closingStock')}
+            disabled={isGeoDisabled}
+          />
+        );
+      
+      case 'closingStock':
+        return (
+          <>
+            <StocktakeForm title="Closing Stocktake" stockData={shiftState.closingStock} onStockChange={handleStockChange('closingStock')} disabled={isGeoDisabled} />
+            <Button onClick={() => handleNextStep('closingTasks')} className="mt-8 w-full" size="lg" disabled={isGeoDisabled}>
+              Continue to Closing Tasks
+            </Button>
+          </>
+        );
+
+      case 'closingTasks':
+        return (
+          <>
+            <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={handleTaskChange('closingTasks')} disabled={isGeoDisabled} />
+            <Button onClick={() => handleNextStep('feedback')} className="mt-8 w-full" size="lg" disabled={!areClosingTasksComplete || isGeoDisabled}>
+              Continue to Feedback
+            </Button>
+            {!areClosingTasksComplete && <p className="text-center text-sm text-yellow-400 mt-2">All tasks must be completed to continue.</p>}
+          </>
+        );
+      
+      case 'feedback':
+        return (
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-50 mb-6">Final Step: Shift Feedback</h2>
+            <Feedback feedback={shiftState.shiftFeedback} onFeedbackChange={handleFeedbackChange} disabled={isGeoDisabled} />
+            <div className="mt-8">
+              {apiError && <p className="text-red-400 text-center mb-4">Error: {apiError.message}</p>}
+              <Button onClick={handleSubmit} className="w-full" size="lg" disabled={apiLoading || !shiftState.shiftFeedback.rating || isGeoDisabled}>
+                {apiLoading ? 'Submitting...' : 'Clock Out & Submit Report'}
+              </Button>
+            </div>
+          </div>
+        );
+      
+      case 'submitting':
+        return (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-100">Submitting your report...</h2>
+            <p className="text-gray-400 mt-2">Please wait.</p>
+          </div>
+        );
+      
       case 'complete':
-        return <CompletionScreen onStartNewShift={handleStartNewShift} />;
+        return <CompletionScreen onStartNewShift={handleReset} />;
+
       default:
-        return <p>Invalid step.</p>;
+        return <p>Unknown step.</p>;
     }
   };
-
-  const progressSteps = [
-      { id: 'opening_tasks' as ShiftStep, title: 'Opening Tasks' },
-      { id: 'opening_stock' as ShiftStep, title: 'Opening Stock' },
-      { id: 'on_shift' as ShiftStep, title: 'On Shift' },
-      { id: 'closing_stock' as ShiftStep, title: 'Closing Stock' },
-      { id: 'closing_tasks' as ShiftStep, title: 'Closing Tasks' },
-  ];
   
-  const getProgressStepId = (): ShiftStep => {
-    if (shiftState.currentStep === 'motivational' || shiftState.currentStep === 'new_stock_delivery') {
-      return 'on_shift' as ShiftStep;
-    }
-    return shiftState.currentStep;
+  if (showNewDelivery) {
+    return (
+       <main className="container mx-auto p-4 md:p-8">
+         <NewStockDelivery
+            deliveries={shiftState.newStockDeliveries}
+            stockItems={allStockItems}
+            onAdd={handleNewDeliveryAdd}
+            onRemove={handleNewDeliveryRemove}
+            disabled={isGeoDisabled}
+          />
+          <Button onClick={() => setShowNewDelivery(false)} className="mt-8" variant="secondary">Back to Mid-Shift Hub</Button>
+       </main>
+    );
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen font-sans overflow-x-hidden">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-100">Spinäl Äpp</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-400 text-sm hidden sm:inline">{user?.email}</span>
-            <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })} variant="secondary" size="sm">
-              Log Out
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gray-900 text-white font-sans overflow-x-hidden">
+      <header className="bg-gray-800 shadow-md p-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold">Spinäl Äpp Handover</h1>
+        <div>
+          <span className="text-sm mr-4">{user?.name}</span>
+          <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })} variant="secondary" size="sm">
+            Log Out
+          </Button>
         </div>
-        
-        {isAdmin && !isWithinFence && (
-            <AdminGeoOverrideIndicator />
+      </header>
+      <main className="container mx-auto p-4 md:p-8">
+        {shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'complete' && shiftState.currentStep !== 'admin_dashboard' && (
+           <ProgressIndicator steps={steps} currentStepId={shiftState.currentStep} />
         )}
-
-        {isGeoDisabled && (
-          <div className="bg-yellow-900 border-l-4 border-yellow-500 text-yellow-100 p-4 mb-6 rounded-r-lg" role="alert">
-            <p className="font-bold">Functionality Disabled</p>
-            <p>You are outside the required geofence. Please return to the location to continue your shift.</p>
-          </div>
-        )}
-
-        {shiftState.currentStep !== 'welcome' && shiftState.currentStep !== 'complete' && (
-          <ProgressIndicator steps={progressSteps} currentStepId={getProgressStepId()} />
-        )}
-
-        <main>
-          {renderCurrentStep()}
-        </main>
-      </div>
+        {isGeoDisabled && <div className="bg-yellow-900 border-l-4 border-yellow-500 text-yellow-100 p-4 mb-6 rounded-r-lg" role="alert"><p className="font-bold">Functionality Disabled</p><p>You are outside the required geofence. Please return to the location to continue your shift.</p></div>}
+        {renderStepContent()}
+      </main>
+      <footer className="text-center p-4 text-gray-500 text-xs">
+        <p>&copy; {new Date().getFullYear()} Spinäl Täp. All rights reserved.</p>
+        <button onClick={handleReset} className="text-gray-600 hover:text-gray-400 mt-2 text-xs">Reset Shift Data (Dev)</button>
+      </footer>
     </div>
   );
 };

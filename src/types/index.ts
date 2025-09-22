@@ -1,13 +1,14 @@
-// FIX: Added type definitions for the application.
+export type TaskType = 'toggle' | 'radio' | 'radio_text' | 'toggle_text';
+
 export type Task = {
   id: string;
   text: string;
-  description?: string;
-  type: 'toggle' | 'radio' | 'radio_text' | 'toggle_text';
+  type: TaskType;
   completed: boolean;
-  options?: string[];
   value?: string;
+  options?: string[];
   notes?: string;
+  description?: string;
 };
 
 export type StockItem = {
@@ -16,7 +17,6 @@ export type StockItem = {
   storeRoom?: number;
   openBottleWeight?: number;
   quantity?: number;
-  fullBottlesTotal?: number; // Added for pre-submission calculation
 };
 
 export type StockCategory = {
@@ -26,21 +26,28 @@ export type StockCategory = {
 };
 
 export type NewStockDeliveryItem = {
-    id: string;
-    name: string;
-    quantity: number;
+  id: string;
+  name: string;
+  quantity: number;
 };
 
-// Represents the distinct steps in the shift handover process.
-export type ShiftStep = 
-  | 'welcome' 
-  | 'opening_tasks' 
-  | 'opening_stock'
-  | 'motivational' // Hub for mid-shift tasks
-  | 'new_stock_delivery' // Non-linear step accessed from motivational
-  | 'closing_stock'
-  | 'closing_tasks'
-  | 'complete';
+export type ShiftFeedback = {
+  rating: 'Great' | 'Normal' | 'Bad' | null;
+  comment: string;
+};
+
+export type ShiftStep =
+  | 'welcome'
+  | 'openingTasks'
+  | 'openingStock'
+  | 'midShift'
+  | 'newStockDelivery'
+  | 'closingTasks'
+  | 'closingStock'
+  | 'feedback'
+  | 'submitting'
+  | 'complete'
+  | 'admin_dashboard';
 
 export type ShiftState = {
   currentStep: ShiftStep;
@@ -51,8 +58,15 @@ export type ShiftState = {
   openingStock: StockCategory[];
   closingStock: StockCategory[];
   newStockDeliveries: NewStockDeliveryItem[];
-  shiftFeedback: {
-    rating: 'Great' | 'Normal' | 'Bad' | null;
-    comment: string;
+  shiftFeedback: ShiftFeedback;
+  user?: {
+    name?: string;
+    email?: string;
+    picture?: string;
   };
+};
+
+// For admin dashboard
+export type ShiftRecord = ShiftState & {
+  id: string;
 };
