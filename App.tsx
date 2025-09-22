@@ -1,24 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useLocalStorage } from './hooks/useLocalStorage';
-import { useApiClient } from './hooks/useApiClient';
-import { initialShiftState, stockTemplate } from './data/mockData';
-import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem, ShiftRecord } from './types';
+import { useLocalStorage } from './src/hooks/useLocalStorage'; // Corrected Path
+import { useApiClient } from './src/hooks/useApiClient'; // Corrected Path
+import { initialShiftState } from './src/data/mockData'; // Corrected Path
+import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem, ShiftRecord } from './src/types'; // Corrected Path
 
 // Components
-import Header from './components/ui/Header';
-import Button from './components/ui/Button';
-import TaskList from './components/tasks/TaskList';
-import StocktakeForm from './components/stock/StocktakeForm';
-import Feedback from './components/ui/Feedback';
-import GeoStatus from './components/ui/GeoStatus';
-import AdminGeoOverrideIndicator from './components/ui/AdminGeoOverrideIndicator';
-import { useGeolocation } from './hooks/useGeolocation';
-import ProgressIndicator from './components/ui/ProgressIndicator';
-import MotivationalScreen from './components/ui/MotivationalScreen';
-import NewStockDelivery from './components/stock/NewStockDelivery';
-import CompletionScreen from './components/ui/CompletionScreen';
-import AdminDashboard from './components/admin/AdminDashboard';
+import Header from './src/components/ui/Header'; // Corrected Path
+import Button from './src/components/ui/Button'; // Corrected Path
+import TaskList from './src/components/tasks/TaskList'; // Corrected Path
+import StocktakeForm from './src/components/stock/StocktakeForm'; // Corrected Path
+import Feedback from './src/components/ui/Feedback'; // Corrected Path
+import GeoStatus from './src/components/ui/GeoStatus'; // Corrected Path
+import AdminGeoOverrideIndicator from './src/components/ui/AdminGeoOverrideIndicator'; // Corrected Path
+import { useGeolocation } from './src/hooks/useGeolocation'; // Corrected Path
+import ProgressIndicator from './src/components/ui/ProgressIndicator'; // Corrected Path
+import MotivationalScreen from './src/components/ui/MotivationalScreen'; // Corrected Path
+import NewStockDelivery from './src/components/stock/NewStockDelivery'; // Corrected Path
+import CompletionScreen from './src/components/ui/CompletionScreen'; // Corrected Path
+import AdminDashboard from './src/components/admin/AdminDashboard'; // Corrected Path
 
 const App: React.FC = () => {
   const { user, logout } = useAuth0();
@@ -141,13 +141,13 @@ const App: React.FC = () => {
 
   const allStockItems = useMemo(() => {
     const itemSet = new Set<string>();
-    stockTemplate.forEach(category => {
+    shiftState.openingStock.forEach(category => {
       category.items.forEach(item => {
         itemSet.add(item.name);
       });
     });
     return Array.from(itemSet).sort();
-  }, []);
+  }, [shiftState.openingStock]);
   
   const areOpeningTasksComplete = useMemo(() => shiftState.openingTasks.every(t => t.completed), [shiftState.openingTasks]);
   const areClosingTasksComplete = useMemo(() => shiftState.closingTasks.every(t => t.completed), [shiftState.closingTasks]);
@@ -175,7 +175,7 @@ const App: React.FC = () => {
         );
 
       case 'admin_dashboard':
-        return <AdminDashboard shifts={shifts} onBack={() => handleNextStep('welcome')} />;
+        return <AdminDashboard onBack={() => handleNextStep('welcome')} />;
 
       case 'openingTasks':
         return (
