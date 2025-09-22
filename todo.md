@@ -55,7 +55,3 @@
 - [x] **Task 17.3: Implement Shift Filtering.** Updated the `AdminDashboard` to display only the last 5 shifts by default. Added a date picker component to allow admins to filter and view shifts from a specific date.
 - [x] **Task 17.4: Reorder Admin Dashboard Layout.** Modified the `ShiftDetail.tsx` component to display the stocktake sections before the task list sections for a more logical data review flow.
 - [x] **Task 17.5: Add Total Stock Count to Admin Dashboard.** Implemented a calculated, read-only "Total" column in the stocktake tables within `ShiftDetail.tsx` that sums the "FOH" and "Store Room" counts for relevant items.
-
-## Phase 18: Workflow and UI Refinements
-- [ ] **Task 18.1: Reorder Main Workflow.** Modify the application's step progression in `App.tsx` so that the `openingTasks` and `closingTasks` screens appear *after* their respective stocktake screens.
-- [ ] **Task 18.2: Add Total Stock Count to Live Forms.** Implement the calculated "Total" column on the live `StocktakeForm.tsx` component, so the value updates dynamically as the user enters FOH and Store Room counts.
