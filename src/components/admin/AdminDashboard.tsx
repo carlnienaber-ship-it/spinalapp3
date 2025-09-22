@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
 import { ShiftRecord } from '../../types';
 import ShiftList from './ShiftList';
@@ -6,15 +6,14 @@ import ShiftDetail from './ShiftDetail';
 import Header from '../ui/Header';
 import Button from '../ui/Button';
 
-// FIX: Update props to only accept `onBack` for navigation.
 type AdminDashboardProps = {
   onBack: () => void;
 };
 
-// FIX: Refactor component to fetch its own data.
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [selectedShift, setSelectedShift] = useState<ShiftRecord | null>(null);
+  const [selectedDate, setSelectedDate] = useState('');
   const { getShifts, loading, error } = useApiClient();
 
   useEffect(() => {
@@ -23,7 +22,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         const fetchedShifts = await getShifts();
         setShifts(fetchedShifts);
       } catch (e) {
-        // error is handled by useApiClient hook and displayed below
         console.error("Failed to load shifts", e);
       }
     };
@@ -31,14 +29,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     fetchShifts();
   }, [getShifts]);
 
+  const filteredShifts = useMemo(() => {
+    if (selectedDate) {
+      return shifts.filter(shift => {
+        if (!shift.startTime) return false;
+        const shiftDate = new Date(shift.startTime).toISOString().split('T')[0];
+        return shiftDate === selectedDate;
+      });
+    }
+    return shifts.slice(0, 5);
+  }, [shifts, selectedDate]);
+
   useEffect(() => {
-    // When shifts data changes, select the first one by default
-    if (shifts.length > 0) {
-      setSelectedShift(shifts[0]);
+    if (filteredShifts.length > 0) {
+      setSelectedShift(filteredShifts[0]);
     } else {
       setSelectedShift(null);
     }
-  }, [shifts]);
+  }, [filteredShifts]);
 
 
   if (loading && shifts.length === 0) {
@@ -62,27 +70,43 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     <div>
       <Header title="Admin Dashboard" subtitle="Review submitted shift handovers" />
       
-      {shifts.length === 0 ? (
+      {shifts.length === 0 && !loading ? (
         <div className="text-center p-8 bg-gray-800 rounded-lg">
            <p className="text-gray-400 mb-6">No shift reports have been submitted yet.</p>
-           <Button onClick={onBack} variant="secondary">Back to Welcome Screen</Button>
+           <Button onClick={onBack}>Back to Welcome Screen</Button>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-1/3 lg:w-1/4">
-            <ShiftList
-              shifts={shifts}
-              selectedShiftId={selectedShift?.id || ''}
-              onSelectShift={setSelectedShift}
-            />
-             <Button onClick={onBack} variant="secondary" className="w-full mt-4">Back to Welcome Screen</Button>
+            <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
+              <h2 className="text-xl font-bold text-gray-50 mb-4 px-2">Shifts</h2>
+               <div className="mb-4 px-2">
+                 <label htmlFor="date-picker" className="block text-sm font-medium text-gray-400 mb-1">Filter by date</label>
+                 <input 
+                  type="date"
+                  id="date-picker"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full bg-gray-700 text-gray-200 rounded-md border-gray-600 p-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                 />
+                 {selectedDate && <Button size="sm" variant="secondary" onClick={() => setSelectedDate('')} className="mt-2 w-full">Clear Filter</Button>}
+               </div>
+              <ShiftList
+                shifts={filteredShifts}
+                selectedShiftId={selectedShift?.id || ''}
+                onSelectShift={setSelectedShift}
+              />
+            </div>
+             <Button onClick={onBack} className="w-full mt-4">Back to Welcome Screen</Button>
           </div>
           <div className="w-full md:w-2/3 lg:w-3/4">
             {selectedShift ? (
               <ShiftDetail shift={selectedShift} />
             ) : (
               <div className="bg-gray-800 p-8 rounded-lg text-center">
-                <p>Select a shift to view its details.</p>
+                <p className="text-gray-300">
+                  {selectedDate ? 'No shifts found for the selected date.' : 'Select a shift to view its details.'}
+                </p>
               </div>
             )}
           </div>

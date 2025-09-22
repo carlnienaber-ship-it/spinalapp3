@@ -41,10 +41,21 @@
 ## Phase 15: Backend Implementation (Completed)
 - [x] **Task 15.1: Implement Serverless Data Submission.** Created a secure Netlify serverless function (`submit-shift.ts`) that receives the final shift report, connects to Firebase using secure environment variables, and stores the data in the Firestore database.
 
-## Phase 16: Admin Dashboard (In Progress)
+## Phase 16: Admin Dashboard (Completed)
 - [x] **Task 16.1: Configure Admin Role in Auth0.** (Manual Step) Create a new `Admin` role in the Auth0 dashboard and assign it to the admin user(s).
 - [x] **Task 16.2: Create Secure Data-Fetching Endpoint.** Created a new Netlify Function (`get-shifts.ts`) to fetch all shift reports from the database.
 - [x] **Task 16.3: Secure the `get-shifts` Endpoint.** Implemented robust JWT validation within the `get-shifts.ts` function to ensure only users with the `Admin` role can access the data.
 - [x] **Task 16.4: Implement Admin-Only Entry Point.** Added a conditionally rendered "Admin Dashboard" button to the Welcome Screen that is only visible to users with the `Admin` role.
 - [x] **Task 16.5: Build Admin Dashboard UI Components.** Created the frontend components (`AdminDashboard.tsx`, `ShiftList.tsx`, `ShiftDetail.tsx`) to display the fetched shift data.
 - [x] **Task 16.6: Implement Admin Geofence Bypass.** Updated the application logic to exempt users with the 'Admin' role from all geofence restrictions.
+
+## Phase 17: Admin Dashboard Refinements (Completed)
+- [x] **Task 17.1: Unify Admin Button Styles.** Updated the "Admin Dashboard" and "Back to Welcome Screen" buttons to use the primary button style for better UI consistency.
+- [x] **Task 17.2: Improve User Identification in Shift List.** Modified the `ShiftList` component to display the user's email address as a fallback if their name is not available, preventing "Unknown User" from being shown.
+- [x] **Task 17.3: Implement Shift Filtering.** Updated the `AdminDashboard` to display only the last 5 shifts by default. Added a date picker component to allow admins to filter and view shifts from a specific date.
+- [x] **Task 17.4: Reorder Admin Dashboard Layout.** Modified the `ShiftDetail.tsx` component to display the stocktake sections before the task list sections for a more logical data review flow.
+- [x] **Task 17.5: Add Total Stock Count to Admin Dashboard.** Implemented a calculated, read-only "Total" column in the stocktake tables within `ShiftDetail.tsx` that sums the "FOH" and "Store Room" counts for relevant items.
+
+## Phase 18: Workflow and UI Refinements
+- [ ] **Task 18.1: Reorder Main Workflow.** Modify the application's step progression in `App.tsx` so that the `openingTasks` and `closingTasks` screens appear *after* their respective stocktake screens.
+- [ ] **Task 18.2: Add Total Stock Count to Live Forms.** Implement the calculated "Total" column on the live `StocktakeForm.tsx` component, so the value updates dynamically as the user enters FOH and Store Room counts.

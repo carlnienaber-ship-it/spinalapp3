@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShiftRecord, Task, StockCategory } from '../../types';
+import { ShiftRecord, Task, StockCategory, StockItem } from '../../types';
 
 type ShiftDetailProps = {
   shift: ShiftRecord;
@@ -29,30 +29,38 @@ const StockDetail: React.FC<{ title: string; stock: StockCategory[] }> = ({ titl
   <div>
     <h3 className="text-lg font-semibold text-gray-200 mt-4 mb-2 border-b border-gray-600 pb-1">{title}</h3>
     <div className="space-y-3">
-      {stock.map(category => (
-        <div key={category.title}>
-          <h4 className="font-semibold text-gray-300 text-md">{category.title}</h4>
-          <table className="w-full text-sm text-left mt-1">
-            <thead className="bg-gray-700 text-xs text-gray-400 uppercase">
-              <tr>
-                <th className="px-4 py-2">Item</th>
-                {category.headers.map(h => <th key={h} className="px-4 py-2 text-right">{h}</th>)}
-              </tr>
-            </thead>
-            <tbody className="bg-gray-800">
-              {category.items.map(item => (
-                <tr key={item.name} className="border-b border-gray-700">
-                  <td className="px-4 py-2 font-medium text-gray-50">{item.name}</td>
-                  {category.headers.includes('FOH') && <td className="px-4 py-2 text-right">{item.foh ?? 0}</td>}
-                  {category.headers.includes('Store Room') && <td className="px-4 py-2 text-right">{item.storeRoom ?? 0}</td>}
-                  {category.headers.includes('Open Bottle Weight') && <td className="px-4 py-2 text-right">{item.openBottleWeight ?? 0}g</td>}
-                  {category.headers.includes('Quantity') && <td className="px-4 py-2 text-right">{item.quantity ?? 0}</td>}
+      {stock.map(category => {
+        const hasTotal = category.headers.includes('FOH') && category.headers.includes('Store Room');
+        return (
+          <div key={category.title}>
+            <h4 className="font-semibold text-gray-300 text-md">{category.title}</h4>
+            <table className="w-full text-sm text-left mt-1">
+              <thead className="bg-gray-700 text-xs text-gray-400 uppercase">
+                <tr>
+                  <th className="px-4 py-2">Item</th>
+                  {category.headers.map(h => <th key={h} className="px-4 py-2 text-right">{h}</th>)}
+                  {hasTotal && <th className="px-4 py-2 text-right font-bold">Total</th>}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+              </thead>
+              <tbody className="bg-gray-800">
+                {category.items.map(item => {
+                  const total = (item.foh ?? 0) + (item.storeRoom ?? 0);
+                  return (
+                    <tr key={item.name} className="border-b border-gray-700">
+                      <td className="px-4 py-2 font-medium text-gray-50">{item.name}</td>
+                      {category.headers.includes('FOH') && <td className="px-4 py-2 text-right">{item.foh ?? 0}</td>}
+                      {category.headers.includes('Store Room') && <td className="px-4 py-2 text-right">{item.storeRoom ?? 0}</td>}
+                      {category.headers.includes('Open Bottle Weight') && <td className="px-4 py-2 text-right">{item.openBottleWeight ?? 0}g</td>}
+                      {category.headers.includes('Quantity') && <td className="px-4 py-2 text-right">{item.quantity ?? 0}</td>}
+                      {hasTotal && <td className="px-4 py-2 text-right font-bold">{total}</td>}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      })}
     </div>
   </div>
 );
@@ -107,15 +115,15 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
            </ul>
         </div>
       )}
-
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
-        <TaskDetail title="Opening Tasks" tasks={shift.openingTasks} />
-        <TaskDetail title="Closing Tasks" tasks={shift.closingTasks} />
+        <StockDetail title="Opening Stock" stock={shift.openingStock} />
+        <StockDetail title="Closing Stock" stock={shift.closingStock} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 mt-4">
-        <StockDetail title="Opening Stock" stock={shift.openingStock} />
-        <StockDetail title="Closing Stock" stock={shift.closingStock} />
+        <TaskDetail title="Opening Tasks" tasks={shift.openingTasks} />
+        <TaskDetail title="Closing Tasks" tasks={shift.closingTasks} />
       </div>
     </div>
   );
