@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
 import { Product } from '../../types';
 import Button from '../ui/Button';
@@ -7,8 +7,9 @@ import ProductForm from './ProductForm';
 const ProductManager: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const { getProducts, deactivateProduct, loading, error } = useApiClient();
+  const { getProducts, deactivateProduct, seedProducts, loading, error } = useApiClient();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -54,7 +55,20 @@ const ProductManager: React.FC = () => {
     fetchProducts();
   };
 
-  const groupedProducts = useMemo(() => {
+  const handleSeed = async () => {
+    setIsSeeding(true);
+    try {
+      await seedProducts();
+      await fetchProducts();
+    } catch (e) {
+      console.error("Failed to seed products", e);
+      alert(`Error seeding products: ${(e as Error).message}`);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  const groupedProducts = React.useMemo(() => {
     const groups: { [key: string]: Product[] } = {
       'Spirits': [],
       'Cans and Bottles': [],
@@ -66,6 +80,10 @@ const ProductManager: React.FC = () => {
         groups[p.category].push(p);
       }
     });
+    // Sort products alphabetically within each group
+    for (const category in groups) {
+        groups[category].sort((a, b) => a.name.localeCompare(b.name));
+    }
     return groups;
   }, [products]);
 
@@ -79,28 +97,39 @@ const ProductManager: React.FC = () => {
       {loading && products.length === 0 && <p>Loading products...</p>}
       {error && <p className="text-red-400">Error: {error.message}</p>}
 
-      <div className="space-y-6">
-        {Object.entries(groupedProducts).map(([category, items]) => (
-          <div key={category}>
-            <h3 className="text-xl font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-2">{category}</h3>
-            {items.length > 0 ? (
-              <ul className="space-y-2">
-                {items.map(product => (
-                  <li key={product.id} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
-                    <span className="text-gray-200">{product.name}</span>
-                    <div className="flex gap-2">
-                      <Button onClick={() => handleEdit(product)} size="sm" variant="secondary">Edit</Button>
-                      <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive">Deactivate</Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500 text-sm">No products in this category.</p>
-            )}
-          </div>
-        ))}
-      </div>
+      {!loading && products.length === 0 && (
+         <div className="text-center p-8 border-2 border-dashed border-gray-600 rounded-lg">
+            <h3 className="text-xl font-semibold text-gray-200">Your product list is empty.</h3>
+            <p className="text-gray-400 mt-2 mb-4">You can add products manually or import the original default product list.</p>
+            <Button onClick={handleSeed} disabled={isSeeding}>
+            {isSeeding ? 'Importing...' : 'Import Default Products'}
+            </Button>
+        </div>
+      )}
+
+      {products.length > 0 && (
+        <div className="space-y-6">
+            {Object.entries(groupedProducts).map(([category, items]) => {
+            if (items.length === 0) return null;
+            return (
+                <div key={category}>
+                <h3 className="text-xl font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-2">{category}</h3>
+                <ul className="space-y-2">
+                    {items.map(product => (
+                    <li key={product.id} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
+                        <span className="text-gray-200">{product.name}</span>
+                        <div className="flex gap-2">
+                        <Button onClick={() => handleEdit(product)} size="sm" variant="secondary">Edit</Button>
+                        <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive">Deactivate</Button>
+                        </div>
+                    </li>
+                    ))}
+                </ul>
+                </div>
+            );
+            })}
+        </div>
+      )}
 
       {isFormOpen && (
         <ProductForm 

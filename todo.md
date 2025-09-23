@@ -144,6 +144,12 @@ _This section summarizes the initial development phases based on the project pla
 - **(Completed)** Task 24.1: Refactor Shift Initialization. Modify the core app logic to fetch the product list from the backend when a new shift is started, instead of using the static `mockData.ts`.
 - **(Completed)** Task 24.2: Generate Dynamic Stocktake Forms. Use the fetched product list to dynamically generate the items within the Opening and Closing stocktake forms.
 - **(Completed)** Task 24.3: Update New Stock Delivery Dropdown. Populate the items in the "New Stock Delivery" dropdown from the dynamically fetched product list.
+- **(Completed)** Task 24.5: Implement One-Time Data Migration.
+  - **Objective:** Provide a simple way to populate the new empty `products` database with the original hardcoded product list.
+  - **Implementation:**
+    - Create a `seed-products` serverless function that contains the original product list and adds them to Firestore if the collection is empty.
+    - Add a button to the "Manage Products" UI that is only visible when the product list is empty.
+    - This button calls the `seed-products` function to perform the one-time data import.
 
 ---
 

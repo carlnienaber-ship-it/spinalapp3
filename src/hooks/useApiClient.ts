@@ -11,6 +11,7 @@ type ApiClient = {
   addProduct: (product: Omit<Product, 'id' | 'isActive'>) => Promise<Product>;
   updateProduct: (product: Product) => Promise<Product>;
   deactivateProduct: (productId: string) => Promise<{ id: string }>;
+  seedProducts: () => Promise<{ message: string; count: number }>;
   loading: boolean;
   error: Error | null;
 };
@@ -76,6 +77,10 @@ export function useApiClient(): ApiClient {
     body: JSON.stringify({ id: productId }),
   });
 
+  const seedProducts = () => makeRequest<{ message: string; count: number }>('seed-products', {
+    method: 'POST',
+  });
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, loading, error };
+
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, seedProducts, loading, error };
 }
