@@ -75,21 +75,22 @@ _This section summarizes the initial development phases based on the project pla
 
 ---
 
-## Phase 17: Admin Dashboard Refinements (In Progress)
-- **(Completed) Task 17.1: Unify Admin Button Styles.** Make the "Admin Dashboard" button on the welcome screen a primary button.
-- **(Completed) Task 17.2: Unify Dashboard Back Button Style.** Make the "Back to Welcome Screen" button a primary button.
-- **(Completed) Task 17.3: Display User Email in Shift List.** Show the user's email in the shift list instead of "Unknown User".
-- **(Completed) Task 17.4: Reorder Admin Dashboard Layout.** Move the stocktake sections above the task list sections in the detail view.
-- **(Completed) Task 17.5: Add Total Stock Count to Dashboard.** Display a calculated "Total" column in the stocktake tables.
-- **(Completed) Task 17.6: Unify Welcome Screen Button Styles.** Ensure "Clock In" and "Admin Dashboard" buttons are identical in style.
-- **(Completed) Task 17.7: Display User Email in Shift List (Reiteration).** Ensure shift list buttons show the user's email.
-- **(Completed) Task 17.8: Display User Email in Shift Details.** Ensure the "Employee" field in the detail summary shows the user's email.
-- **(Completed) Task 17.9: Relocate Shift Feedback.** Move the "How was your shift?" section to the top summary area in the detail view.
+## Phase 17: Admin Dashboard Refinements (Completed)
+- **(Completed)** Task 17.1: Unify Admin Button Styles. Make the "Admin Dashboard" button on the welcome screen a primary button.
+- **(Completed)** Task 17.2: Unify Dashboard Back Button Style. Make the "Back to Welcome Screen" button a primary button.
+- **(Completed)** Task 17.3: Display User Email in Shift List. Show the user's email in the shift list instead of "Unknown User".
+- **(Completed)** Task 17.4: Reorder Admin Dashboard Layout. Move the stocktake sections above the task list sections in the detail view.
+- **(Completed)** Task 17.5: Add Total Stock Count to Dashboard. Display a calculated "Total" column in the stocktake tables.
+- **(Completed)** Task 17.6: Unify Welcome Screen Button Styles. Ensure "Clock In" and "Admin Dashboard" buttons are identical in style.
+- **(Completed)** Task 17.7: Display User Email in Shift List (Reiteration). Ensure shift list buttons show the user's email.
+- **(Completed)** Task 17.8: Display User Email in Shift Details. Ensure the "Employee" field in the detail summary shows the user's email.
+- **(Completed)** Task 17.9: Relocate Shift Feedback. Move the "How was your shift?" section to the top summary area in the detail view.
+- **(Completed)** Task 17.10: Ensure Feedback Comment is Displayed. Make sure the text comment from the "How was your shift?" feedback form is visible in the shift detail view in the Admin Dashboard.
 
 ---
 
-## Phase 18: Stock Variance Calculation (To Do)
-- **Task 18.1: Update Data Model.** Add `fullBottleWeight` to the `StockItem` type and the mock data for spirits.
+## Phase 18: Stock Variance Calculation (In Progress)
+- **(Completed)** Task 18.1: Update Data Model. Add `fullBottleWeight` to the `StockItem` type and the mock data for spirits.
 - **Task 18.2: Implement Variance Calculation Logic.** 
   - Create a utility function to calculate stock variance for all categories.
   - For spirits, use the "total liquid mass" method.

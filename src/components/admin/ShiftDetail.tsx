@@ -26,11 +26,7 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
             <p className="font-semibold text-gray-400">Employee:</p>
             <p className="text-gray-100">{shift.user?.email || shift.user?.name || 'N/A'}</p>
           </div>
-          <div>
-            <p className="font-semibold text-gray-400">Shift Feedback:</p>
-            <p className="text-gray-100">{shift.shiftFeedback.rating ? ratingEmojis[shift.shiftFeedback.rating] : 'N/A'}</p>
-          </div>
-          <div>
+           <div>
             <p className="font-semibold text-gray-400">Shift Start:</p>
             <p className="text-gray-100">{shift.startTime ? new Date(shift.startTime).toLocaleString() : 'N/A'}</p>
           </div>
@@ -38,12 +34,15 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
             <p className="font-semibold text-gray-400">Shift End:</p>
             <p className="text-gray-100">{shift.endTime ? new Date(shift.endTime).toLocaleString() : 'N/A'}</p>
           </div>
-           {shift.shiftFeedback.comment && (
-            <div className="md:col-span-2">
-              <p className="font-semibold text-gray-400">Feedback Comment:</p>
-              <p className="text-gray-100 whitespace-pre-wrap bg-gray-700 p-2 rounded-md">{shift.shiftFeedback.comment}</p>
-            </div>
-          )}
+          <div className="md:col-span-2">
+            <p className="font-semibold text-gray-400">Shift Feedback:</p>
+            <p className="text-gray-100 mb-1">{shift.shiftFeedback.rating ? ratingEmojis[shift.shiftFeedback.rating] : 'No rating given.'}</p>
+            {shift.shiftFeedback.comment && (
+               <blockquote className="text-gray-200 border-l-4 border-gray-600 pl-4 py-2 bg-gray-700 rounded-r-md whitespace-pre-wrap">
+                {shift.shiftFeedback.comment}
+              </blockquote>
+            )}
+          </div>
         </div>
       </div>
 
