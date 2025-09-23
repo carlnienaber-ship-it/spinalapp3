@@ -41,8 +41,8 @@ const App: React.FC = () => {
     { id: 'openingTasks', title: 'Opening Tasks' },
     { id: 'openingStock', title: 'Opening Stock' },
     { id: 'midShift', title: 'Mid-Shift' },
-    { id: 'closingTasks', title: 'Closing Tasks' },
     { id: 'closingStock', title: 'Closing Stock' },
+    { id: 'closingTasks', title: 'Closing Tasks' },
     { id: 'feedback', title: 'Feedback' },
     { id: 'complete', title: 'Complete' },
   ];
@@ -187,7 +187,7 @@ const App: React.FC = () => {
             onNewDelivery={() => setShowNewDelivery(true)}
             onProceed={() => {
               setShowNewDelivery(false);
-              handleNextStep('closingTasks');
+              handleNextStep('closingStock');
             }}
           />
         );
@@ -205,22 +205,22 @@ const App: React.FC = () => {
           </>
         );
       
-      case 'closingTasks':
-        return (
-          <>
-            <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={handleTaskChange('closingTasks')} />
-            <Button onClick={() => handleNextStep('closingStock')} className="mt-8 w-full" size="lg">Continue to Closing Stocktake</Button>
-          </>
-        );
-
       case 'closingStock':
         return (
           <>
             <StocktakeForm title="Closing Stocktake" stockData={shiftState.closingStock} onStockChange={handleStockChange('closingStock')} />
+            <Button onClick={() => handleNextStep('closingTasks')} className="mt-8 w-full" size="lg">Continue to Closing Tasks</Button>
+          </>
+        );
+
+      case 'closingTasks':
+        return (
+          <>
+            <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={handleTaskChange('closingTasks')} />
             <Button onClick={() => handleNextStep('feedback')} className="mt-8 w-full" size="lg">Continue to Feedback</Button>
           </>
         );
-      
+
       case 'feedback':
         return (
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg">

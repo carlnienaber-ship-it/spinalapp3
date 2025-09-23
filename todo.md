@@ -102,3 +102,15 @@ _This section summarizes the initial development phases based on the project pla
 
 ## Phase 19: Admin Dashboard UI Polish (Completed)
 - **(Completed)** Task 19.1: Reorganize Shift Detail Layout. Adjust the layout in the shift detail view to display the "Shift Start" and "Shift End" times on the same row for better readability.
+
+---
+
+## Phase 20: Variance Report Enhancements (Completed)
+- **(Completed) Task 20.1: Add CSV Download to Variance Report.**
+  - **Objective:** Allow admins to download the variance report as a CSV file for offline analysis.
+  - **Implementation:**
+    - Add a "Download CSV" button to the `VarianceReport.tsx` component.
+    - On click, create a function that converts the `reportData` prop into a CSV-formatted string.
+    - The CSV should have three columns: `Category`, `Item Name`, and `Variance`.
+    - The `Variance` column should contain the full value, including the sign and unit (e.g., "-4.5 shots").
+    - Trigger a browser file download for the generated CSV content.
