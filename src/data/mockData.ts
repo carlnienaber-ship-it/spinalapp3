@@ -30,11 +30,20 @@ export const stockTemplate: StockCategory[] = [
     title: 'Spirits',
     headers: ['FOH', 'Store Room', 'Open Bottle Weight'],
     items: [
-      { name: 'African Dry Gin' }, { name: 'Aperol' }, { name: 'Bain\'s' }, 
-      { name: 'Die Mas 5y/o Brandy' }, { name: 'El Jimador' }, { name: 'Floating Dutchman' }, 
-      { name: 'Jägermeister' }, { name: 'Jameson' }, { name: 'Johnnie Walker Black' }, 
-      { name: 'Olmeca' }, { name: 'Rooster' }, { name: 'Stolichnaya' }, 
-      { name: 'Tanqueray' }, { name: 'Ugly Gin' }
+      { name: 'African Dry Gin', fullBottleWeight: 1250 }, 
+      { name: 'Aperol', fullBottleWeight: 1300 }, 
+      { name: 'Bain\'s', fullBottleWeight: 1280 }, 
+      { name: 'Die Mas 5y/o Brandy', fullBottleWeight: 1260 }, 
+      { name: 'El Jimador', fullBottleWeight: 1270 }, 
+      { name: 'Floating Dutchman', fullBottleWeight: 1290 }, 
+      { name: 'Jägermeister', fullBottleWeight: 1310 }, 
+      { name: 'Jameson', fullBottleWeight: 1280 }, 
+      { name: 'Johnnie Walker Black', fullBottleWeight: 1290 }, 
+      { name: 'Olmeca', fullBottleWeight: 1260 }, 
+      { name: 'Rooster', fullBottleWeight: 1250 }, 
+      { name: 'Stolichnaya', fullBottleWeight: 1240 }, 
+      { name: 'Tanqueray', fullBottleWeight: 1270 }, 
+      { name: 'Ugly Gin', fullBottleWeight: 1250 }
     ],
   },
   {

@@ -17,6 +17,7 @@ export type StockItem = {
   storeRoom?: number;
   openBottleWeight?: number;
   quantity?: number;
+  fullBottleWeight?: number;
 };
 
 export type StockCategory = {

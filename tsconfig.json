@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "netlify"],
+  "include": ["src", "netlify", "App.tsx", "index.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
