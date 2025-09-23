@@ -89,14 +89,14 @@ _This section summarizes the initial development phases based on the project pla
 
 ---
 
-## Phase 18: Stock Variance Calculation (In Progress)
+## Phase 18: Stock Variance Calculation (Completed)
 - **(Completed)** Task 18.1: Update Data Model. Add `fullBottleWeight` to the `StockItem` type and the mock data for spirits.
-- **Task 18.2: Implement Variance Calculation Logic.** 
+- **(Completed)** Task 18.2: Implement Variance Calculation Logic. 
   - Create a utility function to calculate stock variance for all categories.
   - For spirits, use the "total liquid mass" method.
   - **Crucially, implement a +/- 7g tolerance for spirit weight variance, treating any result in this range as 0g.**
   - **Convert the final gram variance into the number of shots poured (23.5g per shot) for the final report.**
-- **Task 18.3: Build Variance Report UI.** Create a new component within the Admin Dashboard to display the calculated variance report for a selected shift.
+- **(Completed)** Task 18.3: Build Variance Report UI. Create a new component within the Admin Dashboard to display the calculated variance report for a selected shift.
 
 ---
 

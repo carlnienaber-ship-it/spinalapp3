@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ShiftRecord } from '../../types';
 import TaskList from '../tasks/TaskList';
 import NewStockDelivery from '../stock/NewStockDelivery';
 import AdminStockDisplay from './AdminStockDisplay';
+import Button from '../ui/Button';
+import { calculateShiftVariance } from '../../utils/varianceCalculator';
+import VarianceReport from './VarianceReport';
+
 
 type ShiftDetailProps = {
   shift: ShiftRecord;
@@ -15,6 +19,8 @@ const ratingEmojis = {
 };
 
 const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
+  const [showVariance, setShowVariance] = useState(false);
+  const varianceReportData = useMemo(() => calculateShiftVariance(shift), [shift]);
   const allStockItems = Array.from(new Set(shift.openingStock.flatMap(cat => cat.items.map(item => item.name)))).sort();
 
   return (
@@ -44,6 +50,13 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
             )}
           </div>
         </div>
+      </div>
+
+      <div>
+        <Button onClick={() => setShowVariance(!showVariance)} className="w-full">
+            {showVariance ? 'Hide Variance Report' : 'Calculate & View Variance Report'}
+        </Button>
+        {showVariance && <VarianceReport reportData={varianceReportData} />}
       </div>
 
       <AdminStockDisplay
