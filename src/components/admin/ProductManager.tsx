@@ -1,34 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
 import { Product } from '../../types';
 import Button from '../ui/Button';
 import ProductForm from './ProductForm';
 
-const ProductManager: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+type ProductManagerProps = {
+  products: Product[];
+  isLoading: boolean;
+  onProductsChange: () => Promise<void>;
+};
+
+const ProductManager: React.FC<ProductManagerProps> = ({ products, isLoading, onProductsChange }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const { getProducts, deactivateProduct, deleteProduct, seedProducts, loading, error } = useApiClient();
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      const fetchedProducts = await getProducts();
-      setProducts(fetchedProducts);
-    } catch (e) {
-      console.error("Failed to fetch products", e);
-    }
-  }, [getProducts]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const { deactivateProduct, deleteProduct, seedProducts, loading: mutationLoading, error } = useApiClient();
 
   const handleDeactivate = async (productId: string) => {
     if (window.confirm('Are you sure you want to deactivate this product? It will no longer appear in new stocktakes.')) {
       try {
         await deactivateProduct(productId);
-        fetchProducts(); // Refresh the list
+        onProductsChange(); // Refresh the list
       } catch (e) {
         console.error("Failed to deactivate product", e);
       }
@@ -39,7 +31,7 @@ const ProductManager: React.FC = () => {
     if (window.confirm(`Are you absolutely sure you want to permanently delete "${productName}"? This action is irreversible and cannot be undone.`)) {
       try {
         await deleteProduct(productId);
-        fetchProducts();
+        onProductsChange();
       } catch (e) {
         console.error("Failed to delete product", e);
         alert(`Error deleting product: ${(e as Error).message}`);
@@ -64,14 +56,14 @@ const ProductManager: React.FC = () => {
   
   const handleFormSuccess = () => {
     handleFormClose();
-    fetchProducts();
+    onProductsChange();
   };
 
   const handleSeed = async () => {
     setIsSeeding(true);
     try {
       await seedProducts();
-      await fetchProducts();
+      await onProductsChange();
     } catch (e) {
       console.error("Failed to seed products", e);
       alert(`Error seeding products: ${(e as Error).message}`);
@@ -106,14 +98,14 @@ const ProductManager: React.FC = () => {
         <Button onClick={handleAddNew}>Add New Product</Button>
       </div>
 
-      {loading && products.length === 0 && <p>Loading products...</p>}
+      {isLoading && products.length === 0 && <p>Loading products...</p>}
       {error && <p className="text-red-400">Error: {error.message}</p>}
 
-      {!loading && products.length === 0 && (
+      {!isLoading && products.length === 0 && (
          <div className="text-center p-8 border-2 border-dashed border-gray-600 rounded-lg">
             <h3 className="text-xl font-semibold text-gray-200">Your product list is empty.</h3>
             <p className="text-gray-400 mt-2 mb-4">You can add products manually or import the original default product list.</p>
-            <Button onClick={handleSeed} disabled={isSeeding}>
+            <Button onClick={handleSeed} disabled={isSeeding || mutationLoading}>
             {isSeeding ? 'Importing...' : 'Import Default Products'}
             </Button>
         </div>
@@ -131,9 +123,9 @@ const ProductManager: React.FC = () => {
                     <li key={product.id} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
                         <span className="text-gray-200">{product.name}</span>
                         <div className="flex gap-2">
-                        <Button onClick={() => handleEdit(product)} size="sm" variant="secondary">Edit</Button>
-                        <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive">Deactivate</Button>
-                        <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive">Delete</Button>
+                        <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
+                        <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
+                        <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
                         </div>
                     </li>
                     ))}

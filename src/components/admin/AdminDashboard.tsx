@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
-import { ShiftRecord } from '../../types';
+import { ShiftRecord, Product } from '../../types';
 import ShiftList from './ShiftList';
 import ShiftDetail from './ShiftDetail';
 import Header from '../ui/Header';
@@ -8,17 +8,20 @@ import Button from '../ui/Button';
 import ProductManager from './ProductManager';
 
 type AdminDashboardProps = {
+  products: Product[];
+  productsLoading: boolean;
+  onProductsChange: () => Promise<void>;
   onBack: () => void;
 };
 
 type View = 'shifts' | 'products';
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoading, onProductsChange, onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [selectedShift, setSelectedShift] = useState<ShiftRecord | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [currentView, setCurrentView] = useState<View>('shifts');
-  const { getShifts, loading, error } = useApiClient();
+  const { getShifts, loading: shiftsLoading, error } = useApiClient();
 
   useEffect(() => {
     if (currentView === 'shifts') {
@@ -53,7 +56,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     }
   }, [filteredShifts]);
 
-  if (loading && shifts.length === 0 && currentView === 'shifts') {
+  if (shiftsLoading && shifts.length === 0 && currentView === 'shifts') {
     return (
       <div className="text-center p-8">
         <p>Loading shift reports...</p>
@@ -73,7 +76,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
 
   const renderShiftsView = () => (
     <>
-      {shifts.length === 0 && !loading ? (
+      {shifts.length === 0 && !shiftsLoading ? (
         <div className="text-center p-8 bg-gray-800 rounded-lg">
            <p className="text-gray-400 mb-6">No shift reports have been submitted yet.</p>
         </div>
@@ -120,20 +123,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     <div>
       <Header title="Admin Dashboard" subtitle={currentView === 'shifts' ? "Review submitted shift handovers" : "Manage Products"} />
       
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex justify-center gap-4 mb-8 border-b border-gray-700 pb-6">
         <Button onClick={() => setCurrentView('shifts')} variant={currentView === 'shifts' ? 'primary' : 'secondary'}>
           View Shifts
         </Button>
         <Button onClick={() => setCurrentView('products')} variant={currentView === 'products' ? 'primary' : 'secondary'}>
           Manage Products
         </Button>
+        <Button onClick={onBack} variant="secondary">
+          Back to Welcome
+        </Button>
       </div>
 
-      {currentView === 'shifts' ? renderShiftsView() : <ProductManager />}
-
-      <div className="text-center mt-8">
-          <Button onClick={onBack}>Back to Welcome Screen</Button>
-      </div>
+      {currentView === 'shifts' ? renderShiftsView() : (
+        <ProductManager 
+          products={products}
+          isLoading={productsLoading}
+          onProductsChange={onProductsChange}
+        />
+      )}
     </div>
   );
 };

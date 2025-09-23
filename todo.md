@@ -1,3 +1,4 @@
+--- START OF FILE todo.md ---
 # Todo List: Spinäl Äpp Handover
 
 ## Phase 1-8: Initial Implementation (Completed)
@@ -166,3 +167,25 @@ _This section summarizes the initial development phases based on the project pla
 - **(Completed)** Task 26.1: Add `delete-product` Serverless Function. Create a new, admin-only backend function that permanently removes a product document from the Firestore `products` collection.
 - **(Completed)** Task 26.2: Update Product Manager UI. Add a "Delete" button to the product list in the admin panel. This action should trigger a confirmation modal warning the user that the deletion is permanent and irreversible.
 - **(Completed)** Task 26.3: Implement Frontend Deletion Logic. Connect the new UI to the `delete-product` backend function and refresh the product list upon successful deletion.
+
+---
+
+## Phase 27: Admin UI Refinements (Completed)
+- **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
+  - **Objective:** Improve the navigation flow and UI consistency within the Admin Dashboard.
+  - **Implementation:**
+    - In the `AdminDashboard.tsx` component, move the "Back to Welcome Screen" button from its current position at the bottom of the component.
+    - Relocate it to the top navigation bar, placing it alongside the "View Shifts" and "Manage Products" buttons for a unified control area.
+
+---
+
+## Phase 28: Bug Fixes (Completed)
+- **(Completed)** Task 28.1: Fix Product State Synchronization.
+  - **Problem:** Changes made in the "Manage Products" admin screen were not reflected in the stocktake forms for new shifts.
+  - **Solution:** Lifted the product state and fetching logic up to the main `App.tsx` component. The `ProductManager` now receives the product list and a refresh function as props, ensuring that the entire application always shares a single, consistent source of product data.
+
+---
+
+## Phase 29: Workflow Enforcement (Completed)
+- **(Completed)** Task 29.1: Enforce Opening Task Completion. The "Continue to Opening Stocktake" button is now disabled until all opening tasks have been completed. A message informs the user of this requirement.
+- **(Completed)** Task 29.2: Enforce Closing Task Completion. The "Continue to Feedback" button is now disabled until all closing tasks have been completed, with a corresponding message for the user.

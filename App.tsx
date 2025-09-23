@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
@@ -43,31 +45,34 @@ const App: React.FC = () => {
   const [showNewDelivery, setShowNewDelivery] = useState(false);
   const [adminShowDashboard, setAdminShowDashboard] = useState(true);
   
+  const fetchProducts = useCallback(async () => {
+    setProductsLoading(true);
+    try {
+      const fetchedProducts = await getProducts();
+      setProducts(fetchedProducts);
+      return fetchedProducts;
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+      // Handle error, maybe show a message to the user
+      return [];
+    } finally {
+      setProductsLoading(false);
+    }
+  }, [getProducts]);
+  
   useEffect(() => {
-    const fetchProductsAndInitializeState = async () => {
-      try {
-        const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
+    const initializeState = async () => {
+        const fetchedProducts = await fetchProducts();
 
-        // Check if a shift is already in progress in localStorage
         const savedState = localStorage.getItem('shiftState');
         const parsedState = savedState ? JSON.parse(savedState) : null;
 
-        // If no shift is in progress (i.e., we are at the welcome step with no start time),
-        // generate a fresh shift state with the new products.
         if (!parsedState || (parsedState.currentStep === 'welcome' && !parsedState.startTime)) {
            setShiftState(generateInitialShiftState(fetchedProducts));
         }
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        // Handle error, maybe show a message to the user
-      } finally {
-        setProductsLoading(false);
-      }
     };
-
-    fetchProductsAndInitializeState();
-  }, [getProducts, setShiftState]);
+    initializeState();
+  }, [fetchProducts, setShiftState]);
 
 
   const isAdmin = useMemo(() => {
@@ -76,6 +81,16 @@ const App: React.FC = () => {
   }, [user]);
 
   const canProceed = isAdmin || isWithinFence;
+
+  const allOpeningTasksCompleted = useMemo(() => {
+    if (!shiftState.openingTasks || shiftState.openingTasks.length === 0) return false;
+    return shiftState.openingTasks.every(task => task.completed);
+  }, [shiftState.openingTasks]);
+
+  const allClosingTasksCompleted = useMemo(() => {
+    if (!shiftState.closingTasks || shiftState.closingTasks.length === 0) return false;
+    return shiftState.closingTasks.every(task => task.completed);
+  }, [shiftState.closingTasks]);
 
   const steps: { id: ShiftStep; title: string }[] = [
     { id: 'welcome', title: 'Start Shift' },
@@ -179,7 +194,15 @@ const App: React.FC = () => {
     }
     
     if (isAdmin && shiftState.currentStep === 'welcome' && adminShowDashboard) {
-      return <AdminDashboard onBack={() => setAdminShowDashboard(false)} />;
+      return (
+        <AdminDashboard 
+          products={products}
+          productsLoading={productsLoading}
+          // FIX: Wrap fetchProducts to match the expected `() => Promise<void>` signature.
+          onProductsChange={async () => { await fetchProducts(); }}
+          onBack={() => setAdminShowDashboard(false)} 
+        />
+      );
     }
 
     switch (shiftState.currentStep) {
@@ -206,7 +229,17 @@ const App: React.FC = () => {
         return (
           <>
             <TaskList title="Opening Tasks" tasks={shiftState.openingTasks} onTaskChange={handleTaskChange('openingTasks')} />
-            <Button onClick={() => handleNextStep('openingStock')} className="mt-8 w-full" size="lg">Continue to Opening Stocktake</Button>
+            <Button
+              onClick={() => handleNextStep('openingStock')}
+              className="mt-8 w-full"
+              size="lg"
+              disabled={!allOpeningTasksCompleted}
+            >
+              Continue to Opening Stocktake
+            </Button>
+            {!allOpeningTasksCompleted && (
+              <p className="text-center text-yellow-400 mt-2 text-sm">Please complete all tasks before continuing.</p>
+            )}
           </>
         );
 
@@ -254,7 +287,17 @@ const App: React.FC = () => {
         return (
           <>
             <TaskList title="Closing Tasks" tasks={shiftState.closingTasks} onTaskChange={handleTaskChange('closingTasks')} />
-            <Button onClick={() => handleNextStep('feedback')} className="mt-8 w-full" size="lg">Continue to Feedback</Button>
+            <Button
+              onClick={() => handleNextStep('feedback')}
+              className="mt-8 w-full"
+              size="lg"
+              disabled={!allClosingTasksCompleted}
+            >
+              Continue to Feedback
+            </Button>
+            {!allClosingTasksCompleted && (
+              <p className="text-center text-yellow-400 mt-2 text-sm">Please complete all tasks before continuing.</p>
+            )}
           </>
         );
 
