@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
 import { useApiClient } from './src/hooks/useApiClient';
-import { generateInitialShiftState, openingTasks, closingTasks } from './src/data/mockData';
+import { generateInitialShiftState } from './src/data/mockData';
 import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem, Product } from './src/types';
 
 // Components
@@ -43,12 +43,10 @@ const App: React.FC = () => {
   const [showNewDelivery, setShowNewDelivery] = useState(false);
   const [adminShowDashboard, setAdminShowDashboard] = useState(true);
   
-  const apiClient = useApiClient();
-
   useEffect(() => {
     const fetchProductsAndInitializeState = async () => {
       try {
-        const fetchedProducts = await apiClient.getProducts();
+        const fetchedProducts = await getProducts();
         setProducts(fetchedProducts);
 
         // Check if a shift is already in progress in localStorage
