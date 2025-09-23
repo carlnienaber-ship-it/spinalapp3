@@ -9,7 +9,7 @@ const ProductManager: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const { getProducts, deactivateProduct, seedProducts, loading, error } = useApiClient();
+  const { getProducts, deactivateProduct, deleteProduct, seedProducts, loading, error } = useApiClient();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -31,6 +31,18 @@ const ProductManager: React.FC = () => {
         fetchProducts(); // Refresh the list
       } catch (e) {
         console.error("Failed to deactivate product", e);
+      }
+    }
+  };
+
+  const handleDelete = async (productId: string, productName: string) => {
+    if (window.confirm(`Are you absolutely sure you want to permanently delete "${productName}"? This action is irreversible and cannot be undone.`)) {
+      try {
+        await deleteProduct(productId);
+        fetchProducts();
+      } catch (e) {
+        console.error("Failed to delete product", e);
+        alert(`Error deleting product: ${(e as Error).message}`);
       }
     }
   };
@@ -121,6 +133,7 @@ const ProductManager: React.FC = () => {
                         <div className="flex gap-2">
                         <Button onClick={() => handleEdit(product)} size="sm" variant="secondary">Edit</Button>
                         <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive">Deactivate</Button>
+                        <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive">Delete</Button>
                         </div>
                     </li>
                     ))}

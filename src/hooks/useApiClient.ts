@@ -11,6 +11,7 @@ type ApiClient = {
   addProduct: (product: Omit<Product, 'id' | 'isActive'>) => Promise<Product>;
   updateProduct: (product: Product) => Promise<Product>;
   deactivateProduct: (productId: string) => Promise<{ id: string }>;
+  deleteProduct: (productId: string) => Promise<{ id: string }>;
   seedProducts: () => Promise<{ message: string; count: number }>;
   loading: boolean;
   error: Error | null;
@@ -77,10 +78,15 @@ export function useApiClient(): ApiClient {
     body: JSON.stringify({ id: productId }),
   }), [makeRequest]);
 
+  const deleteProduct = useCallback((productId: string) => makeRequest<{ id: string }>('delete-product', {
+    method: 'DELETE',
+    body: JSON.stringify({ id: productId }),
+  }), [makeRequest]);
+
   const seedProducts = useCallback(() => makeRequest<{ message: string; count: number }>('seed-products', {
     method: 'POST',
   }), [makeRequest]);
 
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, seedProducts, loading, error };
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, loading, error };
 }

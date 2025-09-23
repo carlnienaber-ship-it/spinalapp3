@@ -71,7 +71,7 @@ _This section summarizes the initial development phases based on the project pla
 - **(Completed) Task 16.3: Secure `get-shifts` Endpoint.** Implement Auth0 JWT validation to ensure only users with the `Admin` role can access the data.
 - **(Completed) Task 16.4: Build Admin Dashboard Frontend.** Create the main dashboard component, shift list, and shift detail views.
 - **(Completed) Task 16.5: Implement Secure Data Fetching.** Update the API client to call the `get-shifts` endpoint and display the data.
-- **(Completed) Task 16.6: Implement Admin Geofence Bypass.** Add logic to exempt admin users from geofence restrictions and add a UI indicator.
+- **(Completed) Task 16.6: Implement Admin Geofence Bypass.** Add logic to exempt admin users from geofence restrictions and a UI indicator.
 
 ---
 
@@ -159,3 +159,10 @@ _This section summarizes the initial development phases based on the project pla
 - **Task 25.3: Update Product Management UI.** Enhance the Add/Edit Product form in the admin panel to include fields for `tastingNotes` and `abv` when the "Brewer's Reserve" category is selected.
 - **Task 25.4: Implement Routing for Public Page.** Set up a new route in the React application (e.g., `/brewers-reserve`) that can be accessed without logging in.
 - **Task 25.5: Build Public Menu Page Component.** Create a new, visually distinct component to display the Brewer's Reserve beers and their tasting notes, fetched from the new public function. This page will be linked to by the QR code.
+
+---
+
+## Phase 26: Permanent Product Deletion (Completed)
+- **(Completed)** Task 26.1: Add `delete-product` Serverless Function. Create a new, admin-only backend function that permanently removes a product document from the Firestore `products` collection.
+- **(Completed)** Task 26.2: Update Product Manager UI. Add a "Delete" button to the product list in the admin panel. This action should trigger a confirmation modal warning the user that the deletion is permanent and irreversible.
+- **(Completed)** Task 26.3: Implement Frontend Deletion Logic. Connect the new UI to the `delete-product` backend function and refresh the product list upon successful deletion.
