@@ -8,27 +8,26 @@ type VarianceReportProps = {
 
 const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
   const handleDownloadCsv = () => {
-    const headers = ['Category', 'Item Name', 'Variance'];
+    const headers = ['Category', 'Item Name', 'Variance', 'Unit'];
     const rows = reportData.flatMap(category =>
       category.items.map(item => {
-        let displayVariance: string;
-        const fixedVariance = Math.abs(item.variance).toFixed(1);
-
-        if (item.variance > 0) { // Loss
-          displayVariance = `-${fixedVariance} ${item.unit}`;
-        } else if (item.variance < 0) { // Surplus
-          displayVariance = `+${fixedVariance} ${item.unit}`;
-        } else { // Neutral
-          displayVariance = `${fixedVariance} ${item.unit}`;
-        }
-
-        return [category.categoryTitle, item.name, displayVariance];
+        // A positive variance from the calculator means a loss (opening > closing),
+        // so we represent it as a negative number for typical reporting.
+        // A negative variance (surplus) is represented as a positive number.
+        const reportVariance = -item.variance;
+        
+        return [
+          category.categoryTitle, 
+          item.name, 
+          reportVariance.toFixed(2), // Numeric value only
+          item.unit // Unit in a separate column
+        ];
       })
     );
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(',')) // Handle quotes in fields
+      ...rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')) // Handle quotes in fields
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -48,7 +47,7 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
     <div className="bg-gray-700 p-6 rounded-lg shadow-inner mt-6 space-y-6">
        <div className="flex justify-between items-center border-b border-gray-600 pb-2 mb-4">
         <h2 className="text-2xl font-bold text-gray-50">Stock Variance Report</h2>
-        <Button onClick={handleDownloadCsv} size="sm" variant="secondary">
+        <Button onClick={handleDownloadCsv} size="sm">
           Download CSV
         </Button>
       </div>

@@ -106,7 +106,7 @@ _This section summarizes the initial development phases based on the project pla
 ---
 
 ## Phase 20: Variance Report Enhancements (Completed)
-- **(Completed) Task 20.1: Add CSV Download to Variance Report.**
+- **(Completed)** Task 20.1: Add CSV Download to Variance Report.
   - **Objective:** Allow admins to download the variance report as a CSV file for offline analysis.
   - **Implementation:**
     - Add a "Download CSV" button to the `VarianceReport.tsx` component.
@@ -114,3 +114,9 @@ _This section summarizes the initial development phases based on the project pla
     - The CSV should have three columns: `Category`, `Item Name`, and `Variance`.
     - The `Variance` column should contain the full value, including the sign and unit (e.g., "-4.5 shots").
     - Trigger a browser file download for the generated CSV content.
+
+---
+
+## Phase 21: CSV Export Refinements (Completed)
+- **(Completed)** Task 21.1: Update CSV Button Style. Change the 'Download CSV' button in the variance report to use the primary (blue) style for consistency with other action buttons.
+- **(Completed)** Task 21.2: Refactor CSV Data Structure. Modify the CSV export logic to separate the variance value and its unit into two distinct columns: 'Variance' (number only) and 'Unit' ('shots' or 'units'). This improves data usability for spreadsheet analysis.
