@@ -1,8 +1,8 @@
 import React from 'react';
 import { ShiftRecord } from '../../types';
 import TaskList from '../tasks/TaskList';
-import StocktakeForm from '../stock/StocktakeForm';
 import NewStockDelivery from '../stock/NewStockDelivery';
+import AdminStockDisplay from './AdminStockDisplay';
 
 type ShiftDetailProps = {
   shift: ShiftRecord;
@@ -22,7 +22,7 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
       <div>
         <h2 className="text-2xl font-bold text-gray-50 mb-4 border-b border-gray-700 pb-2">Shift Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
+          <div className="md:col-span-2">
             <p className="font-semibold text-gray-400">Employee:</p>
             <p className="text-gray-100">{shift.user?.email || shift.user?.name || 'N/A'}</p>
           </div>
@@ -46,11 +46,9 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
         </div>
       </div>
 
-      <StocktakeForm
+      <AdminStockDisplay
         title="Opening Stocktake"
         stockData={shift.openingStock}
-        onStockChange={() => {}} 
-        disabled={true}
       />
       
       <NewStockDelivery
@@ -61,11 +59,9 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
         disabled={true}
       />
 
-      <StocktakeForm
+      <AdminStockDisplay
         title="Closing Stocktake"
         stockData={shift.closingStock}
-        onStockChange={() => {}}
-        disabled={true}
       />
       
        <TaskList

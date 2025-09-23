@@ -1,5 +1,9 @@
 # Project Plan: Spinäl Äpp Handover
 
+## Critical Development Protocol
+
+- **Strict Workflow Protocol:** The AI assistant is **only** to implement code changes based on tasks explicitly listed in `todo.md`. New features or changes must first be added to the to-do list from a direct prompt before implementation can be requested.
+
 ## 1. Objective
 
 To develop a robust, secure, and intuitive web application that assists staff in managing and tracking their daily tasks. The application will provide a linear workflow for opening, mid-shift, and closing duties, ensuring consistency, accountability, and data integrity in bar operations.
@@ -43,13 +47,7 @@ To develop a robust, secure, and intuitive web application that assists staff in
 
 ## 5. Known Development Constraints
 
-- **Manual File Management:** Due to a persistent environmental issue with the AI assistant, the following files **must be managed manually by the user**. The AI cannot reliably create or modify them.
-    - `package.json`
-    - `index.tsx`
-    - `netlify.toml`
-    - `App.tsx`
 - **Import Map Workaround:** While not ideal for Vite projects, an environmental constraint forces the use of an `importmap` in `index.html`. A custom Vite plugin is required as a workaround to remove it during the build process.
-- **Strict Workflow Protocol:** The AI assistant is **only** to implement code changes based on tasks explicitly listed in `todo.md`. New features or changes must first be added to the to-do list from a direct prompt before implementation can be requested.
 - **No Placeholder Content:** It is a critical failure for the AI assistant to replace the contents of `project.md` or `todo.md` with placeholder text like "full contents of...". These files must always be output in their complete, readable form.
 
 ## 6. Geofencing

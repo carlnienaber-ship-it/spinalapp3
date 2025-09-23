@@ -80,7 +80,7 @@ _This section summarizes the initial development phases based on the project pla
 - **(Completed)** Task 17.2: Unify Dashboard Back Button Style. Make the "Back to Welcome Screen" button a primary button.
 - **(Completed)** Task 17.3: Display User Email in Shift List. Show the user's email in the shift list instead of "Unknown User".
 - **(Completed)** Task 17.4: Reorder Admin Dashboard Layout. Move the stocktake sections above the task list sections in the detail view.
-- **(Completed)** Task 17.5: Add Total Stock Count to Dashboard. Display a calculated "Total" column in the stocktake tables.
+- **(Completed)** Task 17.5: Add Total Stock Count to Dashboard. In the Admin Dashboard's stocktake views, display a calculated "Total" for items that have FOH and Store Room counts. The "Total" is the sum of FOH and Store Room, representing total full bottles. Individual FOH/Store Room counts are hidden from the admin view.
 - **(Completed)** Task 17.6: Unify Welcome Screen Button Styles. Ensure "Clock In" and "Admin Dashboard" buttons are identical in style.
 - **(Completed)** Task 17.7: Display User Email in Shift List (Reiteration). Ensure shift list buttons show the user's email.
 - **(Completed)** Task 17.8: Display User Email in Shift Details. Ensure the "Employee" field in the detail summary shows the user's email.
@@ -97,3 +97,8 @@ _This section summarizes the initial development phases based on the project pla
   - **Crucially, implement a +/- 7g tolerance for spirit weight variance, treating any result in this range as 0g.**
   - **Convert the final gram variance into the number of shots poured (23.5g per shot) for the final report.**
 - **Task 18.3: Build Variance Report UI.** Create a new component within the Admin Dashboard to display the calculated variance report for a selected shift.
+
+---
+
+## Phase 19: Admin Dashboard UI Polish (Completed)
+- **(Completed)** Task 19.1: Reorganize Shift Detail Layout. Adjust the layout in the shift detail view to display the "Shift Start" and "Shift End" times on the same row for better readability.
