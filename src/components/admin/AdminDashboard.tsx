@@ -5,29 +5,34 @@ import ShiftList from './ShiftList';
 import ShiftDetail from './ShiftDetail';
 import Header from '../ui/Header';
 import Button from '../ui/Button';
+import ProductManager from './ProductManager';
 
 type AdminDashboardProps = {
   onBack: () => void;
 };
 
+type View = 'shifts' | 'products';
+
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [selectedShift, setSelectedShift] = useState<ShiftRecord | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
+  const [currentView, setCurrentView] = useState<View>('shifts');
   const { getShifts, loading, error } = useApiClient();
 
   useEffect(() => {
-    const fetchShifts = async () => {
-      try {
-        const fetchedShifts = await getShifts();
-        setShifts(fetchedShifts);
-      } catch (e) {
-        console.error("Failed to load shifts", e);
-      }
-    };
-
-    fetchShifts();
-  }, [getShifts]);
+    if (currentView === 'shifts') {
+      const fetchShifts = async () => {
+        try {
+          const fetchedShifts = await getShifts();
+          setShifts(fetchedShifts);
+        } catch (e) {
+          console.error("Failed to load shifts", e);
+        }
+      };
+      fetchShifts();
+    }
+  }, [getShifts, currentView]);
 
   const filteredShifts = useMemo(() => {
     if (selectedDate) {
@@ -37,7 +42,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         return shiftDate === selectedDate;
       });
     }
-    return shifts.slice(0, 5);
+    return shifts.slice(0, 10); // Show more recent shifts by default
   }, [shifts, selectedDate]);
 
   useEffect(() => {
@@ -48,8 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     }
   }, [filteredShifts]);
 
-
-  if (loading && shifts.length === 0) {
+  if (loading && shifts.length === 0 && currentView === 'shifts') {
     return (
       <div className="text-center p-8">
         <p>Loading shift reports...</p>
@@ -60,20 +64,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   if (error) {
     return (
       <div className="text-center p-8 bg-red-900 text-red-100 rounded-lg">
-        <p className="font-bold">Error loading shifts:</p>
+        <p className="font-bold">Error:</p>
         <p>{error.message}</p>
+        <Button onClick={onBack} className="mt-4">Back to Welcome Screen</Button>
       </div>
     );
   }
 
-  return (
-    <div>
-      <Header title="Admin Dashboard" subtitle="Review submitted shift handovers" />
-      
+  const renderShiftsView = () => (
+    <>
       {shifts.length === 0 && !loading ? (
         <div className="text-center p-8 bg-gray-800 rounded-lg">
            <p className="text-gray-400 mb-6">No shift reports have been submitted yet.</p>
-           <Button onClick={onBack}>Back to Welcome Screen</Button>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-8">
@@ -97,7 +99,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                 onSelectShift={setSelectedShift}
               />
             </div>
-             <Button onClick={onBack} className="w-full mt-4">Back to Welcome Screen</Button>
           </div>
           <div className="w-full md:w-2/3 lg:w-3/4">
             {selectedShift ? (
@@ -112,6 +113,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           </div>
         </div>
       )}
+    </>
+  );
+
+  return (
+    <div>
+      <Header title="Admin Dashboard" subtitle={currentView === 'shifts' ? "Review submitted shift handovers" : "Manage Products"} />
+      
+      <div className="flex justify-center gap-4 mb-8">
+        <Button onClick={() => setCurrentView('shifts')} variant={currentView === 'shifts' ? 'primary' : 'secondary'}>
+          View Shifts
+        </Button>
+        <Button onClick={() => setCurrentView('products')} variant={currentView === 'products' ? 'primary' : 'secondary'}>
+          Manage Products
+        </Button>
+      </div>
+
+      {currentView === 'shifts' ? renderShiftsView() : <ProductManager />}
+
+      <div className="text-center mt-8">
+          <Button onClick={onBack}>Back to Welcome Screen</Button>
+      </div>
     </div>
   );
 };

@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
 import { useApiClient } from './src/hooks/useApiClient';
-import { initialShiftState } from './src/data/mockData';
-import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem } from './src/types';
+import { generateInitialShiftState, openingTasks, closingTasks } from './src/data/mockData';
+import { ShiftState, ShiftStep, Task, StockItem, NewStockDeliveryItem, Product } from './src/types';
 
 // Components
 import Header from './src/components/ui/Header';
@@ -23,11 +23,55 @@ import AdminDashboard from './src/components/admin/AdminDashboard';
 const App: React.FC = () => {
   const { user, logout } = useAuth0();
   const { isWithinFence, loading: geoLoading } = useGeolocation();
-  const [shiftState, setShiftState] = useLocalStorage<ShiftState>('shiftState', initialShiftState);
-  const { submitShift, loading: apiLoading, error: apiError } = useApiClient();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  // Initialize shiftState with a default structure. It will be populated dynamically.
+  const [shiftState, setShiftState] = useLocalStorage<ShiftState>('shiftState', {
+    currentStep: 'welcome',
+    startTime: null,
+    endTime: null,
+    openingTasks: [],
+    closingTasks: [],
+    openingStock: [],
+    closingStock: [],
+    newStockDeliveries: [],
+    shiftFeedback: { rating: null, comment: '' },
+  });
+
+  const { submitShift, getProducts, loading: apiLoading, error: apiError } = useApiClient();
   const [showNewDelivery, setShowNewDelivery] = useState(false);
-  // FIX: Added state to manage admin dashboard visibility.
   const [adminShowDashboard, setAdminShowDashboard] = useState(true);
+  
+  const apiClient = useApiClient();
+
+  useEffect(() => {
+    const fetchProductsAndInitializeState = async () => {
+      try {
+        const fetchedProducts = await apiClient.getProducts();
+        setProducts(fetchedProducts);
+
+        // Check if a shift is already in progress in localStorage
+        const savedState = localStorage.getItem('shiftState');
+        const parsedState = savedState ? JSON.parse(savedState) : null;
+
+        // If no shift is in progress (i.e., we are at the welcome step with no start time),
+        // generate a fresh shift state with the new products.
+        if (!parsedState || (parsedState.currentStep === 'welcome' && !parsedState.startTime)) {
+           setShiftState(generateInitialShiftState(fetchedProducts));
+        }
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        // Handle error, maybe show a message to the user
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchProductsAndInitializeState();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on component mount
+
 
   const isAdmin = useMemo(() => {
     const roles = user?.['https://spinalapp.com/roles'] as string[] | undefined;
@@ -57,9 +101,8 @@ const App: React.FC = () => {
   };
 
   const handleReset = () => {
-    setShiftState(initialShiftState);
+    setShiftState(generateInitialShiftState(products));
     setShowNewDelivery(false);
-    // FIX: Reset admin dashboard view on shift reset.
     setAdminShowDashboard(true);
   };
 
@@ -130,17 +173,14 @@ const App: React.FC = () => {
   };
 
   const allStockItems = useMemo(() => {
-    const itemSet = new Set<string>();
-    shiftState.openingStock.forEach(category => {
-      category.items.forEach(item => {
-        itemSet.add(item.name);
-      });
-    });
-    return Array.from(itemSet).sort();
-  }, [shiftState.openingStock]);
+    return products.map(p => p.name).sort();
+  }, [products]);
 
   const renderStepContent = () => {
-    // FIX: Conditionally render AdminDashboard for admins on the welcome step.
+    if (productsLoading && shiftState.currentStep !== 'welcome') {
+        return <div className="text-center p-8">Loading products...</div>;
+    }
+    
     if (isAdmin && shiftState.currentStep === 'welcome' && adminShowDashboard) {
       return <AdminDashboard onBack={() => setAdminShowDashboard(false)} />;
     }
@@ -153,8 +193,8 @@ const App: React.FC = () => {
             <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md mx-auto">
               {isAdmin && !isWithinFence && <AdminGeoOverrideIndicator />}
               {!isAdmin && <GeoStatus />}
-               <Button onClick={() => handleNextStep('openingTasks')} size="lg" className="mt-6 w-full" disabled={!canProceed || geoLoading}>
-                {geoLoading ? 'Verifying Location...' : 'Clock In & Start Shift'}
+               <Button onClick={() => handleNextStep('openingTasks')} size="lg" className="mt-6 w-full" disabled={!canProceed || geoLoading || productsLoading}>
+                {geoLoading ? 'Verifying Location...' : productsLoading ? 'Loading Products...' : 'Clock In & Start Shift'}
               </Button>
               {isAdmin && (
                 <Button onClick={() => setAdminShowDashboard(true)} className="mt-4 w-full" disabled={apiLoading}>

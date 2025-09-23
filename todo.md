@@ -120,3 +120,36 @@ _This section summarizes the initial development phases based on the project pla
 ## Phase 21: CSV Export Refinements (Completed)
 - **(Completed)** Task 21.1: Update CSV Button Style. Change the 'Download CSV' button in the variance report to use the primary (blue) style for consistency with other action buttons.
 - **(Completed)** Task 21.2: Refactor CSV Data Structure. Modify the CSV export logic to separate the variance value and its unit into two distinct columns: 'Variance' (number only) and 'Unit' ('shots' or 'units'). This improves data usability for spreadsheet analysis.
+
+---
+
+## Phase 22: Dynamic Product Management (Backend) (Completed)
+- **(Completed)** Task 22.1: New Firestore `products` Collection. Create a new collection in Firestore to store product data. Each document will contain `name`, `category`, `fullBottleWeight`, and `isActive` fields.
+- **(Completed)** Task 22.2: Implement `get-products` Function. Create a new serverless function to fetch all active products from the `products` collection.
+- **(Completed)** Task 22.3: Implement `add-product` Function. Create a new serverless function to add a new document to the `products` collection.
+- **(Completed)** Task 22.4: Implement `update-product` Function. Create a new serverless function to modify an existing product document.
+- **(Completed)** Task 22.5: Implement `deactivate-product` Function. Create a new serverless function to soft-delete a product by setting its `isActive` flag to `false`.
+
+---
+
+## Phase 23: Dynamic Product Management (Frontend UI) (Completed)
+- **(Completed)** Task 23.1: Create "Manage Products" Section. Add a new button/entry point in the Admin Dashboard to access the product management interface.
+- **(Completed)** Task 23.2: Build Product List View. Create a component to display all active products in a table, grouped by category, with "Edit" and "Deactivate" actions.
+- **(Completed)** Task 23.3: Build Add/Edit Product Form. Create a modal or form for adding and editing products, with a conditional field for `fullBottleWeight` that only shows for the "Spirits" category.
+- **(Completed)** Task 23.4: Implement Product API Logic. Connect the UI to the new backend functions, including user feedback for loading, success, and error states.
+
+---
+
+## Phase 24: Core App Integration (Completed)
+- **(Completed)** Task 24.1: Refactor Shift Initialization. Modify the core app logic to fetch the product list from the backend when a new shift is started, instead of using the static `mockData.ts`.
+- **(Completed)** Task 24.2: Generate Dynamic Stocktake Forms. Use the fetched product list to dynamically generate the items within the Opening and Closing stocktake forms.
+- **(Completed)** Task 24.3: Update New Stock Delivery Dropdown. Populate the items in the "New Stock Delivery" dropdown from the dynamically fetched product list.
+
+---
+
+## Phase 25: Public Brewer's Reserve Menu (Not Started)
+- **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
+- **Task 25.2: Create `get-brewers-reserve` Function.** Build a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
+- **Task 25.3: Update Product Management UI.** Enhance the Add/Edit Product form in the admin panel to include fields for `tastingNotes` and `abv` when the "Brewer's Reserve" category is selected.
+- **Task 25.4: Implement Routing for Public Page.** Set up a new route in the React application (e.g., `/brewers-reserve`) that can be accessed without logging in.
+- **Task 25.5: Build Public Menu Page Component.** Create a new, visually distinct component to display the Brewer's Reserve beers and their tasting notes, fetched from the new public function. This page will be linked to by the QR code.

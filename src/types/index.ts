@@ -71,3 +71,12 @@ export type ShiftState = {
 export type ShiftRecord = ShiftState & {
   id: string;
 };
+
+// For product management
+export type Product = {
+  id: string;
+  name: string;
+  category: 'Spirits' | 'Cans and Bottles' | 'Food' | "Brewer's Reserve";
+  fullBottleWeight?: number;
+  isActive: boolean;
+};

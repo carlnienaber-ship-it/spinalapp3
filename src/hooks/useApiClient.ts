@@ -1,12 +1,16 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useCallback } from 'react';
-import { ShiftState, ShiftRecord } from '../types';
+import { ShiftState, ShiftRecord, Product } from '../types';
 
 const API_BASE_URL = '/.netlify/functions';
 
 type ApiClient = {
   submitShift: (shiftData: ShiftState) => Promise<{ documentId: string }>;
   getShifts: () => Promise<ShiftRecord[]>;
+  getProducts: () => Promise<Product[]>;
+  addProduct: (product: Omit<Product, 'id' | 'isActive'>) => Promise<Product>;
+  updateProduct: (product: Product) => Promise<Product>;
+  deactivateProduct: (productId: string) => Promise<{ id: string }>;
   loading: boolean;
   error: Error | null;
 };
@@ -23,51 +27,23 @@ export function useApiClient(): ApiClient {
       Authorization: `Bearer ${token}`,
     };
   }, [getAccessTokenSilently]);
-
-  const submitShift = useCallback(
-    async (shiftData: ShiftState) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_BASE_URL}/submit-shift`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(shiftData),
-        });
-
-        if (!response.ok) {
-          const errorBody = await response.json();
-          throw new Error(errorBody.error || 'Failed to submit shift report.');
-        }
-
-        return await response.json();
-      } catch (e) {
-        setError(e as Error);
-        throw e;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [getHeaders]
-  );
-
-  const getShifts = useCallback(async () => {
+  
+  const makeRequest = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     setLoading(true);
     setError(null);
     try {
       const headers = await getHeaders();
-      const response = await fetch(`${API_BASE_URL}/get-shifts`, {
-        method: 'GET',
+      const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+        ...options,
         headers,
       });
 
       if (!response.ok) {
-        const errorBody = await response.json();
-        throw new Error(errorBody.error || 'Failed to fetch shifts.');
+        const errorBody = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
+        throw new Error(errorBody.error || `Request failed with status ${response.status}`);
       }
-
-      return await response.json() as ShiftRecord[];
+      
+      return response.json() as Promise<T>;
     } catch (e) {
       setError(e as Error);
       throw e;
@@ -76,5 +52,30 @@ export function useApiClient(): ApiClient {
     }
   }, [getHeaders]);
 
-  return { submitShift, getShifts, loading, error };
+  const submitShift = (shiftData: ShiftState) => makeRequest<{ documentId: string }>('submit-shift', {
+    method: 'POST',
+    body: JSON.stringify(shiftData),
+  });
+
+  const getShifts = () => makeRequest<ShiftRecord[]>('get-shifts');
+  
+  const getProducts = () => makeRequest<Product[]>('get-products');
+  
+  const addProduct = (product: Omit<Product, 'id' | 'isActive'>) => makeRequest<Product>('add-product', {
+    method: 'POST',
+    body: JSON.stringify(product),
+  });
+
+  const updateProduct = (product: Product) => makeRequest<Product>('update-product', {
+    method: 'PUT',
+    body: JSON.stringify(product),
+  });
+
+  const deactivateProduct = (productId: string) => makeRequest<{ id: string }>('deactivate-product', {
+    method: 'PUT',
+    body: JSON.stringify({ id: productId }),
+  });
+
+
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, loading, error };
 }
