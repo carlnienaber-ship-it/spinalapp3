@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useLocalStorage } from './src/hooks/useLocalStorage';
 import { useApiClient } from './src/hooks/useApiClient';
@@ -67,8 +67,7 @@ const App: React.FC = () => {
     };
 
     fetchProductsAndInitializeState();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on component mount
+  }, [getProducts, setShiftState]);
 
 
   const isAdmin = useMemo(() => {
@@ -89,29 +88,29 @@ const App: React.FC = () => {
     { id: 'complete', title: 'Complete' },
   ];
 
-  const handleNextStep = (nextStep: ShiftStep) => {
+  const handleNextStep = useCallback((nextStep: ShiftStep) => {
     let updates: Partial<ShiftState> = { currentStep: nextStep };
     if (nextStep === 'openingTasks') {
       updates.startTime = new Date().toISOString();
     }
     setShiftState(prev => ({ ...prev, ...updates }));
     window.scrollTo(0, 0);
-  };
+  }, [setShiftState]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setShiftState(generateInitialShiftState(products));
     setShowNewDelivery(false);
     setAdminShowDashboard(true);
-  };
+  }, [products, setShiftState]);
 
-  const handleTaskChange = (list: 'openingTasks' | 'closingTasks') => (updatedTask: Task) => {
+  const handleTaskChange = useCallback((list: 'openingTasks' | 'closingTasks') => (updatedTask: Task) => {
     setShiftState(prev => ({
       ...prev,
       [list]: prev[list].map(task => (task.id === updatedTask.id ? updatedTask : task)),
     }));
-  };
+  }, [setShiftState]);
 
-  const handleStockChange = (
+  const handleStockChange = useCallback((
     list: 'openingStock' | 'closingStock'
   ) => (categoryIndex: number, itemIndex: number, field: keyof StockItem, value: number) => {
     setShiftState(prev => {
@@ -119,28 +118,28 @@ const App: React.FC = () => {
       newStock[categoryIndex].items[itemIndex][field] = value;
       return { ...prev, [list]: newStock };
     });
-  };
+  }, [setShiftState]);
   
-  const handleFeedbackChange = (rating: 'Great' | 'Normal' | 'Bad' | null, comment: string) => {
+  const handleFeedbackChange = useCallback((rating: 'Great' | 'Normal' | 'Bad' | null, comment: string) => {
     setShiftState(prev => ({
       ...prev,
       shiftFeedback: { rating, comment },
     }));
-  };
+  }, [setShiftState]);
 
-  const handleNewDeliveryAdd = (item: NewStockDeliveryItem) => {
+  const handleNewDeliveryAdd = useCallback((item: NewStockDeliveryItem) => {
     setShiftState(prev => ({
       ...prev,
       newStockDeliveries: [...prev.newStockDeliveries, item],
     }));
-  };
+  }, [setShiftState]);
 
-  const handleNewDeliveryRemove = (id: string) => {
+  const handleNewDeliveryRemove = useCallback((id: string) => {
     setShiftState(prev => ({
       ...prev,
       newStockDeliveries: prev.newStockDeliveries.filter(d => d.id !== id),
     }));
-  };
+  }, [setShiftState]);
 
   const handleSubmit = async () => {
     if (shiftState.shiftFeedback.rating && (shiftState.shiftFeedback.rating !== 'Normal' && !shiftState.shiftFeedback.comment)) {
@@ -263,12 +262,6 @@ const App: React.FC = () => {
         return (
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold text-gray-50 mb-6">Final Step: Shift Feedback</h2>
-            <NewStockDelivery
-              deliveries={shiftState.newStockDeliveries}
-              stockItems={allStockItems}
-              onAdd={handleNewDeliveryAdd}
-              onRemove={handleNewDeliveryRemove}
-            />
             <Feedback feedback={shiftState.shiftFeedback} onFeedbackChange={handleFeedbackChange} />
             <div className="mt-8">
               {apiError && <p className="text-red-400 text-center mb-4">Error: {apiError.message}</p>}

@@ -53,33 +53,33 @@ export function useApiClient(): ApiClient {
     }
   }, [getHeaders]);
 
-  const submitShift = (shiftData: ShiftState) => makeRequest<{ documentId: string }>('submit-shift', {
+  const submitShift = useCallback((shiftData: ShiftState) => makeRequest<{ documentId: string }>('submit-shift', {
     method: 'POST',
     body: JSON.stringify(shiftData),
-  });
+  }), [makeRequest]);
 
-  const getShifts = () => makeRequest<ShiftRecord[]>('get-shifts');
+  const getShifts = useCallback(() => makeRequest<ShiftRecord[]>('get-shifts'), [makeRequest]);
   
-  const getProducts = () => makeRequest<Product[]>('get-products');
+  const getProducts = useCallback(() => makeRequest<Product[]>('get-products'), [makeRequest]);
   
-  const addProduct = (product: Omit<Product, 'id' | 'isActive'>) => makeRequest<Product>('add-product', {
+  const addProduct = useCallback((product: Omit<Product, 'id' | 'isActive'>) => makeRequest<Product>('add-product', {
     method: 'POST',
     body: JSON.stringify(product),
-  });
+  }), [makeRequest]);
 
-  const updateProduct = (product: Product) => makeRequest<Product>('update-product', {
+  const updateProduct = useCallback((product: Product) => makeRequest<Product>('update-product', {
     method: 'PUT',
     body: JSON.stringify(product),
-  });
+  }), [makeRequest]);
 
-  const deactivateProduct = (productId: string) => makeRequest<{ id: string }>('deactivate-product', {
+  const deactivateProduct = useCallback((productId: string) => makeRequest<{ id: string }>('deactivate-product', {
     method: 'PUT',
     body: JSON.stringify({ id: productId }),
-  });
+  }), [makeRequest]);
 
-  const seedProducts = () => makeRequest<{ message: string; count: number }>('seed-products', {
+  const seedProducts = useCallback(() => makeRequest<{ message: string; count: number }>('seed-products', {
     method: 'POST',
-  });
+  }), [makeRequest]);
 
 
   return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, seedProducts, loading, error };
