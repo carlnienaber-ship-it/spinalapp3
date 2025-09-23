@@ -1,4 +1,4 @@
-import { ShiftRecord, StockCategory, StockItem } from '../types';
+import { ShiftRecord } from '../types';
 
 export type VarianceItem = {
   name: string;
@@ -24,7 +24,7 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
       items: [],
     };
 
-    openingCategory.items.forEach((openingItem, itemIndex) => {
+    openingCategory.items.forEach((openingItem) => {
       const closingItem = closingCategory.items.find(item => item.name === openingItem.name);
       if (!closingItem) return;
 

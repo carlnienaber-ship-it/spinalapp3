@@ -17,12 +17,9 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
                 {category.items.map(item => {
                     const isLoss = item.variance > 0;
                     const isSurplus = item.variance < 0;
-                    const isNeutral = item.variance === 0;
 
                     const colorClass = isLoss ? 'text-red-400' : isSurplus ? 'text-blue-400' : 'text-gray-100';
-                    // Display surplus as positive
-                    const displayVariance = -item.variance;
-
+                    
                     return (
                         <li key={item.name} className="flex justify-between items-center bg-gray-800 p-3 rounded-md">
                             <span className="text-gray-300">{item.name}</span>
