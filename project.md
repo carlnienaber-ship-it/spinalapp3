@@ -77,3 +77,15 @@ To develop a robust, secure, and intuitive web application that assists staff in
   - `get-shifts`: Receives a request, validates that the user has the `Admin` role, and fetches all shift reports from Firestore.
 - **Database:** Firebase Firestore is used to store shift report documents in a `shifts` collection.
 - **Security:** Backend functions are secured by validating the Auth0 JWT sent with each request. Access to shift data is restricted to users with the `Admin` role.
+
+## 9. Inventory Management
+
+### 9.1. Par Levels & Supplier Information
+To facilitate proactive stock ordering, the product data model will be extended with inventory management fields. These will be configurable on the "Manage Products" page in the Admin Dashboard.
+
+- **New Product Fields:**
+  - `supplierName` (string): The name of the product's supplier (e.g., "Mega-Bev Distributors").
+  - `supplierEmail` (string): The contact email address for placing orders with the supplier.
+  - `parLevel` (number): The ideal minimum number of *individual units* that should be on hand at the end of a shift.
+  - `orderUnitSize` (number): The number of individual items contained within a single orderable unit. For example, a case of Coke has a size of 24, while a single bottle of El Jimador has a size of 1.
+  - `minOrderUnits` (number): The minimum quantity of *order units* (e.g., cases, single bottles) that can be placed in a single order. For instance, if you can only order Coke by the case, the minimum would be 1.

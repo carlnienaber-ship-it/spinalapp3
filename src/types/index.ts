@@ -79,4 +79,9 @@ export type Product = {
   category: 'Spirits' | 'Cans and Bottles' | 'Food' | "Brewer's Reserve";
   fullBottleWeight?: number;
   isActive: boolean;
+  supplierName?: string;
+  supplierEmail?: string;
+  parLevel?: number;
+  orderUnitSize?: number;
+  minOrderUnits?: number;
 };

@@ -120,12 +120,17 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, isLoading, on
                 <h3 className="text-xl font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-2">{category}</h3>
                 <ul className="space-y-2">
                     {items.map(product => (
-                    <li key={product.id} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
-                        <span className="text-gray-200">{product.name}</span>
-                        <div className="flex gap-2">
-                        <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
-                        <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
-                        <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
+                    <li key={product.id} className="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-700 p-3 rounded-md">
+                        <div>
+                          <span className="font-semibold text-gray-100">{product.name}</span>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Supplier: {product.supplierName || 'N/A'} | PAR Level: {product.parLevel ?? 'N/A'}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 mt-2 sm:mt-0 flex-shrink-0">
+                          <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
+                          <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
+                          <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
                         </div>
                     </li>
                     ))}

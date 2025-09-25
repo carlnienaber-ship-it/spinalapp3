@@ -11,8 +11,8 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ steps, currentSte
   const currentStepIndex = steps.findIndex((step) => step.id === currentStepId);
 
   return (
-    <div className="w-full mb-8">
-      <ol className="flex items-center w-full">
+    <div className="w-full mb-8 overflow-x-auto pb-3">
+      <ol className="flex items-center" style={{ minWidth: '750px' }}>
         {steps.map((step, index) => {
           const isCompleted = index < currentStepIndex;
           const isCurrent = index === currentStepIndex;

@@ -34,11 +34,16 @@ const handler: Handler = async (event) => {
     // TODO: Secure with JWT and ADMIN role validation
     if (!event.body) throw new Error("Request body is missing.");
     const productData = JSON.parse(event.body);
-    const newProduct: Omit<Product, 'id'> = {
+    const newProduct = {
         name: productData.name,
         category: productData.category,
-        fullBottleWeight: productData.fullBottleWeight || null,
+        fullBottleWeight: productData.fullBottleWeight ?? null,
         isActive: true,
+        supplierName: productData.supplierName ?? null,
+        supplierEmail: productData.supplierEmail ?? null,
+        parLevel: productData.parLevel ?? null,
+        orderUnitSize: productData.orderUnitSize ?? null,
+        minOrderUnits: productData.minOrderUnits ?? null,
     };
     const docRef = await db.collection('products').add(newProduct);
     return {

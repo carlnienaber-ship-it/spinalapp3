@@ -37,8 +37,20 @@ const handler: Handler = async (event) => {
 
     if (!id) throw new Error("Product ID is missing.");
     
+    // Construct an explicit update payload to handle clearing fields with null
+    const updatePayload = {
+      name: productData.name,
+      category: productData.category,
+      fullBottleWeight: productData.fullBottleWeight ?? null,
+      supplierName: productData.supplierName ?? null,
+      supplierEmail: productData.supplierEmail ?? null,
+      parLevel: productData.parLevel ?? null,
+      orderUnitSize: productData.orderUnitSize ?? null,
+      minOrderUnits: productData.minOrderUnits ?? null,
+    };
+
     const docRef = db.collection('products').doc(id);
-    await docRef.update(productData);
+    await docRef.update(updatePayload);
     
     return {
       statusCode: 200,
