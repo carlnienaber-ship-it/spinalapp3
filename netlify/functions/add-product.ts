@@ -1,6 +1,5 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
-import { Product } from "../../src/types";
 
 if (!admin.apps.length) {
   try {
