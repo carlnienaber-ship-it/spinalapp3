@@ -12,6 +12,11 @@ function getKey(header: any, callback: (err: Error | null, key?: string) => void
         callback(err, undefined);
         return;
     }
+    // FIX: Add a check to ensure the key is not undefined before using it.
+    if (!key) {
+      callback(new Error('Signing key not found.'), undefined);
+      return;
+    }
     const signingKey = key.getPublicKey();
     callback(null, signingKey);
   });
