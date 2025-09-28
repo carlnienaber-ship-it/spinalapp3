@@ -6,13 +6,13 @@ import { HandlerEvent } from "@netlify/functions";
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
-// These environment variables need to be set in your Netlify build settings.
-// They should match the ones used in your frontend Auth0 configuration.
-const AUTH0_DOMAIN = process.env.VITE_AUTH0_DOMAIN;
-const AUTH0_AUDIENCE = process.env.VITE_AUTH0_AUDIENCE;
+// These environment variables are for the backend functions and must be set in your Netlify dashboard.
+// They should NOT have the "VITE_" prefix.
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
+const AUTH0_API_AUDIENCE = process.env.AUTH0_API_AUDIENCE;
 
-if (!AUTH0_DOMAIN || !AUTH0_AUDIENCE) {
-    throw new Error('VITE_AUTH0_DOMAIN and VITE_AUTH0_AUDIENCE must be set in the environment for Netlify functions.');
+if (!AUTH0_DOMAIN || !AUTH0_API_AUDIENCE) {
+    throw new Error('AUTH0_DOMAIN and AUTH0_API_AUDIENCE must be set in the environment for Netlify functions.');
 }
 
 const client = jwksClient({
@@ -28,7 +28,10 @@ const getKey: jwt.GetPublicKeyOrSecret = (header, callback) => {
       console.error("Error getting signing key:", err);
       return callback(err);
     }
-    // The key object can be of different types, getPublicKey() is for RSA
+    // This check is crucial. It handles the case where the key is not found (e.g., invalid kid).
+    if (!key) {
+        return callback(new Error("Authorization error: Unable to find a signing key that matches the 'kid' in the JWT header."));
+    }
     const signingKey = key.getPublicKey();
     callback(null, signingKey);
   });
@@ -36,7 +39,7 @@ const getKey: jwt.GetPublicKeyOrSecret = (header, callback) => {
 
 const verifyJwt = (token: string): Promise<jwt.JwtPayload> => {
     const options: jwt.VerifyOptions = {
-        audience: AUTH0_AUDIENCE,
+        audience: AUTH0_API_AUDIENCE,
         issuer: `https://${AUTH0_DOMAIN}/`,
         algorithms: ['RS256']
     };
