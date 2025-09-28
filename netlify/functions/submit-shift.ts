@@ -1,6 +1,7 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { ShiftState } from "../../src/types";
+import { verifyJwtAndCheckRole } from "../utils/auth";
 
 // Initialize Firebase Admin SDK
 // This requires FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY
@@ -43,7 +44,8 @@ const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    // TODO: Add Auth0 JWT validation here for security
+    // Secure endpoint: Require a valid JWT from any authenticated user.
+    await verifyJwtAndCheckRole(event);
     
     if (!event.body) {
       throw new Error("Request body is missing.");
@@ -63,6 +65,9 @@ const handler: Handler = async (event: HandlerEvent) => {
   } catch (error) {
     console.error('Error processing submission:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+     if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
+    }
     return {
       statusCode: 500,
       headers,

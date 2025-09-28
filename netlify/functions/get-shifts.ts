@@ -1,7 +1,7 @@
-// FIX: Implement the get-shifts Netlify function to fetch shift data from Firestore.
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { ShiftRecord } from "../../src/types";
+import { verifyJwtAndCheckRole } from "../utils/auth";
 
 // Initialize Firebase Admin SDK
 // This requires FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY
@@ -44,7 +44,8 @@ const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    // TODO: Add Auth0 JWT validation here for security
+    // Secure endpoint: Require a valid JWT with the 'Admin' role.
+    await verifyJwtAndCheckRole(event, 'Admin');
 
     const shiftsSnapshot = await db.collection('shifts').orderBy('startTime', 'desc').get();
     const shifts: ShiftRecord[] = [];
@@ -63,6 +64,9 @@ const handler: Handler = async (event: HandlerEvent) => {
   } catch (error) {
     console.error('Error fetching shifts:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
+    }
     return {
       statusCode: 500,
       headers,

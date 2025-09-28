@@ -1,5 +1,6 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
+import { verifyJwtAndCheckRole } from "../utils/auth";
 
 if (!admin.apps.length) {
   try {
@@ -30,7 +31,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    // TODO: Secure with JWT and ADMIN role validation
+    // Secure endpoint: Require a valid JWT with the 'Admin' role.
+    await verifyJwtAndCheckRole(event, 'Admin');
+    
     if (!event.body) throw new Error("Request body is missing.");
     const { id } = JSON.parse(event.body);
 
@@ -45,7 +48,11 @@ const handler: Handler = async (event) => {
       body: JSON.stringify({ id, message: 'Product deactivated successfully' }),
     };
   } catch (error) {
+    console.error('Error deactivating product:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
+    }
     return {
       statusCode: 500,
       headers,

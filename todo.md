@@ -1,4 +1,4 @@
-# Todo List: Spinäl Äpp Handover
+# Todo List: Spinäl Äpp
 
 ## New Features
 
@@ -116,6 +116,17 @@
 
 ---
 
+## Security Hardening (High Priority)
+
+- **(Completed)** Task SH.1: Implement Auth0 JWT Validation on All Serverless Functions.
+  - **Objective:** Secure all backend API endpoints to prevent unauthorized access. "My recommendation is to prioritize implementing the Auth0 JWT validation in all your serverless functions as the very next step. Once that is done, you will have a robust and genuinely secure application."
+  - **Implementation:**
+    - Update every Netlify serverless function (`submit-shift`, `get-shifts`, `add-product`, etc.) to validate the Auth0 JWT included in the `Authorization` header.
+    - For admin-only functions, ensure the token's payload contains the `Admin` role.
+    - The function must return an "Unauthorized" error if the token is invalid or lacks the required permissions.
+
+---
+
 ## UI & UX Polish
 
 ### Initial Refinements (Phases 9, 10, 11, 13, 14)
@@ -156,7 +167,7 @@
 - **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
 
 ### General Polish
-- **Task UP.1:** Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
+- **(Completed)** Task UP.1: Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
 - **Task UP.2 (Not Started): Refine Inventory Terminology & Add Reorder Field.**
   - **Objective:** Update product management fields for clarity and add the `Reorder Quantity` field.
   - **Implementation:**

@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { Product } from "../../src/types";
+import { verifyJwtAndCheckRole } from "../utils/auth";
 
 if (!admin.apps.length) {
   try {
@@ -31,7 +32,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    // TODO: Secure with JWT validation for any authenticated user
+    // Secure endpoint: Require a valid JWT from any authenticated user.
+    await verifyJwtAndCheckRole(event);
+    
     const productsSnapshot = await db.collection('products').where('isActive', '==', true).get();
     const products: Product[] = [];
     productsSnapshot.forEach(doc => {
@@ -43,7 +46,11 @@ const handler: Handler = async (event) => {
       body: JSON.stringify(products),
     };
   } catch (error) {
+    console.error('Error fetching products:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+     if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
+    }
     return {
       statusCode: 500,
       headers,

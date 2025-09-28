@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { Supplier } from "../../src/types";
+import { verifyJwtAndCheckRole } from "../utils/auth";
 
 if (!admin.apps.length) {
   try {
@@ -31,7 +32,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    // TODO: Secure with JWT and ADMIN role validation
+    // Secure endpoint: Require a valid JWT with the 'Admin' role.
+    await verifyJwtAndCheckRole(event, 'Admin');
+
     const suppliersSnapshot = await db.collection('suppliers').where('isActive', '==', true).get();
     const suppliers: Supplier[] = [];
     suppliersSnapshot.forEach(doc => {
@@ -43,7 +46,11 @@ const handler: Handler = async (event) => {
       body: JSON.stringify(suppliers),
     };
   } catch (error) {
+    console.error('Error fetching suppliers:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+        return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
+    }
     return {
       statusCode: 500,
       headers,

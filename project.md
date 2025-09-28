@@ -1,4 +1,4 @@
-# Project Plan: Spinäl Äpp Handover
+# Project Plan: Spinäl Äpp
 
 ## Critical Development Protocol
 
