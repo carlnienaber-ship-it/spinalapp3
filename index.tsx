@@ -7,10 +7,10 @@ import './index.css';
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN;
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-const audience = import.meta.env.VITE_AUTH0_API_AUDIENCE;
+const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
 if (!domain || !clientId || !audience) {
-  throw new Error('VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID and VITE_AUTH0_API_AUDIENCE must be set in your environment variables.');
+  throw new Error('VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID and VITE_AUTH0_AUDIENCE must be set in your environment variables.');
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
