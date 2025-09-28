@@ -348,7 +348,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans">
       <header className="bg-gray-800 shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Spinäl Äpp Handover</h1>
+        <h1 className="text-xl font-bold">Spinäl Äpp</h1>
         <div>
           <span className="text-sm mr-4">{user?.name}</span>
           <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })} variant="secondary" size="sm">

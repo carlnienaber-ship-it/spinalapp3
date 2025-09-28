@@ -72,6 +72,19 @@ export type ShiftRecord = ShiftState & {
   id: string;
 };
 
+// For supplier management
+export type Supplier = {
+  id: string;
+  supplierName: string;
+  supplierEmail: string;
+  contactPerson?: string;
+  address?: string;
+  telephone?: string;
+  liquorLicenseNumber?: string;
+  bankDetails?: string;
+  isActive: boolean;
+};
+
 // For product management
 export type Product = {
   id: string;
@@ -79,9 +92,10 @@ export type Product = {
   category: 'Spirits' | 'Cans and Bottles' | 'Food' | "Brewer's Reserve";
   fullBottleWeight?: number;
   isActive: boolean;
-  supplierName?: string;
-  supplierEmail?: string;
   parLevel?: number;
   orderUnitSize?: number;
   minOrderUnits?: number;
+  primarySupplierId?: string;
+  secondarySupplierId?: string;
+  tertiarySupplierId?: string;
 };

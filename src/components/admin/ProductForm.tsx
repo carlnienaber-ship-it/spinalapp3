@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Product } from '../../types';
+import { Product, Supplier } from '../../types';
 import { useApiClient } from '../../hooks/useApiClient';
 import Button from '../ui/Button';
 import NumericInput from '../ui/NumericInput';
 
 type ProductFormProps = {
   product: Product | null;
+  suppliers: Supplier[];
   onClose: () => void;
   onSuccess: () => void;
 };
@@ -23,15 +24,16 @@ const InfoTooltip: React.FC<{ text: string }> = ({ text }) => (
   </span>
 );
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, onSuccess }) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Product['category']>('Cans and Bottles');
   const [fullBottleWeight, setFullBottleWeight] = useState<number | undefined>(undefined);
-  const [supplierName, setSupplierName] = useState('');
-  const [supplierEmail, setSupplierEmail] = useState('');
   const [parLevel, setParLevel] = useState<number | undefined>(undefined);
   const [orderUnitSize, setOrderUnitSize] = useState<number | undefined>(undefined);
   const [minOrderUnits, setMinOrderUnits] = useState<number | undefined>(undefined);
+  const [primarySupplierId, setPrimarySupplierId] = useState<string>('');
+  const [secondarySupplierId, setSecondarySupplierId] = useState<string>('');
+  const [tertiarySupplierId, setTertiarySupplierId] = useState<string>('');
   
   const { addProduct, updateProduct, loading, error } = useApiClient();
 
@@ -40,21 +42,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess }
       setName(product.name);
       setCategory(product.category);
       setFullBottleWeight(product.fullBottleWeight);
-      setSupplierName(product.supplierName || '');
-      setSupplierEmail(product.supplierEmail || '');
       setParLevel(product.parLevel);
       setOrderUnitSize(product.orderUnitSize);
       setMinOrderUnits(product.minOrderUnits);
+      setPrimarySupplierId(product.primarySupplierId || '');
+      setSecondarySupplierId(product.secondarySupplierId || '');
+      setTertiarySupplierId(product.tertiarySupplierId || '');
     } else {
       // Reset form for new product
       setName('');
       setCategory('Cans and Bottles');
       setFullBottleWeight(undefined);
-      setSupplierName('');
-      setSupplierEmail('');
       setParLevel(undefined);
       setOrderUnitSize(undefined);
       setMinOrderUnits(undefined);
+      setPrimarySupplierId('');
+      setSecondarySupplierId('');
+      setTertiarySupplierId('');
     }
   }, [product]);
 
@@ -65,17 +69,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess }
         name, 
         category, 
         fullBottleWeight: category === 'Spirits' ? fullBottleWeight : undefined,
-        supplierName: supplierName || undefined,
-        supplierEmail: supplierEmail || undefined,
         parLevel,
         orderUnitSize,
         minOrderUnits,
+        primarySupplierId: primarySupplierId || undefined,
+        secondarySupplierId: secondarySupplierId || undefined,
+        tertiarySupplierId: tertiarySupplierId || undefined,
       };
       if (product) {
         await updateProduct({ ...product, ...productData });
       } else {
-        // The type for addProduct expects Omit<Product, 'id' | 'isActive'>
-        // so we don't need to spread product here.
         await addProduct(productData);
       }
       onSuccess();
@@ -132,18 +135,39 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onClose, onSuccess }
             )}
           </div>
 
-          {/* Inventory & Supplier Details */}
+          {/* Supplier Assignment */}
           <div className="p-4 border border-gray-700 rounded-md">
-             <h3 className="text-lg font-semibold text-gray-200 mb-3">Inventory & Supplier</h3>
+             <h3 className="text-lg font-semibold text-gray-200 mb-3">Supplier Assignment</h3>
+             <div className="space-y-4">
+                <div>
+                    <label htmlFor="primary-supplier" className="block text-sm font-medium text-gray-300">Primary Supplier</label>
+                    <select id="primary-supplier" value={primarySupplierId} onChange={(e) => setPrimarySupplierId(e.target.value)} className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">-- None --</option>
+                        {suppliers.map(s => <option key={s.id} value={s.id}>{s.supplierName}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="secondary-supplier" className="block text-sm font-medium text-gray-300">Secondary Supplier (Optional)</label>
+                    <select id="secondary-supplier" value={secondarySupplierId} onChange={(e) => setSecondarySupplierId(e.target.value)} className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">-- None --</option>
+                        {suppliers.map(s => <option key={s.id} value={s.id}>{s.supplierName}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="tertiary-supplier" className="block text-sm font-medium text-gray-300">Tertiary Supplier (Optional)</label>
+                    <select id="tertiary-supplier" value={tertiarySupplierId} onChange={(e) => setTertiarySupplierId(e.target.value)} className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">-- None --</option>
+                        {suppliers.map(s => <option key={s.id} value={s.id}>{s.supplierName}</option>)}
+                    </select>
+                </div>
+             </div>
+          </div>
+
+
+          {/* Inventory Details */}
+          <div className="p-4 border border-gray-700 rounded-md">
+             <h3 className="text-lg font-semibold text-gray-200 mb-3">Inventory Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="supplier-name" className="block text-sm font-medium text-gray-300">Supplier Name</label>
-                <input id="supplier-name" type="text" value={supplierName} onChange={(e) => setSupplierName(e.target.value)} placeholder="e.g., Mega-Bev" className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500"/>
-              </div>
-              <div>
-                <label htmlFor="supplier-email" className="block text-sm font-medium text-gray-300">Supplier Email</label>
-                <input id="supplier-email" type="email" value={supplierEmail} onChange={(e) => setSupplierEmail(e.target.value)} placeholder="orders@mega-bev.com" className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500"/>
-              </div>
               <div>
                 <label htmlFor="par-level" className="block text-sm font-medium text-gray-300">PAR Level</label>
                 <NumericInput id="par-level" value={parLevel || ''} onChange={(e) => setParLevel(parseNumber(e.target.value))} placeholder="e.g., 6" className="mt-1"/>

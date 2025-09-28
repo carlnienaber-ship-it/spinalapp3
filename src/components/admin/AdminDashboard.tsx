@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
-import { ShiftRecord, Product } from '../../types';
+import { ShiftRecord, Product, Supplier } from '../../types';
 import ShiftList from './ShiftList';
 import ShiftDetail from './ShiftDetail';
 import Header from '../ui/Header';
 import Button from '../ui/Button';
 import ProductManager from './ProductManager';
+import SupplierManager from './SupplierManager';
 
 type AdminDashboardProps = {
   products: Product[];
@@ -14,28 +15,46 @@ type AdminDashboardProps = {
   onBack: () => void;
 };
 
-type View = 'shifts' | 'products';
+type View = 'shifts' | 'products' | 'suppliers';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoading, onProductsChange, onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [selectedShift, setSelectedShift] = useState<ShiftRecord | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [currentView, setCurrentView] = useState<View>('shifts');
-  const { getShifts, loading: shiftsLoading, error } = useApiClient();
+  const { getShifts, getSuppliers, loading, error } = useApiClient();
+
+  const fetchShifts = useCallback(async () => {
+    try {
+      const fetchedShifts = await getShifts();
+      setShifts(fetchedShifts);
+    } catch (e) {
+      console.error("Failed to load shifts", e);
+    }
+  }, [getShifts]);
+  
+  const fetchSuppliers = useCallback(async () => {
+    try {
+      const fetchedSuppliers = await getSuppliers();
+      setSuppliers(fetchedSuppliers);
+    } catch (e) {
+      console.error("Failed to load suppliers", e);
+    }
+  }, [getSuppliers]);
 
   useEffect(() => {
     if (currentView === 'shifts') {
-      const fetchShifts = async () => {
-        try {
-          const fetchedShifts = await getShifts();
-          setShifts(fetchedShifts);
-        } catch (e) {
-          console.error("Failed to load shifts", e);
-        }
-      };
       fetchShifts();
     }
-  }, [getShifts, currentView]);
+    if (currentView === 'suppliers') {
+      fetchSuppliers();
+    }
+    // Products are fetched via prop, but we also need suppliers for the product view
+    if (currentView === 'products') {
+        fetchSuppliers();
+    }
+  }, [currentView, fetchShifts, fetchSuppliers]);
 
   const filteredShifts = useMemo(() => {
     if (selectedDate) {
@@ -56,12 +75,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
     }
   }, [filteredShifts]);
 
-  if (shiftsLoading && shifts.length === 0 && currentView === 'shifts') {
-    return (
-      <div className="text-center p-8">
-        <p>Loading shift reports...</p>
-      </div>
-    );
+  if (loading && currentView === 'shifts' && shifts.length === 0) {
+    return <div className="text-center p-8"><p>Loading shift reports...</p></div>;
   }
 
   if (error) {
@@ -76,7 +91,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
 
   const renderShiftsView = () => (
     <>
-      {shifts.length === 0 && !shiftsLoading ? (
+      {shifts.length === 0 && !loading ? (
         <div className="text-center p-8 bg-gray-800 rounded-lg">
            <p className="text-gray-400 mb-6">No shift reports have been submitted yet.</p>
         </div>
@@ -121,25 +136,38 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
 
   return (
     <div>
-      <Header title="Admin Dashboard" subtitle={currentView === 'shifts' ? "Review submitted shift handovers" : "Manage Products"} />
+      <Header title="Admin Dashboard" subtitle={`Review submitted shift handovers`} />
       
-      <div className="flex justify-center gap-4 mb-8 border-b border-gray-700 pb-6">
+      <div className="flex justify-center flex-wrap gap-4 mb-8 border-b border-gray-700 pb-6">
         <Button onClick={() => setCurrentView('shifts')} variant={currentView === 'shifts' ? 'primary' : 'secondary'}>
           View Shifts
         </Button>
         <Button onClick={() => setCurrentView('products')} variant={currentView === 'products' ? 'primary' : 'secondary'}>
           Manage Products
         </Button>
+        <Button onClick={() => setCurrentView('suppliers')} variant={currentView === 'suppliers' ? 'primary' : 'secondary'}>
+          Manage Suppliers
+        </Button>
         <Button onClick={onBack} variant="secondary">
           Back to Welcome
         </Button>
       </div>
 
-      {currentView === 'shifts' ? renderShiftsView() : (
+      {currentView === 'shifts' && renderShiftsView()}
+      {currentView === 'products' && (
         <ProductManager 
           products={products}
-          isLoading={productsLoading}
+          suppliers={suppliers}
+          isLoading={productsLoading || (loading && suppliers.length === 0)}
           onProductsChange={onProductsChange}
+        />
+      )}
+      {currentView === 'suppliers' && (
+        <SupplierManager 
+          products={products}
+          suppliers={suppliers}
+          isLoading={loading && suppliers.length === 0}
+          onSuppliersChange={fetchSuppliers}
         />
       )}
     </div>

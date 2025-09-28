@@ -13,15 +13,15 @@
 - **(Completed)** Build all reusable UI components (`Button`, `Header`, etc.).
 
 ### Backend & Data (Phase 15)
-- **(Completed) Task 15.1: Implement `submit-shift` Function.** Create and deploy the Netlify serverless function to receive shift data and save it to the Firebase Firestore database.
+- **(Completed)** Task 15.1: Implement `submit-shift` Function. Create and deploy the Netlify serverless function to receive shift data and save it to the Firebase Firestore database.
 
 ### Admin Dashboard (Phase 16)
-- **(Completed) Task 16.1: Configure 'Admin' Role in Auth0.** Manually create the role in the Auth0 dashboard.
-- **(Completed) Task 16.2: Create `get-shifts` Serverless Function.** Build the backend endpoint to fetch all shift reports from Firestore.
-- **(Completed) Task 16.3: Secure `get-shifts` Endpoint.** Implement Auth0 JWT validation to ensure only users with the `Admin` role can access the data.
-- **(Completed) Task 16.4: Build Admin Dashboard Frontend.** Create the main dashboard component, shift list, and shift detail views.
-- **(Completed) Task 16.5: Implement Secure Data Fetching.** Update the API client to call the `get-shifts` endpoint and display the data.
-- **(Completed) Task 16.6: Implement Admin Geofence Bypass.** Add logic to exempt admin users from geofence restrictions and a UI indicator.
+- **(Completed)** Task 16.1: Configure 'Admin' Role in Auth0. Manually create the role in the Auth0 dashboard.
+- **(Completed)** Task 16.2: Create `get-shifts` Serverless Function. Build the backend endpoint to fetch all shift reports from Firestore.
+- **(Completed)** Task 16.3: Secure `get-shifts` Endpoint. Implement Auth0 JWT validation to ensure only users with the `Admin` role can access the data.
+- **(Completed)** Task 16.4: Build Admin Dashboard Frontend. Create the main dashboard component, shift list, and shift detail views.
+- **(Completed)** Task 16.5: Implement Secure Data Fetching. Update the API client to call the `get-shifts` endpoint and display the data.
+- **(Completed)** Task 16.6: Implement Admin Geofence Bypass. Add logic to exempt admin users from geofence restrictions and a UI indicator.
 
 ### Stock Variance Calculation (Phase 18)
 - **(Completed)** Task 18.1: Update Data Model. Add `fullBottleWeight` to the `StockItem` type and the mock data for spirits.
@@ -73,11 +73,36 @@
   - Added informational tooltips next to the 'Order Unit Size' and 'Minimum Order Units' fields to explain their purpose.
 - **(Completed) Task 30.5 (Frontend): Display New Product Info.** Updated the product list view in `ProductManager.tsx` to display key inventory info, such as the par level and supplier, for each product.
 
-### Advanced Supplier Management (Phase 31 - Not Started)
-- **Task 31.1: Update Data Model for Multiple Suppliers.** Refactor the product data model to support an array of suppliers instead of a single one. Each entry in the array should contain `supplierName`, `supplierEmail`, and a new boolean flag `isPrimary`.
-- **Task 31.2: Overhaul "Manage Products" Form.** Redesign the Add/Edit Product form to allow admins to add, edit, and remove multiple suppliers for a single product. The UI must include a mechanism (e.g., a radio button) to designate exactly one supplier as the primary.
-- **Task 31.3: Create Supplier-Centric View.** Implement a new tab or section in the Admin Dashboard titled "Suppliers". This view should list all unique suppliers. Clicking a supplier's name should display a list of all products associated with them.
-- **Task 31.4: Update Backend for New Data Structure.** Modify the `add-product` and `update-product` serverless functions to correctly handle the new array-based supplier data.
+### Supplier CRUD Management (Phase 31)
+- **(Completed)** Task 31.1 (Data Model): Create a new `suppliers` collection in Firestore. Each document will contain: `supplierName` (string), `supplierEmail` (string), `contactPerson` (string), `address` (string), `telephone` (string), `liquorLicenseNumber` (string), `bankDetails` (string, for multi-line text), and an `isActive` flag.
+- **(Completed)** Task 31.2 (Backend): Implement a full suite of admin-only serverless functions for supplier CRUD: `add-supplier`, `get-suppliers`, `update-supplier`, and `deactivate-supplier`.
+- **(Completed)** Task 31.3 (Frontend): Build a new "Manage Suppliers" section in the Admin Dashboard. This UI will list all active suppliers and provide forms (e.g., in a modal) to add new ones or edit existing ones. The form must include fields for all the new data points (contact person, address, bank details, etc.).
+- **(Completed)** Task 31.4 (Frontend): Add a "Download All Suppliers" button to the main supplier list page. This will generate and download a single `.txt` file containing the details of all suppliers.
+- **(Completed)** Task 31.5 (Frontend): On each individual supplier's detail/edit page, add a "Download Info" button that generates and downloads a `.txt` file for that specific supplier.
+
+### Product-Supplier Assignment (Phase 32)
+- **(Completed)** Task 32.1 (Data Model): Update the `Product` data model. Remove the `supplierName` and `supplierEmail` fields. Replace them with `primarySupplierId` (string), `secondarySupplierId` (string, optional), and `tertiarySupplierId` (string, optional) to store Firestore document IDs from the `suppliers` collection.
+- **(Completed)** Task 32.2 (Backend): Update the `add-product` and `update-product` functions to handle saving the new supplier ID fields.
+- **(Completed)** Task 32.3 (Frontend): Overhaul the "Add/Edit Product" form.
+  - Remove the manual text inputs for supplier name and email.
+  - Add three dropdown menus: "Primary Supplier," "Secondary Supplier (Optional)," and "Tertiary Supplier (Optional)."
+  - These dropdowns will be populated with the list of active suppliers fetched from the backend. Each dropdown must include a "None" option.
+- **(Completed)** Task 32.4 (Frontend): Create a new "Suppliers" view in the Admin Dashboard. This view will list all suppliers, and clicking one will show all products assigned to them (as primary, secondary, or tertiary).
+
+### Automated Low Stock Notifications (Phase 33 - Not Started)
+- **Objective:** Create a daily automated system that emails a low-stock report to all admins.
+- **Task 33.1 (Backend):** Create a new scheduled serverless function (`daily-stock-check`) that runs once a day (e.g., at 07:00 CET).
+- **Task 33.2 (Backend Logic):** The function must:
+  - Fetch the most recent shift report from Firestore.
+  - For each product in the closing stocktake, compare `currentStock` with its `parLevel`.
+  - **Crucially, if `currentStock` is less than or equal to `parLevel`, the item must be flagged as low stock.**
+  - Group all flagged items by their assigned Primary Supplier.
+- **Task 33.3 (Email Generation):**
+  - If any items are flagged, compose a summary email.
+  - The email should be clearly formatted, grouping items by supplier.
+  - For each item, display: Current Stock, PAR Level, and the Recommended Order (calculated from the product's `reorderQuantity` and `orderUnitSize`).
+- **Task 33.4 (Email Sending):**
+  - The function must send the generated email to all users with the "Admin" role.
 
 ### Public Menu (Phase 25 - Not Started)
 - **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
@@ -129,6 +154,15 @@
 - **(Completed)** Task 21.1: Update CSV Button Style.
 - **(Completed)** Task 21.2: Refactor CSV Data Structure.
 - **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
+
+### General Polish
+- **Task UP.1:** Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
+- **Task UP.2 (Not Started): Refine Inventory Terminology & Add Reorder Field.**
+  - **Objective:** Update product management fields for clarity and add the `Reorder Quantity` field.
+  - **Implementation:**
+    - Rename `minOrderUnits` to `minOrderQuantity` in the `Product` type, Firestore model, and backend functions.
+    - Add a new field: `reorderQuantity` (number) to represent the ideal order amount.
+    - Update the `ProductForm` UI to reflect these changes, labeling the MOQ field as "Minimum Order Quantity (MOQ)".
 
 ---
 

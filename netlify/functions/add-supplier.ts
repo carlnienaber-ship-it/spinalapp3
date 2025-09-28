@@ -32,31 +32,31 @@ const handler: Handler = async (event) => {
   try {
     // TODO: Secure with JWT and ADMIN role validation
     if (!event.body) throw new Error("Request body is missing.");
-    const productData = JSON.parse(event.body);
-    const newProduct = {
-        name: productData.name,
-        category: productData.category,
-        fullBottleWeight: productData.fullBottleWeight ?? null,
+    const supplierData = JSON.parse(event.body);
+
+    const newSupplier = {
+        supplierName: supplierData.supplierName,
+        supplierEmail: supplierData.supplierEmail,
+        contactPerson: supplierData.contactPerson ?? null,
+        address: supplierData.address ?? null,
+        telephone: supplierData.telephone ?? null,
+        liquorLicenseNumber: supplierData.liquorLicenseNumber ?? null,
+        bankDetails: supplierData.bankDetails ?? null,
         isActive: true,
-        parLevel: productData.parLevel ?? null,
-        orderUnitSize: productData.orderUnitSize ?? null,
-        minOrderUnits: productData.minOrderUnits ?? null,
-        primarySupplierId: productData.primarySupplierId ?? null,
-        secondarySupplierId: productData.secondarySupplierId ?? null,
-        tertiarySupplierId: productData.tertiarySupplierId ?? null,
     };
-    const docRef = await db.collection('products').add(newProduct);
+
+    const docRef = await db.collection('suppliers').add(newSupplier);
     return {
       statusCode: 201,
       headers,
-      body: JSON.stringify({ id: docRef.id, ...newProduct }),
+      body: JSON.stringify({ id: docRef.id, ...newSupplier }),
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to add product.', details: errorMessage }),
+      body: JSON.stringify({ error: 'Failed to add supplier.', details: errorMessage }),
     };
   }
 };

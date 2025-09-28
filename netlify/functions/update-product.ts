@@ -42,11 +42,12 @@ const handler: Handler = async (event) => {
       name: productData.name,
       category: productData.category,
       fullBottleWeight: productData.fullBottleWeight ?? null,
-      supplierName: productData.supplierName ?? null,
-      supplierEmail: productData.supplierEmail ?? null,
       parLevel: productData.parLevel ?? null,
       orderUnitSize: productData.orderUnitSize ?? null,
       minOrderUnits: productData.minOrderUnits ?? null,
+      primarySupplierId: productData.primarySupplierId ?? null,
+      secondarySupplierId: productData.secondarySupplierId ?? null,
+      tertiarySupplierId: productData.tertiarySupplierId ?? null,
     };
 
     const docRef = db.collection('products').doc(id);

@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
-import { Product } from '../../types';
+import { Product, Supplier } from '../../types';
 import Button from '../ui/Button';
 import ProductForm from './ProductForm';
 
 type ProductManagerProps = {
   products: Product[];
+  suppliers: Supplier[];
   isLoading: boolean;
   onProductsChange: () => Promise<void>;
 };
 
-const ProductManager: React.FC<ProductManagerProps> = ({ products, isLoading, onProductsChange }) => {
+const ProductManager: React.FC<ProductManagerProps> = ({ products, suppliers, isLoading, onProductsChange }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { deactivateProduct, deleteProduct, seedProducts, loading: mutationLoading, error } = useApiClient();
+
+  const suppliersById = useMemo(() => 
+    new Map(suppliers.map(s => [s.id, s]))
+  , [suppliers]);
 
   const handleDeactivate = async (productId: string) => {
     if (window.confirm('Are you sure you want to deactivate this product? It will no longer appear in new stocktakes.')) {
@@ -119,21 +124,24 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, isLoading, on
                 <div key={category}>
                 <h3 className="text-xl font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-2">{category}</h3>
                 <ul className="space-y-2">
-                    {items.map(product => (
-                    <li key={product.id} className="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-700 p-3 rounded-md">
-                        <div>
-                          <span className="font-semibold text-gray-100">{product.name}</span>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Supplier: {product.supplierName || 'N/A'} | PAR Level: {product.parLevel ?? 'N/A'}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 mt-2 sm:mt-0 flex-shrink-0">
-                          <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
-                          <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
-                          <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
-                        </div>
-                    </li>
-                    ))}
+                    {items.map(product => {
+                      const primarySupplier = product.primarySupplierId ? suppliersById.get(product.primarySupplierId) : null;
+                      return (
+                        <li key={product.id} className="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-700 p-3 rounded-md">
+                            <div>
+                              <span className="font-semibold text-gray-100">{product.name}</span>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Supplier: {primarySupplier?.supplierName || 'N/A'} | PAR Level: {product.parLevel ?? 'N/A'}
+                              </p>
+                            </div>
+                            <div className="flex gap-2 mt-2 sm:mt-0 flex-shrink-0">
+                              <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
+                              <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
+                              <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
+                            </div>
+                        </li>
+                      );
+                    })}
                 </ul>
                 </div>
             );
@@ -143,7 +151,8 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, isLoading, on
 
       {isFormOpen && (
         <ProductForm 
-          product={editingProduct} 
+          product={editingProduct}
+          suppliers={suppliers}
           onClose={handleFormClose}
           onSuccess={handleFormSuccess}
         />

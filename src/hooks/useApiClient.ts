@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useCallback } from 'react';
-import { ShiftState, ShiftRecord, Product } from '../types';
+import { ShiftState, ShiftRecord, Product, Supplier } from '../types';
 
 const API_BASE_URL = '/.netlify/functions';
 
@@ -13,6 +13,10 @@ type ApiClient = {
   deactivateProduct: (productId: string) => Promise<{ id: string }>;
   deleteProduct: (productId: string) => Promise<{ id: string }>;
   seedProducts: () => Promise<{ message: string; count: number }>;
+  getSuppliers: () => Promise<Supplier[]>;
+  addSupplier: (supplier: Omit<Supplier, 'id' | 'isActive'>) => Promise<Supplier>;
+  updateSupplier: (supplier: Supplier) => Promise<Supplier>;
+  deactivateSupplier: (supplierId: string) => Promise<{ id: string }>;
   loading: boolean;
   error: Error | null;
 };
@@ -87,6 +91,23 @@ export function useApiClient(): ApiClient {
     method: 'POST',
   }), [makeRequest]);
 
+  const getSuppliers = useCallback(() => makeRequest<Supplier[]>('get-suppliers'), [makeRequest]);
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, loading, error };
+  const addSupplier = useCallback((supplier: Omit<Supplier, 'id' | 'isActive'>) => makeRequest<Supplier>('add-supplier', {
+    method: 'POST',
+    body: JSON.stringify(supplier),
+  }), [makeRequest]);
+
+  const updateSupplier = useCallback((supplier: Supplier) => makeRequest<Supplier>('update-supplier', {
+    method: 'PUT',
+    body: JSON.stringify(supplier),
+  }), [makeRequest]);
+
+  const deactivateSupplier = useCallback((supplierId: string) => makeRequest<{ id: string }>('deactivate-supplier', {
+    method: 'PUT',
+    body: JSON.stringify({ id: supplierId }),
+  }), [makeRequest]);
+
+
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, loading, error };
 }

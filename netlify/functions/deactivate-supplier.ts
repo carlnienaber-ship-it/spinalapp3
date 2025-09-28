@@ -21,7 +21,7 @@ const handler: Handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
     'Content-Type': 'application/json',
   };
   
@@ -32,31 +32,24 @@ const handler: Handler = async (event) => {
   try {
     // TODO: Secure with JWT and ADMIN role validation
     if (!event.body) throw new Error("Request body is missing.");
-    const productData = JSON.parse(event.body);
-    const newProduct = {
-        name: productData.name,
-        category: productData.category,
-        fullBottleWeight: productData.fullBottleWeight ?? null,
-        isActive: true,
-        parLevel: productData.parLevel ?? null,
-        orderUnitSize: productData.orderUnitSize ?? null,
-        minOrderUnits: productData.minOrderUnits ?? null,
-        primarySupplierId: productData.primarySupplierId ?? null,
-        secondarySupplierId: productData.secondarySupplierId ?? null,
-        tertiarySupplierId: productData.tertiarySupplierId ?? null,
-    };
-    const docRef = await db.collection('products').add(newProduct);
+    const { id } = JSON.parse(event.body);
+
+    if (!id) throw new Error("Supplier ID is missing.");
+    
+    const docRef = db.collection('suppliers').doc(id);
+    await docRef.update({ isActive: false });
+    
     return {
-      statusCode: 201,
+      statusCode: 200,
       headers,
-      body: JSON.stringify({ id: docRef.id, ...newProduct }),
+      body: JSON.stringify({ id, message: 'Supplier deactivated successfully' }),
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to add product.', details: errorMessage }),
+      body: JSON.stringify({ error: 'Failed to deactivate supplier.', details: errorMessage }),
     };
   }
 };
