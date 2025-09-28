@@ -21,7 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience: audience, // Add the audience for your API
-        scope: "openid profile email" // Request profile information
+        scope: "openid profile email offline_access" // Request profile information and offline access for refresh tokens
       }}
       useRefreshTokens={true}
       cacheLocation="localstorage"
