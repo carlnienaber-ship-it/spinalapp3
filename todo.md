@@ -89,20 +89,20 @@
   - These dropdowns will be populated with the list of active suppliers fetched from the backend. Each dropdown must include a "None" option.
 - **(Completed)** Task 32.4 (Frontend): Create a new "Suppliers" view in the Admin Dashboard. This view will list all suppliers, and clicking one will show all products assigned to them (as primary, secondary, or tertiary).
 
-### Automated Low Stock Notifications (Phase 33 - Not Started)
-- **Objective:** Create a daily automated system that emails a low-stock report to all admins.
-- **Task 33.1 (Backend):** Create a new scheduled serverless function (`daily-stock-check`) that runs once a day (e.g., at 07:00 CET).
-- **Task 33.2 (Backend Logic):** The function must:
-  - Fetch the most recent shift report from Firestore.
-  - For each product in the closing stocktake, compare `currentStock` with its `parLevel`.
-  - **Crucially, if `currentStock` is less than or equal to `parLevel`, the item must be flagged as low stock.**
-  - Group all flagged items by their assigned Primary Supplier.
-- **Task 33.3 (Email Generation):**
-  - If any items are flagged, compose a summary email.
-  - The email should be clearly formatted, grouping items by supplier.
-  - For each item, display: Current Stock, PAR Level, and the Recommended Order (calculated from the product's `reorderQuantity` and `orderUnitSize`).
-- **Task 33.4 (Email Sending):**
-  - The function must send the generated email to all users with the "Admin" role.
+### On-Demand Stock Ordering Report (Phase 33)
+- **(Completed)** **Objective:** Instead of email, create a new page in the Admin Dashboard called "Stock Ordering" to display a daily report of items that need to be ordered, grouped by supplier.
+- **(Completed) Task 33.1 (Backend):** Create a new on-demand serverless function (`get-low-stock-report`).
+- **(Completed) Task 33.2 (Backend Logic):** The function, when called:
+  - Fetches the most recent shift report from Firestore.
+  - Compares `currentStock` with each product's `parLevel`.
+  - **Crucially, if `currentStock` is less than or equal to `parLevel`, the item is flagged as low stock.**
+  - Groups all flagged items by their assigned Primary Supplier.
+- **(Completed) Task 33.3 (Frontend UI):**
+  - Create a new "Stock Ordering" view in the Admin Dashboard.
+  - Add a button to call the `get-low-stock-report` function.
+  - Display the returned data in a clear, formatted report, grouped by supplier.
+  - For each item, display: Current Stock, PAR Level, and the Recommended Order quantity.
+  - Add a "Copy to Clipboard" button for each supplier's order list.
 
 ### Public Menu (Phase 25 - Not Started)
 - **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
@@ -168,12 +168,13 @@
 
 ### General Polish
 - **(Completed)** Task UP.1: Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
-- **Task UP.2 (Not Started): Refine Inventory Terminology & Add Reorder Field.**
+- **(Completed)** Task UP.2: Refine Inventory Terminology & Add Reorder Field.
   - **Objective:** Update product management fields for clarity and add the `Reorder Quantity` field.
   - **Implementation:**
     - Rename `minOrderUnits` to `minOrderQuantity` in the `Product` type, Firestore model, and backend functions.
     - Add a new field: `reorderQuantity` (number) to represent the ideal order amount.
     - Update the `ProductForm` UI to reflect these changes, labeling the MOQ field as "Minimum Order Quantity (MOQ)".
+- **(Completed)** Task UP.3: Change browser tab title to "Spinäl Ǎpp".
 
 ---
 

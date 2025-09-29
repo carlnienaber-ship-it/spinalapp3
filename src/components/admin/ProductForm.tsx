@@ -30,7 +30,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
   const [fullBottleWeight, setFullBottleWeight] = useState<number | undefined>(undefined);
   const [parLevel, setParLevel] = useState<number | undefined>(undefined);
   const [orderUnitSize, setOrderUnitSize] = useState<number | undefined>(undefined);
-  const [minOrderUnits, setMinOrderUnits] = useState<number | undefined>(undefined);
+  const [minOrderQuantity, setMinOrderQuantity] = useState<number | undefined>(undefined);
+  const [reorderQuantity, setReorderQuantity] = useState<number | undefined>(undefined);
   const [primarySupplierId, setPrimarySupplierId] = useState<string>('');
   const [secondarySupplierId, setSecondarySupplierId] = useState<string>('');
   const [tertiarySupplierId, setTertiarySupplierId] = useState<string>('');
@@ -44,7 +45,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setFullBottleWeight(product.fullBottleWeight);
       setParLevel(product.parLevel);
       setOrderUnitSize(product.orderUnitSize);
-      setMinOrderUnits(product.minOrderUnits);
+      setMinOrderQuantity(product.minOrderQuantity);
+      setReorderQuantity(product.reorderQuantity);
       setPrimarySupplierId(product.primarySupplierId || '');
       setSecondarySupplierId(product.secondarySupplierId || '');
       setTertiarySupplierId(product.tertiarySupplierId || '');
@@ -55,7 +57,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setFullBottleWeight(undefined);
       setParLevel(undefined);
       setOrderUnitSize(undefined);
-      setMinOrderUnits(undefined);
+      setMinOrderQuantity(undefined);
+      setReorderQuantity(undefined);
       setPrimarySupplierId('');
       setSecondarySupplierId('');
       setTertiarySupplierId('');
@@ -71,7 +74,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
         fullBottleWeight: category === 'Spirits' ? fullBottleWeight : undefined,
         parLevel,
         orderUnitSize,
-        minOrderUnits,
+        minOrderQuantity,
+        reorderQuantity,
         primarySupplierId: primarySupplierId || undefined,
         secondarySupplierId: secondarySupplierId || undefined,
         tertiarySupplierId: tertiarySupplierId || undefined,
@@ -173,18 +177,22 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
                 <NumericInput id="par-level" value={parLevel || ''} onChange={(e) => setParLevel(parseNumber(e.target.value))} placeholder="e.g., 6" className="mt-1"/>
               </div>
                <div>
+                <label htmlFor="reorderQuantity" className="block text-sm font-medium text-gray-300">Reorder Quantity</label>
+                <NumericInput id="reorderQuantity" value={reorderQuantity || ''} onChange={(e) => setReorderQuantity(parseNumber(e.target.value))} placeholder="e.g., 12" className="mt-1"/>
+              </div>
+              <div>
                 <label htmlFor="order-unit-size" className="block text-sm font-medium text-gray-300">
                   Order Unit Size
                   <InfoTooltip text="The number of individual items in a single orderable unit. E.g., a case of Coke has a size of 24, a single bottle of whiskey has a size of 1." />
                 </label>
                 <NumericInput id="order-unit-size" value={orderUnitSize || ''} onChange={(e) => setOrderUnitSize(parseNumber(e.target.value))} placeholder="e.g., 24" className="mt-1"/>
               </div>
-              <div className="md:col-span-2">
-                <label htmlFor="min-order-units" className="block text-sm font-medium text-gray-300">
-                  Minimum Order Units
+              <div>
+                <label htmlFor="minOrderQuantity" className="block text-sm font-medium text-gray-300">
+                  Minimum Order Quantity (MOQ)
                   <InfoTooltip text="The minimum quantity of order units (e.g., cases, single bottles) that must be placed in a single order. E.g., if you must order by the case, the minimum is 1." />
                 </label>
-                <NumericInput id="min-order-units" value={minOrderUnits || ''} onChange={(e) => setMinOrderUnits(parseNumber(e.target.value))} placeholder="e.g., 1" className="mt-1"/>
+                <NumericInput id="minOrderQuantity" value={minOrderQuantity || ''} onChange={(e) => setMinOrderQuantity(parseNumber(e.target.value))} placeholder="e.g., 1" className="mt-1"/>
               </div>
             </div>
           </div>

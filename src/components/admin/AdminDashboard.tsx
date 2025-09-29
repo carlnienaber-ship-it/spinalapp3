@@ -7,6 +7,7 @@ import Header from '../ui/Header';
 import Button from '../ui/Button';
 import ProductManager from './ProductManager';
 import SupplierManager from './SupplierManager';
+import StockOrdering from './StockOrdering';
 
 type AdminDashboardProps = {
   products: Product[];
@@ -15,7 +16,7 @@ type AdminDashboardProps = {
   onBack: () => void;
 };
 
-type View = 'shifts' | 'products' | 'suppliers';
+type View = 'shifts' | 'products' | 'suppliers' | 'ordering';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoading, onProductsChange, onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
@@ -47,12 +48,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
     if (currentView === 'shifts') {
       fetchShifts();
     }
-    if (currentView === 'suppliers') {
+    if (currentView === 'suppliers' || currentView === 'products' || currentView === 'ordering') {
       fetchSuppliers();
-    }
-    // Products are fetched via prop, but we also need suppliers for the product view
-    if (currentView === 'products') {
-        fetchSuppliers();
     }
   }, [currentView, fetchShifts, fetchSuppliers]);
 
@@ -148,6 +145,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
         <Button onClick={() => setCurrentView('suppliers')} variant={currentView === 'suppliers' ? 'primary' : 'secondary'}>
           Manage Suppliers
         </Button>
+        <Button onClick={() => setCurrentView('ordering')} variant={currentView === 'ordering' ? 'primary' : 'secondary'}>
+          Stock Ordering
+        </Button>
         <Button onClick={onBack} variant="secondary">
           Back to Welcome
         </Button>
@@ -169,6 +169,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
           isLoading={loading && suppliers.length === 0}
           onSuppliersChange={fetchSuppliers}
         />
+      )}
+      {currentView === 'ordering' && (
+        <StockOrdering />
       )}
     </div>
   );

@@ -94,8 +94,33 @@ export type Product = {
   isActive: boolean;
   parLevel?: number;
   orderUnitSize?: number;
-  minOrderUnits?: number;
+  minOrderQuantity?: number;
+  reorderQuantity?: number;
   primarySupplierId?: string;
   secondarySupplierId?: string;
   tertiarySupplierId?: string;
+};
+
+// For Low Stock Ordering Report
+export type OrderItem = {
+  productName: string;
+  currentStock: number;
+  parLevel: number;
+  reorderQuantity: number;
+  orderUnitSize: number;
+  minOrderQuantity: number;
+  recommendedOrder: number;
+};
+
+export type SupplierOrder = {
+  supplierId: string;
+  supplierName: string;
+  supplierEmail: string;
+  items: OrderItem[];
+};
+
+export type LowStockReport = {
+  reportGeneratedAt: string;
+  lastShiftDate: string | null;
+  orders: SupplierOrder[];
 };

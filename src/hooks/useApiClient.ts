@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useCallback } from 'react';
-import { ShiftState, ShiftRecord, Product, Supplier } from '../types';
+import { ShiftState, ShiftRecord, Product, Supplier, LowStockReport } from '../types';
 
 const API_BASE_URL = '/.netlify/functions';
 
@@ -17,6 +17,7 @@ type ApiClient = {
   addSupplier: (supplier: Omit<Supplier, 'id' | 'isActive'>) => Promise<Supplier>;
   updateSupplier: (supplier: Supplier) => Promise<Supplier>;
   deactivateSupplier: (supplierId: string) => Promise<{ id: string }>;
+  getLowStockReport: () => Promise<LowStockReport>;
   loading: boolean;
   error: Error | null;
 };
@@ -108,6 +109,8 @@ export function useApiClient(): ApiClient {
     body: JSON.stringify({ id: supplierId }),
   }), [makeRequest]);
 
+  const getLowStockReport = useCallback(() => makeRequest<LowStockReport>('get-low-stock-report'), [makeRequest]);
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, loading, error };
+
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, loading, error };
 }
