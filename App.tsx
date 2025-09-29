@@ -60,19 +60,18 @@ const App: React.FC = () => {
     }
   }, [getProducts]);
   
+  // Effect 1: Fetch products on initial component mount.
   useEffect(() => {
-    const initializeState = async () => {
-        const fetchedProducts = await fetchProducts();
+    fetchProducts();
+  }, [fetchProducts]);
 
-        const savedState = localStorage.getItem('shiftState');
-        const parsedState = savedState ? JSON.parse(savedState) : null;
-
-        if (!parsedState || (parsedState.currentStep === 'welcome' && !parsedState.startTime)) {
-           setShiftState(generateInitialShiftState(fetchedProducts));
-        }
-    };
-    initializeState();
-  }, [fetchProducts, setShiftState]);
+  // Effect 2: Initialize shift state *after* products are successfully fetched,
+  // but only if the shift is new and hasn't started yet.
+  useEffect(() => {
+    if (products.length > 0 && shiftState.currentStep === 'welcome' && !shiftState.startTime) {
+      setShiftState(generateInitialShiftState(products));
+    }
+  }, [products, shiftState.currentStep, shiftState.startTime, setShiftState]);
 
 
   const isAdmin = useMemo(() => {
