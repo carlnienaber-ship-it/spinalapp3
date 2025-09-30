@@ -69,7 +69,9 @@ const App: React.FC = () => {
   // but only if the shift is new and hasn't started yet.
   useEffect(() => {
     if (products.length > 0 && shiftState.currentStep === 'welcome' && !shiftState.startTime) {
-      setShiftState(generateInitialShiftState(products));
+      // Use only active products for the shift
+      const activeProducts = products.filter(p => p.isActive);
+      setShiftState(generateInitialShiftState(activeProducts));
     }
   }, [products, shiftState.currentStep, shiftState.startTime, setShiftState]);
 
@@ -112,7 +114,8 @@ const App: React.FC = () => {
   }, [setShiftState]);
 
   const handleReset = useCallback(() => {
-    setShiftState(generateInitialShiftState(products));
+    const activeProducts = products.filter(p => p.isActive);
+    setShiftState(generateInitialShiftState(activeProducts));
     setShowNewDelivery(false);
     setAdminShowDashboard(true);
   }, [products, setShiftState]);
@@ -184,7 +187,7 @@ const App: React.FC = () => {
   };
 
   const allStockItems = useMemo(() => {
-    return products.map(p => p.name).sort();
+    return products.filter(p => p.isActive).map(p => p.name).sort();
   }, [products]);
 
   const renderStepContent = () => {

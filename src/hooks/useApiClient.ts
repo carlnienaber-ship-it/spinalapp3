@@ -11,6 +11,7 @@ type ApiClient = {
   addProduct: (product: Omit<Product, 'id' | 'isActive'>) => Promise<Product>;
   updateProduct: (product: Product) => Promise<Product>;
   deactivateProduct: (productId: string) => Promise<{ id: string }>;
+  activateProduct: (productId: string) => Promise<{ id: string }>;
   deleteProduct: (productId: string) => Promise<{ id: string }>;
   seedProducts: () => Promise<{ message: string; count: number }>;
   getSuppliers: () => Promise<Supplier[]>;
@@ -83,6 +84,11 @@ export function useApiClient(): ApiClient {
     body: JSON.stringify({ id: productId }),
   }), [makeRequest]);
 
+  const activateProduct = useCallback((productId: string) => makeRequest<{ id: string }>('activate-product', {
+    method: 'PUT',
+    body: JSON.stringify({ id: productId }),
+  }), [makeRequest]);
+
   const deleteProduct = useCallback((productId: string) => makeRequest<{ id: string }>('delete-product', {
     method: 'DELETE',
     body: JSON.stringify({ id: productId }),
@@ -114,5 +120,5 @@ export function useApiClient(): ApiClient {
   [makeRequest]);
 
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, loading, error };
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, activateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, loading, error };
 }

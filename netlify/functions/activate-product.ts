@@ -1,6 +1,5 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
-import { Product } from "../../src/types";
 import { verifyJwtAndCheckRole } from "../utils/auth";
 
 if (!admin.apps.length) {
@@ -23,7 +22,7 @@ const handler: Handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
     'Content-Type': 'application/json',
   };
   
@@ -32,33 +31,32 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    // Secure endpoint: Require a valid JWT from any authenticated user.
-    // An admin check is not strictly needed here as it's also used by the core app,
-    // but we can assume an admin role check for product management context.
-    // For now, any authenticated user can fetch products.
+    // Secure endpoint: Require a valid JWT with the 'Admin' role.
     await verifyJwtAndCheckRole(event, 'Admin');
     
-    // Fetch ALL products, both active and inactive. The frontend will handle filtering/styling.
-    const productsSnapshot = await db.collection('products').get();
-    const products: Product[] = [];
-    productsSnapshot.forEach(doc => {
-      products.push({ id: doc.id, ...doc.data() } as Product);
-    });
+    if (!event.body) throw new Error("Request body is missing.");
+    const { id } = JSON.parse(event.body);
+
+    if (!id) throw new Error("Product ID is missing.");
+    
+    const docRef = db.collection('products').doc(id);
+    await docRef.update({ isActive: true });
+    
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(products),
+      body: JSON.stringify({ id, message: 'Product activated successfully' }),
     };
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Error activating product:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-     if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
+    if (errorMessage.includes("Authorization") || errorMessage.includes("Access denied")) {
         return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized", details: errorMessage }) };
     }
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to fetch products.', details: errorMessage }),
+      body: JSON.stringify({ error: 'Failed to activate product.', details: errorMessage }),
     };
   }
 };

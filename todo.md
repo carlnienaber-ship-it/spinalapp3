@@ -112,6 +112,16 @@
   - The user must select a shift from the dropdown before the "Generate Report" button becomes active.
 - **(Completed)** **Task 34.3 (Frontend):** Update the frontend API call to pass the selected `shiftId` to the `get-low-stock-report` function.
 
+### Improved Product Deactivation Workflow (Phase 35 - Completed)
+- **(Completed)** **Objective:** Change the deactivation process so that inactive products remain visible in the admin list but are visually distinct, and provide a way to reactivate them.
+- **(Completed)** **Task 35.1 (Backend):** Modify the `get-products` serverless function to return *all* products (both active and inactive). The `isActive` flag will be used by the frontend to differentiate.
+- **(Completed)** **Task 35.2 (Backend):** Create a new `activate-product` serverless function that takes a `productId` and sets its `isActive` flag back to `true`.
+- **(Completed)** **Task 35.3 (Frontend):** Update the `ProductManager.tsx` component to:
+  - Display both active and inactive products.
+  - Apply distinct styling (e.g., greyed out) to inactive products.
+  - Conditionally render buttons: show a red "Deactivate" button for active products and a blue "Activate" button for inactive products.
+- **(Completed)** **Task 35.4 (Frontend):** Update the `useApiClient.ts` hook to include the new `activateProduct` function and connect the new UI button to it.
+
 ### Public Menu (Phase 25 - Not Started)
 - **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
 - **Task 25.2: Create `get-brewers-reserve` Function.** Build a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.

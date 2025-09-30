@@ -15,19 +15,30 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, suppliers, is
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const { deactivateProduct, deleteProduct, seedProducts, loading: mutationLoading, error } = useApiClient();
+  const { deactivateProduct, activateProduct, deleteProduct, seedProducts, loading: mutationLoading, error } = useApiClient();
 
   const suppliersById = useMemo(() => 
     new Map(suppliers.map(s => [s.id, s]))
   , [suppliers]);
 
   const handleDeactivate = async (productId: string) => {
-    if (window.confirm('Are you sure you want to deactivate this product? It will no longer appear in new stocktakes.')) {
+    if (window.confirm('Are you sure you want to deactivate this product? It will be hidden from new stocktakes but can be reactivated later.')) {
       try {
         await deactivateProduct(productId);
         onProductsChange(); // Refresh the list
       } catch (e) {
         console.error("Failed to deactivate product", e);
+      }
+    }
+  };
+  
+  const handleActivate = async (productId: string) => {
+    if (window.confirm('Are you sure you want to reactivate this product? It will appear in new stocktakes again.')) {
+      try {
+        await activateProduct(productId);
+        onProductsChange(); // Refresh the list
+      } catch (e) {
+        console.error("Failed to activate product", e);
       }
     }
   };
@@ -85,13 +96,18 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, suppliers, is
       "Brewer's Reserve": [],
     };
     products.forEach(p => {
-      if (groups[p.category]) {
+      if (p.category && groups[p.category]) {
         groups[p.category].push(p);
       }
     });
-    // Sort products alphabetically within each group
+    // Sort products: active first, then alphabetically within each group
     for (const category in groups) {
-        groups[category].sort((a, b) => a.name.localeCompare(b.name));
+        groups[category].sort((a, b) => {
+            if (a.isActive !== b.isActive) {
+                return a.isActive ? -1 : 1; // Active products come first
+            }
+            return a.name.localeCompare(b.name); // Then sort by name
+        });
     }
     return groups;
   }, [products]);
@@ -127,7 +143,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, suppliers, is
                     {items.map(product => {
                       const primarySupplier = product.primarySupplierId ? suppliersById.get(product.primarySupplierId) : null;
                       return (
-                        <li key={product.id} className="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-700 p-3 rounded-md">
+                        <li key={product.id} className={`flex flex-col sm:flex-row justify-between sm:items-center p-3 rounded-md transition-opacity ${!product.isActive ? 'opacity-50 bg-gray-900' : 'bg-gray-700'}`}>
                             <div>
                               <span className="font-semibold text-gray-100">{product.name}</span>
                               <p className="text-xs text-gray-400 mt-1">
@@ -136,7 +152,11 @@ const ProductManager: React.FC<ProductManagerProps> = ({ products, suppliers, is
                             </div>
                             <div className="flex gap-2 mt-2 sm:mt-0 flex-shrink-0">
                               <Button onClick={() => handleEdit(product)} size="sm" variant="secondary" disabled={mutationLoading}>Edit</Button>
-                              <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
+                              {product.isActive ? (
+                                <Button onClick={() => handleDeactivate(product.id)} size="sm" variant="destructive" disabled={mutationLoading}>Deactivate</Button>
+                              ) : (
+                                <Button onClick={() => handleActivate(product.id)} size="sm" variant="primary" disabled={mutationLoading}>Activate</Button>
+                              )}
                               <Button onClick={() => handleDelete(product.id, product.name)} size="sm" variant="destructive" disabled={mutationLoading}>Delete</Button>
                             </div>
                         </li>
