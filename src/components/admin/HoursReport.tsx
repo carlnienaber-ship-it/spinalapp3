@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
-import { HoursWorkedReport, UserHours } from '../../types';
+import { HoursWorkedReport } from '../../types';
 import Button from '../ui/Button';
 
 const HoursReport: React.FC = () => {

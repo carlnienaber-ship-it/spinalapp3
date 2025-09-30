@@ -1,7 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { verifyJwtAndCheckRole } from "../utils/auth";
-import { ShiftRecord, HoursWorkedReport, UserHours, DailyHours } from "../../src/types";
+import { ShiftRecord, HoursWorkedReport, DailyHours } from "../../src/types";
 
 if (!admin.apps.length) {
   try {
