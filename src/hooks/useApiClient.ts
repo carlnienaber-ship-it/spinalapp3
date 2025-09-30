@@ -17,7 +17,7 @@ type ApiClient = {
   addSupplier: (supplier: Omit<Supplier, 'id' | 'isActive'>) => Promise<Supplier>;
   updateSupplier: (supplier: Supplier) => Promise<Supplier>;
   deactivateSupplier: (supplierId: string) => Promise<{ id: string }>;
-  getLowStockReport: () => Promise<LowStockReport>;
+  getLowStockReport: (shiftId: string) => Promise<LowStockReport>;
   loading: boolean;
   error: Error | null;
 };
@@ -109,7 +109,9 @@ export function useApiClient(): ApiClient {
     body: JSON.stringify({ id: supplierId }),
   }), [makeRequest]);
 
-  const getLowStockReport = useCallback(() => makeRequest<LowStockReport>('get-low-stock-report'), [makeRequest]);
+  const getLowStockReport = useCallback((shiftId: string) => 
+    makeRequest<LowStockReport>(`get-low-stock-report?shiftId=${shiftId}`), 
+  [makeRequest]);
 
 
   return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, loading, error };

@@ -33,6 +33,16 @@ const handler: Handler = async (event) => {
 
   try {
     await verifyJwtAndCheckRole(event, 'Admin');
+    
+    const { shiftId } = event.queryStringParameters || {};
+
+    if (!shiftId) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'A shiftId query parameter is required.' }),
+      };
+    }
 
     // 1. Fetch all products and suppliers
     const productsSnapshot = await db.collection('products').where('isActive', '==', true).get();
@@ -41,25 +51,24 @@ const handler: Handler = async (event) => {
     const productsMap = new Map(products.map(p => [p.name, p]));
 
     const suppliersSnapshot = await db.collection('suppliers').where('isActive', '==', true).get();
-    const suppliersMap = new Map(suppliersSnapshot.docs.map(doc => [doc.id, doc.data() as Supplier]));
+    const suppliersMap = new Map(suppliersSnapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() } as Supplier]));
 
-    // 2. Fetch the most recent shift report
-    const shiftsSnapshot = await db.collection('shifts').orderBy('startTime', 'desc').limit(1).get();
+    // 2. Fetch the SPECIFIED shift report
+    const shiftDoc = await db.collection('shifts').doc(shiftId).get();
     
-    if (shiftsSnapshot.empty) {
-      const emptyReport: LowStockReport = {
-        reportGeneratedAt: new Date().toISOString(),
-        lastShiftDate: null,
-        orders: [],
-      };
-      return { statusCode: 200, headers, body: JSON.stringify(emptyReport) };
+    if (!shiftDoc.exists) {
+        return {
+            statusCode: 404,
+            headers,
+            body: JSON.stringify({ error: `Shift with ID ${shiftId} not found.` }),
+        };
     }
 
-    const lastShift = shiftsSnapshot.docs[0].data() as ShiftRecord;
+    const targetShift = shiftDoc.data() as ShiftRecord;
     const lowStockItems: OrderItem[] = [];
 
     // 3. Analyze closing stock against PAR levels
-    lastShift.closingStock.forEach(category => {
+    targetShift.closingStock.forEach(category => {
       category.items.forEach(stockItem => {
         const productInfo = productsMap.get(stockItem.name);
         if (!productInfo || typeof productInfo.parLevel !== 'number') {
@@ -69,18 +78,19 @@ const handler: Handler = async (event) => {
         const currentStock = (stockItem.foh || 0) + (stockItem.storeRoom || 0) + (stockItem.quantity || 0);
 
         if (currentStock <= productInfo.parLevel) {
+            // Provide defaults for robust calculation
             const reorderQty = productInfo.reorderQuantity || 1;
             const orderUnitSize = productInfo.orderUnitSize || 1;
             const minOrderQty = productInfo.minOrderQuantity || 1;
-            
-            // A simple logic for recommended order: just use the reorder quantity.
-            // A more complex logic could account for MOQ and unit sizes, but this is a good start.
-            let recommendedOrder = reorderQty;
-            
-            // If the reorder quantity is less than the MOQ, adjust to meet MOQ.
-            if (reorderQty < minOrderQty) {
-                recommendedOrder = minOrderQty;
-            }
+
+            // Calculate how many "order units" (e.g., cases) are needed to satisfy the reorder quantity, always rounding up.
+            const unitsNeededForReorder = Math.ceil(reorderQty / orderUnitSize);
+
+            // Determine the actual number of order units to recommend, ensuring it meets the MOQ.
+            const recommendedOrderUnits = Math.max(unitsNeededForReorder, minOrderQty);
+
+            // Convert the recommended order units back into the total number of individual items.
+            const recommendedOrder = recommendedOrderUnits * orderUnitSize;
 
             lowStockItems.push({
                 productName: productInfo.name,
@@ -118,7 +128,7 @@ const handler: Handler = async (event) => {
 
     const finalReport: LowStockReport = {
         reportGeneratedAt: new Date().toISOString(),
-        lastShiftDate: lastShift.endTime,
+        lastShiftDate: targetShift.endTime,
         orders: Array.from(ordersBySupplier.values()),
     };
 

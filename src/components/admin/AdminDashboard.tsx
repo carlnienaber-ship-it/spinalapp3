@@ -45,7 +45,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
   }, [getSuppliers]);
 
   useEffect(() => {
-    if (currentView === 'shifts') {
+    if (currentView === 'shifts' || currentView === 'ordering') {
       fetchShifts();
     }
     if (currentView === 'suppliers' || currentView === 'products' || currentView === 'ordering') {
@@ -171,7 +171,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
         />
       )}
       {currentView === 'ordering' && (
-        <StockOrdering />
+        <StockOrdering 
+          shifts={shifts}
+          shiftsLoading={loading && shifts.length === 0}
+        />
       )}
     </div>
   );

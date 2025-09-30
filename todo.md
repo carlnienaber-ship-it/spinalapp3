@@ -104,6 +104,14 @@
   - For each item, display: Current Stock, PAR Level, and the Recommended Order quantity.
   - Add a "Copy to Clipboard" button for each supplier's order list.
 
+### Shift-Specific Stock Ordering Report (Phase 34 - Completed)
+- **(Completed)** **Objective:** Modify the "Stock Ordering" report feature to allow admins to select a specific shift to generate the report from, instead of always using the most recent one.
+- **(Completed)** **Task 34.1 (Backend):** Update the `get-low-stock-report` serverless function to accept a `shiftId` as a parameter. The function will now fetch and process the specified shift document instead of defaulting to the latest one.
+- **(Completed)** **Task 34.2 (Frontend):** Modify the "Stock Ordering" page UI.
+  - Add a dropdown menu to list recent shifts (e.g., the last 20).
+  - The user must select a shift from the dropdown before the "Generate Report" button becomes active.
+- **(Completed)** **Task 34.3 (Frontend):** Update the frontend API call to pass the selected `shiftId` to the `get-low-stock-report` function.
+
 ### Public Menu (Phase 25 - Not Started)
 - **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
 - **Task 25.2: Create `get-brewers-reserve` Function.** Build a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
@@ -175,6 +183,11 @@
     - Add a new field: `reorderQuantity` (number) to represent the ideal order amount.
     - Update the `ProductForm` UI to reflect these changes, labeling the MOQ field as "Minimum Order Quantity (MOQ)".
 - **(Completed)** Task UP.3: Change browser tab title to "Spinäl Ǎpp".
+- **(Not Started)** Task UP.4: Add Keyboard Shortcuts to Product Form.
+  - **Objective:** Enhance the user experience in the "Add/Edit Product" modal.
+  - **Implementation:**
+    - In `ProductForm.tsx`, implement logic so that pressing the `Enter` key triggers the "Save Product" action.
+    - Implement logic so that pressing the `Escape` key triggers the "Cancel" action, closing the modal.
 
 ---
 
