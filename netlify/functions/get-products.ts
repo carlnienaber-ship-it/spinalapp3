@@ -32,11 +32,9 @@ const handler: Handler = async (event) => {
   }
 
   try {
-    // Secure endpoint: Require a valid JWT from any authenticated user.
-    // An admin check is not strictly needed here as it's also used by the core app,
-    // but we can assume an admin role check for product management context.
-    // For now, any authenticated user can fetch products.
-    await verifyJwtAndCheckRole(event, 'Admin');
+    // Secure endpoint: Require a valid JWT from ANY authenticated user.
+    // The role check is removed as both Normal Users and Admins need this data to start a shift.
+    await verifyJwtAndCheckRole(event);
     
     // Fetch ALL products, both active and inactive. The frontend will handle filtering/styling.
     const productsSnapshot = await db.collection('products').get();
