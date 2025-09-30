@@ -122,6 +122,11 @@
   - Conditionally render buttons: show a red "Deactivate" button for active products and a blue "Activate" button for inactive products.
 - **(Completed)** **Task 35.4 (Frontend):** Update the `useApiClient.ts` hook to include the new `activateProduct` function and connect the new UI button to it.
 
+### Enhanced Variance Report (Phase 36 - Completed)
+- **(Completed)** Task 36.1 (Data Calculation): Modify the `calculateShiftVariance` utility function. It must now return not only the final variance but also the raw opening and closing stock figures (total bottles, open bottle weights, or quantities) for each item.
+- **(Completed)** Task 36.2 (UI Update): Overhaul the `VarianceReport.tsx` component to display this new, detailed information. Each item should clearly show its Opening SOH, Closing SOH, and the final Variance in a structured, easy-to-read format.
+- **(Completed)** Task 36.3 (CSV Export Update): Enhance the CSV download functionality to include new columns for the raw opening and closing stock data, matching the updated UI.
+
 ### Public Menu (Phase 25 - Not Started)
 - **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
 - **Task 25.2: Create `get-brewers-reserve` Function.** Build a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
@@ -193,7 +198,7 @@
     - Add a new field: `reorderQuantity` (number) to represent the ideal order amount.
     - Update the `ProductForm` UI to reflect these changes, labeling the MOQ field as "Minimum Order Quantity (MOQ)".
 - **(Completed)** Task UP.3: Change browser tab title to "Spinäl Ǎpp".
-- **(Not Started)** Task UP.4: Add Keyboard Shortcuts to Product Form.
+- **(Completed)** Task UP.4: Add Keyboard Shortcuts to Product Form.
   - **Objective:** Enhance the user experience in the "Add/Edit Product" modal.
   - **Implementation:**
     - In `ProductForm.tsx`, implement logic so that pressing the `Enter` key triggers the "Save Product" action.

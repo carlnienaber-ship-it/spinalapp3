@@ -1,14 +1,35 @@
 import React from 'react';
-import { VarianceCategory } from '../../utils/varianceCalculator';
+import { VarianceCategory, StockOnHand } from '../../utils/varianceCalculator';
 import Button from '../ui/Button';
 
 type VarianceReportProps = {
   reportData: VarianceCategory[];
 };
 
+const formatSOH = (soh: StockOnHand): string => {
+    if (typeof soh.quantity === 'number') {
+      return `${soh.quantity} units`;
+    }
+    if (typeof soh.bottles === 'number') {
+      return `${soh.bottles} bottles, ${soh.weight || 0}g`;
+    }
+    return 'N/A';
+};
+
 const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
   const handleDownloadCsv = () => {
-    const headers = ['Category', 'Item Name', 'Variance', 'Unit'];
+    const headers = [
+      'Category', 
+      'Item Name', 
+      'Variance', 
+      'Unit', 
+      'Opening Bottles', 
+      'Opening Weight (g)',
+      'Opening Quantity',
+      'Closing Bottles',
+      'Closing Weight (g)',
+      'Closing Quantity'
+    ];
     const rows = reportData.flatMap(category =>
       category.items.map(item => {
         // A positive variance from the calculator means a loss (opening > closing),
@@ -19,8 +40,14 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
         return [
           category.categoryTitle, 
           item.name, 
-          reportVariance.toFixed(2), // Numeric value only
-          item.unit // Unit in a separate column
+          reportVariance.toFixed(2),
+          item.unit,
+          item.openingSOH.bottles ?? '',
+          item.openingSOH.weight ?? '',
+          item.openingSOH.quantity ?? '',
+          item.closingSOH.bottles ?? '',
+          item.closingSOH.weight ?? '',
+          item.closingSOH.quantity ?? '',
         ];
       })
     );
@@ -54,7 +81,7 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
        {reportData.map((category) => (
         <div key={category.categoryTitle}>
             <h3 className="text-xl font-semibold text-gray-200 mb-3">{category.categoryTitle}</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
                 {category.items.map(item => {
                     const isLoss = item.variance > 0;
                     const isSurplus = item.variance < 0;
@@ -62,11 +89,22 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
                     const colorClass = isLoss ? 'text-red-400' : isSurplus ? 'text-blue-400' : 'text-gray-100';
                     
                     return (
-                        <li key={item.name} className="flex justify-between items-center bg-gray-800 p-3 rounded-md">
-                            <span className="text-gray-300">{item.name}</span>
-                            <span className={`font-bold text-lg ${colorClass}`}>
-                                {isLoss ? '-' : isSurplus ? '+' : ''}{Math.abs(item.variance).toFixed(1)} {item.unit}
-                            </span>
+                        <li key={item.name} className="bg-gray-800 p-3 rounded-md space-y-2">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-gray-100">{item.name}</span>
+                                <div className="text-right">
+                                    <p className="font-bold text-lg">
+                                        <span className={colorClass}>
+                                            {isLoss ? '-' : isSurplus ? '+' : ''}{Math.abs(item.variance).toFixed(1)} {item.unit}
+                                        </span>
+                                    </p>
+                                    <p className="text-xs text-gray-400">Variance</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-400 border-t border-gray-700 pt-2">
+                                <span>Opening SOH: <strong className="text-gray-300 font-normal">{formatSOH(item.openingSOH)}</strong></span>
+                                <span>Closing SOH: <strong className="text-gray-300 font-normal">{formatSOH(item.closingSOH)}</strong></span>
+                            </div>
                         </li>
                     );
                 })}

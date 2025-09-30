@@ -64,6 +64,21 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setTertiarySupplierId('');
     }
   }, [product]);
+  
+  // Effect for keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+      // 'Enter' key for submission is handled by the form's default `onSubmit` behavior.
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

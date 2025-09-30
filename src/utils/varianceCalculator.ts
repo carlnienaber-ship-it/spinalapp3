@@ -1,9 +1,17 @@
 import { ShiftRecord } from '../types';
 
+export type StockOnHand = {
+  bottles?: number;
+  weight?: number;
+  quantity?: number;
+};
+
 export type VarianceItem = {
   name: string;
   variance: number;
   unit: 'units' | 'shots';
+  openingSOH: StockOnHand;
+  closingSOH: StockOnHand;
 };
 
 export type VarianceCategory = {
@@ -33,6 +41,8 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
 
       let variance: number = 0;
       let unit: 'units' | 'shots' = 'units';
+      const openingSOH: StockOnHand = {};
+      const closingSOH: StockOnHand = {};
 
       // Logic for Spirits (mass-based calculation)
       if (openingCategory.title === 'Spirits') {
@@ -52,17 +62,29 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
         
         variance = finalVarianceInGrams / SHOT_WEIGHT_GRAMS;
 
+        // Capture SOH details
+        openingSOH.bottles = openingFullBottles;
+        openingSOH.weight = openingItem.openBottleWeight || 0;
+        closingSOH.bottles = closingFullBottles;
+        closingSOH.weight = closingItem.openBottleWeight || 0;
+
       } else { // Logic for simple items (unit-based calculation)
         const openingCount = (openingItem.foh || 0) + (openingItem.storeRoom || 0) + (openingItem.quantity || 0);
         const closingCount = (closingItem.foh || 0) + (closingItem.storeRoom || 0) + (closingItem.quantity || 0);
         
         variance = (openingCount + deliveryQty) - closingCount;
+
+        // Capture SOH details
+        openingSOH.quantity = openingCount;
+        closingSOH.quantity = closingCount;
       }
       
       categoryVariance.items.push({
         name: openingItem.name,
         variance,
         unit,
+        openingSOH,
+        closingSOH,
       });
     });
     
