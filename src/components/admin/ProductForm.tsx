@@ -3,6 +3,7 @@ import { Product, Supplier } from '../../types';
 import { useApiClient } from '../../hooks/useApiClient';
 import Button from '../ui/Button';
 import NumericInput from '../ui/NumericInput';
+import Toggle from '../ui/Toggle';
 
 type ProductFormProps = {
   product: Product | null;
@@ -35,6 +36,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
   const [primarySupplierId, setPrimarySupplierId] = useState<string>('');
   const [secondarySupplierId, setSecondarySupplierId] = useState<string>('');
   const [tertiarySupplierId, setTertiarySupplierId] = useState<string>('');
+  const [isBrewersReserve, setIsBrewersReserve] = useState(false);
+  const [tastingNotes, setTastingNotes] = useState<string>('');
+  const [abv, setAbv] = useState<number | undefined>(undefined);
   
   const { addProduct, updateProduct, loading, error } = useApiClient();
 
@@ -50,6 +54,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setPrimarySupplierId(product.primarySupplierId || '');
       setSecondarySupplierId(product.secondarySupplierId || '');
       setTertiarySupplierId(product.tertiarySupplierId || '');
+      setIsBrewersReserve(product.isBrewersReserve || false);
+      setTastingNotes(product.tastingNotes || '');
+      setAbv(product.abv);
     } else {
       // Reset form for new product
       setName('');
@@ -62,6 +69,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setPrimarySupplierId('');
       setSecondarySupplierId('');
       setTertiarySupplierId('');
+      setIsBrewersReserve(false);
+      setTastingNotes('');
+      setAbv(undefined);
     }
   }, [product]);
   
@@ -94,6 +104,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
         primarySupplierId: primarySupplierId || undefined,
         secondarySupplierId: secondarySupplierId || undefined,
         tertiarySupplierId: tertiarySupplierId || undefined,
+        isBrewersReserve,
+        tastingNotes: isBrewersReserve ? tastingNotes : undefined,
+        abv: isBrewersReserve ? abv : undefined,
       };
       if (product) {
         await updateProduct({ ...product, ...productData });
@@ -106,7 +119,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
     }
   };
 
-  const parseNumber = (value: string) => parseInt(value, 10) || undefined;
+  const parseNumber = (value: string) => parseFloat(value) || undefined;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -153,6 +166,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
               </div>
             )}
           </div>
+          
+          {/* Brewer's Reserve Details */}
+           <div className="p-4 border border-gray-700 rounded-md">
+            <h3 className="text-lg font-semibold text-gray-200 mb-3">Public Menu Details</h3>
+             <Toggle 
+                id="is-brewers-reserve"
+                label="Brewer's Reserve Item"
+                checked={isBrewersReserve}
+                onChange={setIsBrewersReserve}
+             />
+             {isBrewersReserve && (
+                <div className="space-y-4 mt-4 pt-4 border-t border-gray-700">
+                     <div>
+                        <label htmlFor="abv" className="block text-sm font-medium text-gray-300">ABV (%)</label>
+                        <NumericInput id="abv" value={abv || ''} onChange={(e) => setAbv(parseNumber(e.target.value))} placeholder="e.g., 5.5" step="0.1" className="mt-1"/>
+                    </div>
+                    <div>
+                        <label htmlFor="tastingNotes" className="block text-sm font-medium text-gray-300">Tasting Notes</label>
+                        <textarea id="tastingNotes" value={tastingNotes} onChange={(e) => setTastingNotes(e.target.value)} rows={3} placeholder="e.g., Notes of citrus, pine, and a hint of caramel." className="mt-1 block w-full rounded-md bg-gray-900 border-gray-700 px-3 py-2 text-gray-50 focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+             )}
+           </div>
 
           {/* Supplier Assignment */}
           <div className="p-4 border border-gray-700 rounded-md">

@@ -52,6 +52,10 @@ const handler: Handler = async (event) => {
       primarySupplierId: productData.primarySupplierId ?? null,
       secondarySupplierId: productData.secondarySupplierId ?? null,
       tertiarySupplierId: productData.tertiarySupplierId ?? null,
+      isBrewersReserve: productData.isBrewersReserve ?? false,
+      tastingNotes: productData.tastingNotes ?? null,
+      // FIX: Corrected typo from productDara to productData.
+      abv: productData.abv ?? null,
     };
 
     const docRef = db.collection('products').doc(id);

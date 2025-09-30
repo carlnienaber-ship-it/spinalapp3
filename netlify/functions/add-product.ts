@@ -48,6 +48,9 @@ const handler: Handler = async (event) => {
         primarySupplierId: productData.primarySupplierId ?? null,
         secondarySupplierId: productData.secondarySupplierId ?? null,
         tertiarySupplierId: productData.tertiarySupplierId ?? null,
+        isBrewersReserve: productData.isBrewersReserve ?? false,
+        tastingNotes: productData.tastingNotes ?? null,
+        abv: productData.abv ?? null,
     };
     const docRef = await db.collection('products').add(newProduct);
     return {

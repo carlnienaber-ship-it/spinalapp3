@@ -99,6 +99,9 @@ export type Product = {
   primarySupplierId?: string;
   secondarySupplierId?: string;
   tertiarySupplierId?: string;
+  isBrewersReserve?: boolean;
+  tastingNotes?: string;
+  abv?: number;
 };
 
 // For Low Stock Ordering Report

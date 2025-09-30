@@ -127,12 +127,37 @@
 - **(Completed)** Task 36.2 (UI Update): Overhaul the `VarianceReport.tsx` component to display this new, detailed information. Each item should clearly show its Opening SOH, Closing SOH, and the final Variance in a structured, easy-to-read format.
 - **(Completed)** Task 36.3 (CSV Export Update): Enhance the CSV download functionality to include new columns for the raw opening and closing stock data, matching the updated UI.
 
-### Public Menu (Phase 25 - Not Started)
-- **Task 25.1: Update Product Data Model.** Add new optional fields to the `products` collection for `tastingNotes`, `abv`, and a boolean `isBrewersReserve`.
-- **Task 25.2: Create `get-brewers-reserve` Function.** Build a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
-- **Task 25.3: Update Product Management UI.** Enhance the Add/Edit Product form in the admin panel to include fields for `tastingNotes` and `abv` when the "Brewer's Reserve" category is selected.
-- **Task 25.4: Implement Routing for Public Page.** Set up a new route in the React application (e.g., `/brewers-reserve`) that can be accessed without logging in.
-- **Task 25.5: Build Public Menu Page Component.** Create a new, visually distinct component to display the Brewer's Reserve beers and their tasting notes, fetched from the new public function. This page will be linked to by the QR code.
+### Public Menu (Phase 25 - Completed)
+- **(Completed)** Task 25.1: Update Product Data Model. Added new optional fields to the `products` collection for `tastingNotes` (string), `abv` (number), and a boolean `isBrewersReserve`.
+- **(Completed)** Task 25.2: Create `get-brewers-reserve` Function. Built a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
+- **(Completed)** Task 25.3: Update Product Management UI. Enhanced the Add/Edit Product form in the admin panel to include a toggle for `isBrewersReserve` and conditional fields for `tastingNotes` and `abv`.
+- **(Completed)** Task 25.4: Implement Routing for Public Page. Set up a new route in the React application (e.g., `/brewers-reserve`) that can be accessed without logging in.
+- **(Completed)** Task 25.5: Build Public Menu Page Component. Created a new, visually distinct component to display the Brewer's Reserve beers and their tasting notes, fetched from the new public function.
+
+### Yoco Integration - Setup & Authentication (Phase 37 - Not Started)
+- **Objective:** Create a secure, one-time setup process for connecting the app to the Yoco POS API via OAuth 2.0.
+- **Task 37.1 (Backend):** Add `YOCO_CLIENT_ID` and `YOCO_CLIENT_SECRET` as secure environment variables in Netlify.
+- **Task 37.2 (Backend):** Create a new `app_config` collection in Firestore to securely store encrypted Yoco API tokens (access token, refresh token).
+- **Task 37.3 (Backend):** Create an `initiate-yoco-oauth` serverless function that generates the correct Yoco authorization URL for the user to be redirected to.
+- **Task 37.4 (Backend):** Create a `handle-yoco-oauth-callback` function. This function will receive the authorization code from Yoco, exchange it for tokens, encrypt them, and save them to the `app_config` collection.
+- **Task 37.5 (Frontend):** Create a new "Integrations" page in the Admin Dashboard.
+- **Task 37.6 (Frontend):** Add a "Connect to Yoco" button on the new page that calls `initiate-yoco-oauth` and redirects the admin user to the Yoco authorization URL.
+- **Task 37.7 (Frontend):** Implement a new callback route (e.g., `/admin/integrations/yoco/callback`) to handle the user's return from Yoco, extract the authorization code, and send it to the `handle-yoco-oauth-callback` backend function.
+- **Task 37.8 (Frontend):** The "Integrations" page should display the current connection status (e.g., "Connected" or "Not Connected").
+
+### Yoco Integration - Fetching & Displaying Sales Data (Phase 38 - Not Started)
+- **Objective:** Use the established Yoco connection to fetch sales data for a specific shift and display it in the variance report.
+- **Task 38.1 (Backend):** Create a `get-yoco-sales` serverless function. This function will:
+  - Retrieve and decrypt the stored Yoco tokens.
+  - Handle the token refresh logic if the access token is expired.
+  - Call the Yoco API (`GET /v1/orders/`) using the shift's start and end times as filters.
+  - Process the order data to create a summarized count of each product sold.
+  - Return the processed sales data to the frontend.
+- **Task 38.2 (Data Model):** Update the frontend `VarianceItem` type to include new fields like `posSales` and `finalDiscrepancy`.
+- **Task 38.3 (Frontend):** Modify the `ShiftDetail.tsx` component. When generating a variance report, it should now also call the `get-yoco-sales` function.
+- **Task 38.4 (Data Calculation):** Update the `varianceCalculator.ts` utility to accept the POS sales data and calculate the final discrepancy (`Calculated Usage - POS Sales`).
+- **Task 38.5 (UI Update):** Overhaul the `VarianceReport.tsx` component to display the new data. Add columns for "POS Sales" and "Final Discrepancy" to provide a complete picture of stock movement.
+- **Task 38.6 (CSV Export Update):** Add the new `POS Sales` and `Final Discrepancy` columns to the CSV export file.
 
 ### Geofence Exit Notification (Phase 12 - On Hold)
 - **Task 12.1: Implement Geofence-Exit Notification.** Create a system that detects if a user leaves the geofence without clocking out and sends a browser notification with an audible prompt. (Note: This has technical limitations and will only work if the app is in the foreground).
