@@ -49,7 +49,10 @@ export function useApiClient(): ApiClient {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({ error: 'An unknown error occurred' }));
-        throw new Error(errorBody.error || `Request failed with status ${response.status}`);
+        const errorMessage = errorBody.details 
+          ? `${errorBody.error} ${errorBody.details}` 
+          : (errorBody.error || `Request failed with status ${response.status}`);
+        throw new Error(errorMessage);
       }
       
       return response.json() as Promise<T>;
