@@ -127,6 +127,22 @@
 - **(Completed)** Task 36.2 (UI Update): Overhaul the `VarianceReport.tsx` component to display this new, detailed information. Each item should clearly show its Opening SOH, Closing SOH, and the final Variance in a structured, easy-to-read format.
 - **(Completed)** Task 36.3 (CSV Export Update): Enhance the CSV download functionality to include new columns for the raw opening and closing stock data, matching the updated UI.
 
+### User Hours Worked Report (Phase 39 - Completed)
+- **(Completed)** **Objective:** Create a new report in the Admin Dashboard to calculate and display total hours worked by each user within a selectable date range, including a daily breakdown.
+- **(Completed)** **Task 39.1 (Backend):** Create a new, admin-only serverless function `get-hours-worked-report`. This function must:
+  - Accept `startDate` and `endDate` query parameters.
+  - Query Firestore for all shifts where `startTime` is within the specified range.
+  - For each valid shift, calculate the duration between `endTime` and `startTime`.
+  - Aggregate the total duration for each unique user, and also create a breakdown of hours for each specific day.
+  - Return a JSON object mapping user emails to their report, which includes `userName`, `totalHoursWorked`, and a breakdown of hours worked for each specific day in the range.
+- **(Completed)** **Task 39.2 (Frontend):** Add a new `getHoursWorkedReport` function to the `useApiClient` hook to call the new backend endpoint.
+- **(Completed)** **Task 39.3 (Frontend):** Add a new "Hours Report" button and view to the `AdminDashboard`.
+- **(Completed)** **Task 39.4 (Frontend):** Create a new `HoursReport.tsx` component that includes:
+  - A start date and end date picker.
+  - A "Generate Report" button that is disabled until both dates are selected.
+  - A detailed table to display the results. Columns will represent each day in the selected date range, rows will represent each user, showing their hours worked per day and a final total for the period.
+- **(Completed)** **Task 39.5 (Frontend):** Add a "Download CSV" button to the hours report table to export the displayed data.
+
 ### Public Menu (Phase 25 - Completed)
 - **(Completed)** Task 25.1: Update Product Data Model. Added new optional fields to the `products` collection for `tastingNotes` (string), `abv` (number), and a boolean `isBrewersReserve`.
 - **(Completed)** Task 25.2: Create `get-brewers-reserve` Function. Built a new, public serverless function (no auth required) to fetch all active "Brewer's Reserve" products.
@@ -160,7 +176,7 @@
 - **Task 38.6 (CSV Export Update):** Add the new `POS Sales` and `Final Discrepancy` columns to the CSV export file.
 
 ### Geofence Exit Notification (Phase 12 - On Hold)
-- **Task 12.1: Implement Geofence-Exit Notification.** Create a system that detects if a user leaves the geofence without clocking out and sends a browser notification with an audible prompt. (Note: This has technical limitations and will only work if the app is in the foreground).
+- **Task 12.1: Implement Geofence-Exit Notification.** Create a system that detects if a user leaves the geofence without clocking out and sends a browser notification with an audible prompt. (Note: This has technical limitations and only works if the app is in the foreground).
 
 ---
 

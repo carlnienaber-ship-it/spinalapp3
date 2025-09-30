@@ -8,6 +8,7 @@ import Button from '../ui/Button';
 import ProductManager from './ProductManager';
 import SupplierManager from './SupplierManager';
 import StockOrdering from './StockOrdering';
+import HoursReport from './HoursReport';
 
 type AdminDashboardProps = {
   products: Product[];
@@ -16,7 +17,7 @@ type AdminDashboardProps = {
   onBack: () => void;
 };
 
-type View = 'shifts' | 'products' | 'suppliers' | 'ordering';
+type View = 'shifts' | 'products' | 'suppliers' | 'ordering' | 'hours';
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoading, onProductsChange, onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
@@ -148,6 +149,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
         <Button onClick={() => setCurrentView('ordering')} variant={currentView === 'ordering' ? 'primary' : 'secondary'}>
           Stock Ordering
         </Button>
+        <Button onClick={() => setCurrentView('hours')} variant={currentView === 'hours' ? 'primary' : 'secondary'}>
+          Hours Report
+        </Button>
         <Button onClick={onBack} variant="secondary">
           Back to Welcome
         </Button>
@@ -176,6 +180,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
           shiftsLoading={loading && shifts.length === 0}
         />
       )}
+      {currentView === 'hours' && <HoursReport />}
     </div>
   );
 };
