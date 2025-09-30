@@ -127,21 +127,20 @@
 - **(Completed)** Task 36.2 (UI Update): Overhaul the `VarianceReport.tsx` component to display this new, detailed information. Each item should clearly show its Opening SOH, Closing SOH, and the final Variance in a structured, easy-to-read format.
 - **(Completed)** Task 36.3 (CSV Export Update): Enhance the CSV download functionality to include new columns for the raw opening and closing stock data, matching the updated UI.
 
-### User Hours Worked Report (Phase 39 - Completed)
-- **(Completed)** **Objective:** Create a new report in the Admin Dashboard to calculate and display total hours worked by each user within a selectable date range, including a daily breakdown.
-- **(Completed)** **Task 39.1 (Backend):** Create a new, admin-only serverless function `get-hours-worked-report`. This function must:
-  - Accept `startDate` and `endDate` query parameters.
-  - Query Firestore for all shifts where `startTime` is within the specified range.
-  - For each valid shift, calculate the duration between `endTime` and `startTime`.
-  - Aggregate the total duration for each unique user, and also create a breakdown of hours for each specific day.
-  - Return a JSON object mapping user emails to their report, which includes `userName`, `totalHoursWorked`, and a breakdown of hours worked for each specific day in the range.
-- **(Completed)** **Task 39.2 (Frontend):** Add a new `getHoursWorkedReport` function to the `useApiClient` hook to call the new backend endpoint.
-- **(Completed)** **Task 39.3 (Frontend):** Add a new "Hours Report" button and view to the `AdminDashboard`.
-- **(Completed)** **Task 39.4 (Frontend):** Create a new `HoursReport.tsx` component that includes:
-  - A start date and end date picker.
-  - A "Generate Report" button that is disabled until both dates are selected.
-  - A detailed table to display the results. Columns will represent each day in the selected date range, rows will represent each user, showing their hours worked per day and a final total for the period.
-- **(Completed)** **Task 39.5 (Frontend):** Add a "Download CSV" button to the hours report table to export the displayed data.
+### Detailed User Hours Worked Report (Phase 39 - In Progress)
+- **Objective:** Overhaul the hours report to follow a new, user-centric workflow: select a user, then a date range, to generate a detailed report.
+- **Task 39.1 (Backend):** Update the `get-hours-worked-report` serverless function to accept a `userEmail` in addition to `startDate` and `endDate`. The Firestore query must be updated to filter by this email for efficiency.
+- **Task 39.2 (Backend):** Change the function's return data. Instead of an aggregated summary of all users, it must return a detailed object for the selected user, containing their `totalHours` and a chronological list of every `shift` they worked, including the precise `startTime`, `endTime`, and calculated `hours` for each shift.
+- **Task 39.3 (Frontend):** Update the `useApiClient` hook. The `getHoursWorkedReport` function signature must be changed to accept `userEmail`, `startDate`, and `endDate`, and its return type must be updated to match the new detailed report structure.
+- **Task 39.4 (Frontend):** In `AdminDashboard.tsx`, derive a list of unique users from the fetched shifts data and pass it as a prop to the `HoursReport` component.
+- **Task 39.5 (Frontend):** Overhaul the `HoursReport.tsx` component UI.
+  - Replace the matrix view with a new workflow:
+    1. A dropdown to select a user from the new prop.
+    2. Start and end date pickers.
+    3. A "Generate Report" button, disabled until all three fields are selected.
+  - The report display will be a table with columns: `Date`, `Clock In Time`, `Clock Out Time`, `Daily Hours`.
+  - A summary of `Total Hours` for the period will be displayed below the table.
+- **Task 39.6 (Frontend):** Update the "Download CSV" function in `HoursReport.tsx` to export the new, detailed, single-user data format.
 
 ### Public Menu (Phase 25 - Completed)
 - **(Completed)** Task 25.1: Update Product Data Model. Added new optional fields to the `products` collection for `tastingNotes` (string), `abv` (number), and a boolean `isBrewersReserve`.
