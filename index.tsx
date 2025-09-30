@@ -13,6 +13,7 @@ const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 const rootElement = document.getElementById('root')!;
 const root = ReactDOM.createRoot(rootElement);
 
+// Use standard path-based routing. The `_redirects` file will handle server-side routing for the SPA.
 const isPublicRoute = window.location.pathname === '/brewers-reserve';
 
 if (isPublicRoute) {

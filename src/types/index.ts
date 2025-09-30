@@ -1,16 +1,18 @@
-export type TaskType = 'toggle' | 'radio' | 'radio_text' | 'toggle_text';
+// src/types/index.ts
 
+// Basic types for tasks
 export type Task = {
   id: string;
   text: string;
-  type: TaskType;
+  type: 'toggle' | 'radio' | 'radio_text' | 'toggle_text';
   completed: boolean;
-  value?: string;
   options?: string[];
+  value?: string;
   notes?: string;
   description?: string;
 };
 
+// Types for stock management
 export type StockItem = {
   name: string;
   foh?: number;
@@ -28,28 +30,24 @@ export type StockCategory = {
 
 export type NewStockDeliveryItem = {
   id: string;
-  name: string;
+  name:string;
   quantity: number;
 };
 
-export type ShiftFeedback = {
-  rating: 'Great' | 'Normal' | 'Bad' | null;
-  comment: string;
-};
-
-export type ShiftStep =
-  | 'welcome'
-  | 'openingTasks'
-  | 'openingStock'
-  | 'midShift'
+// Types for shift progression
+export type ShiftStep = 
+  | 'welcome' 
+  | 'openingTasks' 
+  | 'openingStock' 
+  | 'midShift' 
   | 'newStockDelivery'
-  | 'closingTasks'
-  | 'closingStock'
-  | 'feedback'
+  | 'closingStock' 
+  | 'closingTasks' 
+  | 'feedback' 
   | 'submitting'
-  | 'complete'
-  | 'admin_dashboard';
+  | 'complete';
 
+// Main shift state object
 export type ShiftState = {
   currentStep: ShiftStep;
   startTime: string | null;
@@ -59,7 +57,10 @@ export type ShiftState = {
   openingStock: StockCategory[];
   closingStock: StockCategory[];
   newStockDeliveries: NewStockDeliveryItem[];
-  shiftFeedback: ShiftFeedback;
+  shiftFeedback: {
+    rating: 'Great' | 'Normal' | 'Bad' | null;
+    comment: string;
+  };
   user?: {
     name?: string;
     email?: string;
@@ -67,25 +68,12 @@ export type ShiftState = {
   };
 };
 
-// For admin dashboard
+// Shift record as stored in the database
 export type ShiftRecord = ShiftState & {
   id: string;
 };
 
-// For supplier management
-export type Supplier = {
-  id: string;
-  supplierName: string;
-  supplierEmail: string;
-  contactPerson?: string;
-  address?: string;
-  telephone?: string;
-  liquorLicenseNumber?: string;
-  bankDetails?: string;
-  isActive: boolean;
-};
-
-// For product management
+// Product information
 export type Product = {
   id: string;
   name: string;
@@ -102,28 +90,42 @@ export type Product = {
   isBrewersReserve?: boolean;
   tastingNotes?: string;
   abv?: number;
+  price?: number;
 };
 
-// For Low Stock Ordering Report
+// Supplier information
+export type Supplier = {
+    id: string;
+    supplierName: string;
+    supplierEmail: string;
+    contactPerson?: string;
+    address?: string;
+    telephone?: string;
+    liquorLicenseNumber?: string;
+    bankDetails?: string;
+    isActive: boolean;
+};
+
+// Types for stock ordering report
 export type OrderItem = {
-  productName: string;
-  currentStock: number;
-  parLevel: number;
-  reorderQuantity: number;
-  orderUnitSize: number;
-  minOrderQuantity: number;
-  recommendedOrder: number;
+    productName: string;
+    currentStock: number;
+    parLevel: number;
+    reorderQuantity: number;
+    orderUnitSize: number;
+    minOrderQuantity: number;
+    recommendedOrder: number;
 };
 
 export type SupplierOrder = {
-  supplierId: string;
-  supplierName: string;
-  supplierEmail: string;
-  items: OrderItem[];
+    supplierId: string;
+    supplierName: string;
+    supplierEmail: string;
+    items: OrderItem[];
 };
 
 export type LowStockReport = {
-  reportGeneratedAt: string;
-  lastShiftDate: string | null;
-  orders: SupplierOrder[];
+    reportGeneratedAt: string;
+    lastShiftDate: string | null;
+    orders: SupplierOrder[];
 };

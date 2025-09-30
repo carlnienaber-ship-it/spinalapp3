@@ -56,6 +56,7 @@ const handler: Handler = async (event) => {
       tastingNotes: productData.tastingNotes ?? null,
       // FIX: Corrected typo from productDara to productData.
       abv: productData.abv ?? null,
+      price: productData.price ?? null,
     };
 
     const docRef = db.collection('products').doc(id);

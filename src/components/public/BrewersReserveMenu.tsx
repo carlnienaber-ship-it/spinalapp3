@@ -56,11 +56,16 @@ const BrewersReserveMenu: React.FC = () => {
             <div className="space-y-8">
               {menuItems.map(item => (
                 <div key={item.id} className="bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-yellow-500">
-                  <div className="flex justify-between items-baseline">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
                     <h2 className="text-2xl font-bold text-gray-50">{item.name}</h2>
-                    {item.abv && (
-                      <p className="text-lg font-semibold text-yellow-400">{item.abv}% ABV</p>
-                    )}
+                    <div className="flex items-baseline gap-4 mt-2 sm:mt-0">
+                      {item.abv != null && (
+                        <p className="text-lg font-semibold text-yellow-400">{item.abv}% ABV</p>
+                      )}
+                      {item.price != null && (
+                        <p className="text-xl font-bold text-emerald-400">R {item.price.toFixed(2)}</p>
+                      )}
+                    </div>
                   </div>
                   {item.tastingNotes && (
                     <p className="text-gray-300 mt-3 italic">

@@ -51,6 +51,7 @@ const handler: Handler = async (event) => {
         isBrewersReserve: productData.isBrewersReserve ?? false,
         tastingNotes: productData.tastingNotes ?? null,
         abv: productData.abv ?? null,
+        price: productData.price ?? null,
     };
     const docRef = await db.collection('products').add(newProduct);
     return {

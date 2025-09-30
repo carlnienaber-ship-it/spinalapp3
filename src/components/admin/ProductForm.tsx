@@ -39,6 +39,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
   const [isBrewersReserve, setIsBrewersReserve] = useState(false);
   const [tastingNotes, setTastingNotes] = useState<string>('');
   const [abv, setAbv] = useState<number | undefined>(undefined);
+  const [price, setPrice] = useState<number | undefined>(undefined);
   
   const { addProduct, updateProduct, loading, error } = useApiClient();
 
@@ -57,6 +58,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setIsBrewersReserve(product.isBrewersReserve || false);
       setTastingNotes(product.tastingNotes || '');
       setAbv(product.abv);
+      setPrice(product.price);
     } else {
       // Reset form for new product
       setName('');
@@ -72,6 +74,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       setIsBrewersReserve(false);
       setTastingNotes('');
       setAbv(undefined);
+      setPrice(undefined);
     }
   }, [product]);
   
@@ -107,6 +110,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
         isBrewersReserve,
         tastingNotes: isBrewersReserve ? tastingNotes : undefined,
         abv: isBrewersReserve ? abv : undefined,
+        price: isBrewersReserve ? price : undefined,
       };
       if (product) {
         await updateProduct({ ...product, ...productData });
@@ -178,9 +182,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
              />
              {isBrewersReserve && (
                 <div className="space-y-4 mt-4 pt-4 border-t border-gray-700">
-                     <div>
-                        <label htmlFor="abv" className="block text-sm font-medium text-gray-300">ABV (%)</label>
-                        <NumericInput id="abv" value={abv || ''} onChange={(e) => setAbv(parseNumber(e.target.value))} placeholder="e.g., 5.5" step="0.1" className="mt-1"/>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-300">Price (R)</label>
+                            <NumericInput id="price" value={price || ''} onChange={(e) => setPrice(parseNumber(e.target.value))} placeholder="e.g., 45.50" step="0.01" className="mt-1"/>
+                        </div>
+                        <div>
+                            <label htmlFor="abv" className="block text-sm font-medium text-gray-300">ABV (%)</label>
+                            <NumericInput id="abv" value={abv || ''} onChange={(e) => setAbv(parseNumber(e.target.value))} placeholder="e.g., 5.5" step="0.1" className="mt-1"/>
+                        </div>
                     </div>
                     <div>
                         <label htmlFor="tastingNotes" className="block text-sm font-medium text-gray-300">Tasting Notes</label>
