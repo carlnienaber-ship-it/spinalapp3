@@ -1,7 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import admin from 'firebase-admin';
 import { verifyJwtAndCheckRole } from "../utils/auth";
-import { ShiftRecord, HoursWorkedReport, DailyHours } from "../../src/types";
+import { ShiftRecord, DetailedHoursWorkedReport, ShiftDetailRecord } from "../../src/types";
 
 if (!admin.apps.length) {
   try {
@@ -34,58 +34,56 @@ const handler: Handler = async (event) => {
   try {
     await verifyJwtAndCheckRole(event, 'Admin');
     
-    const { startDate, endDate } = event.queryStringParameters || {};
+    const { userEmail, startDate, endDate } = event.queryStringParameters || {};
 
-    if (!startDate || !endDate) {
+    if (!userEmail || !startDate || !endDate) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Both startDate and endDate query parameters are required.' }),
+        body: JSON.stringify({ error: 'userEmail, startDate, and endDate query parameters are required.' }),
       };
     }
 
     const shiftsSnapshot = await db.collection('shifts')
+        .where('user.email', '==', userEmail)
         .where('startTime', '>=', startDate)
-        .where('startTime', '<=', `${endDate}T23:59:59.999Z`) // Include the entire end day
+        .where('startTime', '<=', `${endDate}T23:59:59.999Z`)
+        .orderBy('startTime', 'asc')
         .get();
         
-    const userHoursMap = new Map<string, { userName: string, dailyHours: Map<string, number> }>();
-
+    const detailedShifts: ShiftDetailRecord[] = [];
+    let userName = '';
+    
     shiftsSnapshot.forEach(doc => {
-      const shift = doc.data() as ShiftRecord;
+      const shift = { id: doc.id, ...doc.data() } as ShiftRecord;
       if (!shift.startTime || !shift.endTime || !shift.user?.email) {
         return;
       }
       
+      // Capture username from the first valid record
+      if (!userName && shift.user.name) {
+        userName = shift.user.name;
+      }
+      
       const durationMs = new Date(shift.endTime).getTime() - new Date(shift.startTime).getTime();
       const durationHours = durationMs / (1000 * 60 * 60);
-      const date = new Date(shift.startTime).toISOString().split('T')[0];
-      const email = shift.user.email;
-      const name = shift.user.name || 'Unknown';
 
-      if (!userHoursMap.has(email)) {
-        userHoursMap.set(email, { userName: name, dailyHours: new Map() });
-      }
-
-      const userEntry = userHoursMap.get(email)!;
-      userEntry.dailyHours.set(date, (userEntry.dailyHours.get(date) || 0) + durationHours);
+      detailedShifts.push({
+        id: shift.id,
+        startTime: shift.startTime,
+        endTime: shift.endTime,
+        hours: durationHours,
+      });
     });
 
-    const report: HoursWorkedReport = [];
-    for (const [email, data] of userHoursMap.entries()) {
-        const dailyBreakdown: DailyHours[] = Array.from(data.dailyHours.entries()).map(([date, hours]) => ({ date, hours }));
-        const totalHours = dailyBreakdown.reduce((sum, day) => sum + day.hours, 0);
+    const totalHours = detailedShifts.reduce((sum, s) => sum + s.hours, 0);
 
-        report.push({
-            userEmail: email,
-            userName: data.userName,
-            totalHours,
-            dailyBreakdown,
-        });
-    }
-
-    // Sort by user name
-    report.sort((a, b) => a.userName.localeCompare(b.userName));
+    const report: DetailedHoursWorkedReport = {
+        userEmail,
+        userName: userName || userEmail,
+        totalHours,
+        shifts: detailedShifts,
+    };
 
     return {
       statusCode: 200,

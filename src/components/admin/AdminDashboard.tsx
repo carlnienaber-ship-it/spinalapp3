@@ -46,7 +46,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
   }, [getSuppliers]);
 
   useEffect(() => {
-    if (currentView === 'shifts' || currentView === 'ordering') {
+    if (currentView === 'shifts' || currentView === 'ordering' || currentView === 'hours') {
       fetchShifts();
     }
     if (currentView === 'suppliers' || currentView === 'products' || currentView === 'ordering') {
@@ -64,6 +64,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
     }
     return shifts.slice(0, 10); // Show more recent shifts by default
   }, [shifts, selectedDate]);
+
+  const uniqueUsers = useMemo(() => {
+    const users = new Map<string, { name: string, email: string }>();
+    shifts.forEach(shift => {
+      if (shift.user?.email && !users.has(shift.user.email)) {
+        users.set(shift.user.email, {
+          email: shift.user.email,
+          name: shift.user.name || shift.user.email,
+        });
+      }
+    });
+    return Array.from(users.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [shifts]);
 
   useEffect(() => {
     if (filteredShifts.length > 0) {
@@ -180,7 +193,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
           shiftsLoading={loading && shifts.length === 0}
         />
       )}
-      {currentView === 'hours' && <HoursReport />}
+      {currentView === 'hours' && <HoursReport users={uniqueUsers} shiftsLoading={loading && shifts.length === 0}/>}
     </div>
   );
 };

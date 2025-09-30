@@ -130,17 +130,17 @@ export type LowStockReport = {
     orders: SupplierOrder[];
 };
 
-// Types for hours worked report
-export type DailyHours = {
-  date: string;
+// Types for the DETAILED hours worked report
+export type ShiftDetailRecord = {
+  id: string;
+  startTime: string;
+  endTime: string;
   hours: number;
 };
 
-export type UserHours = {
+export type DetailedHoursWorkedReport = {
   userName: string;
   userEmail: string;
   totalHours: number;
-  dailyBreakdown: DailyHours[];
+  shifts: ShiftDetailRecord[];
 };
-
-export type HoursWorkedReport = UserHours[];

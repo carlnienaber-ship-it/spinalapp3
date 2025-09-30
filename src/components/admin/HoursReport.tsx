@@ -1,68 +1,65 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useApiClient } from '../../hooks/useApiClient';
-import { HoursWorkedReport } from '../../types';
+import { DetailedHoursWorkedReport } from '../../types';
 import Button from '../ui/Button';
 
-const HoursReport: React.FC = () => {
+type User = {
+    name: string;
+    email: string;
+}
+
+type HoursReportProps = {
+    users: User[];
+    shiftsLoading: boolean;
+};
+
+const HoursReport: React.FC<HoursReportProps> = ({ users, shiftsLoading }) => {
   const today = new Date().toISOString().split('T')[0];
+  const [selectedUserEmail, setSelectedUserEmail] = useState('');
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const [report, setReport] = useState<HoursWorkedReport | null>(null);
+  const [report, setReport] = useState<DetailedHoursWorkedReport | null>(null);
   const { getHoursWorkedReport, loading, error } = useApiClient();
 
   const handleGenerateReport = async () => {
-    if (!startDate || !endDate) return;
+    if (!selectedUserEmail || !startDate || !endDate) return;
     setReport(null);
     try {
-      const fetchedReport = await getHoursWorkedReport(startDate, endDate);
+      const fetchedReport = await getHoursWorkedReport(selectedUserEmail, startDate, endDate);
       setReport(fetchedReport);
     } catch (e) {
       console.error("Failed to generate hours report", e);
     }
   };
-  
-  const dateHeaders = useMemo(() => {
-    if (!report || !startDate || !endDate) return [];
-    const dates = new Set<string>();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    // Ensure we capture all possible dates from the data within the range
-    report.forEach(user => {
-        user.dailyBreakdown.forEach(day => dates.add(day.date));
-    });
-
-    // Also fill in the range from start to end date to ensure empty days are shown
-    for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-        dates.add(new Date(d).toISOString().split('T')[0]);
-    }
-
-    return Array.from(dates).sort();
-  }, [report, startDate, endDate]);
 
   const handleDownloadCsv = () => {
     if (!report) return;
     
-    const headers = ['User', ...dateHeaders, 'Total Hours'];
-    const rows = report.map(user => {
-        const dailyMap = new Map(user.dailyBreakdown.map(d => [d.date, d.hours]));
-        const row = [
-            user.userName,
-            ...dateHeaders.map(date => (dailyMap.get(date) || 0).toFixed(2)),
-            user.totalHours.toFixed(2)
-        ];
-        return row;
-    });
+    const headers = ['Date', 'Clock In Time', 'Clock Out Time', 'Daily Hours'];
+    const rows = report.shifts.map(shift => [
+      new Date(shift.startTime).toLocaleDateString(),
+      new Date(shift.startTime).toLocaleTimeString(),
+      new Date(shift.endTime).toLocaleTimeString(),
+      shift.hours.toFixed(2)
+    ]);
 
+    const totalsRow = ['', '', 'Total Hours:', report.totalHours.toFixed(2)];
+    
     const csvContent = [
+      `Report for: ${report.userName}`,
+      `Period: ${startDate} to ${endDate}`,
+      '',
       headers.join(','),
-      ...rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+      ...rows.map(row => row.join(',')),
+      '',
+      totalsRow.join(',')
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `hours_report_${startDate}_to_${endDate}.csv`;
+    const safeUserName = report.userName.replace(/[^a-z0-9]/gi, '_');
+    link.download = `hours_report_${safeUserName}_${startDate}_to_${endDate}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -70,11 +67,11 @@ const HoursReport: React.FC = () => {
 
   const renderReportTable = () => {
     if (!report) return null;
-    if (report.length === 0) {
+    if (report.shifts.length === 0) {
       return (
         <div className="text-center p-8 bg-gray-700 rounded-lg mt-8">
-          <h3 className="text-xl font-semibold text-gray-200">No Data Found</h3>
-          <p className="text-gray-300 mt-2">No completed shifts were found for the selected date range.</p>
+          <h3 className="text-xl font-semibold text-gray-200">No Shifts Found</h3>
+          <p className="text-gray-300 mt-2">No completed shifts were found for <span className="font-semibold">{report.userName}</span> in the selected date range.</p>
         </div>
       );
     }
@@ -82,33 +79,35 @@ const HoursReport: React.FC = () => {
     return (
         <div className="mt-8">
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-50">Report Results</h3>
+                <h3 className="text-xl font-bold text-gray-50">Report for: <span className="text-blue-300">{report.userName}</span></h3>
                 <Button onClick={handleDownloadCsv} size="sm">Download CSV</Button>
             </div>
             <div className="overflow-x-auto bg-gray-700 rounded-lg">
-                <table className="w-full text-left min-w-[800px]">
+                <table className="w-full text-left">
                     <thead className="bg-gray-800">
                         <tr>
-                            <th className="p-3 font-semibold text-gray-200">User</th>
-                            {dateHeaders.map(date => <th key={date} className="p-3 font-semibold text-gray-300 text-center">{new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</th>)}
-                            <th className="p-3 font-semibold text-gray-200 text-center">Total Hours</th>
+                            <th className="p-3 font-semibold text-gray-200">Date</th>
+                            <th className="p-3 font-semibold text-gray-200">Clock In</th>
+                            <th className="p-3 font-semibold text-gray-200">Clock Out</th>
+                            <th className="p-3 font-semibold text-gray-200 text-right">Hours</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-600">
-                        {report.map(user => {
-                            const dailyMap = new Map(user.dailyBreakdown.map(d => [d.date, d.hours]));
-                            return (
-                                <tr key={user.userEmail} className="hover:bg-gray-600">
-                                    <td className="p-3 text-gray-100 font-medium">{user.userName}</td>
-                                    {dateHeaders.map(date => {
-                                        const hours = dailyMap.get(date) || 0;
-                                        return <td key={date} className={`p-3 text-center ${hours > 0 ? 'text-white' : 'text-gray-400'}`}>{hours > 0 ? hours.toFixed(2) : '-'}</td>;
-                                    })}
-                                    <td className="p-3 text-center font-bold text-emerald-400">{user.totalHours.toFixed(2)}</td>
-                                </tr>
-                            );
-                        })}
+                        {report.shifts.map(shift => (
+                            <tr key={shift.id} className="hover:bg-gray-600">
+                                <td className="p-3 text-gray-100">{new Date(shift.startTime).toLocaleDateString()}</td>
+                                <td className="p-3 text-gray-100">{new Date(shift.startTime).toLocaleTimeString()}</td>
+                                <td className="p-3 text-gray-100">{new Date(shift.endTime).toLocaleTimeString()}</td>
+                                <td className="p-3 text-gray-100 text-right">{shift.hours.toFixed(2)}</td>
+                            </tr>
+                        ))}
                     </tbody>
+                    <tfoot className="bg-gray-800">
+                        <tr>
+                            <td colSpan={3} className="p-3 text-right font-bold text-gray-200">Total Hours for Period:</td>
+                            <td className="p-3 text-right font-bold text-lg text-emerald-400">{report.totalHours.toFixed(2)}</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -119,10 +118,18 @@ const HoursReport: React.FC = () => {
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-50">User Hours Worked Report</h2>
-        <p className="text-gray-400 mt-2 max-w-2xl mx-auto">Select a date range to generate a report of hours worked by each staff member.</p>
+        <p className="text-gray-400 mt-2 max-w-2xl mx-auto">Select a staff member and a date range to generate a detailed log of their hours.</p>
       </div>
       
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-center max-w-xl mx-auto">
+      <div className="flex flex-col sm:flex-row gap-4 items-end justify-center max-w-3xl mx-auto">
+        <div className="flex-grow">
+            <label htmlFor="user-select" className="block text-sm font-medium text-gray-300 mb-1">Select User</label>
+            {shiftsLoading ? <div className="bg-gray-700 p-2 rounded-md text-gray-400">Loading users...</div> :
+            <select id="user-select" value={selectedUserEmail} onChange={e => setSelectedUserEmail(e.target.value)} className="w-full bg-gray-700 text-gray-200 rounded-md border-gray-600 p-2 text-base focus:ring-blue-500 focus:border-blue-500">
+                <option value="" disabled>-- Please choose a user --</option>
+                {users.map(user => <option key={user.email} value={user.email}>{user.name}</option>)}
+            </select>}
+        </div>
         <div>
             <label htmlFor="start-date" className="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
             <input type="date" id="start-date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-gray-700 text-gray-200 rounded-md border-gray-600 p-2 text-base focus:ring-blue-500 focus:border-blue-500" />
@@ -131,9 +138,9 @@ const HoursReport: React.FC = () => {
             <label htmlFor="end-date" className="block text-sm font-medium text-gray-300 mb-1">End Date</label>
             <input type="date" id="end-date" value={endDate} onChange={e => setEndDate(e.target.value)} min={startDate} className="w-full bg-gray-700 text-gray-200 rounded-md border-gray-600 p-2 text-base focus:ring-blue-500 focus:border-blue-500" />
         </div>
-        <div className="self-end">
-            <Button onClick={handleGenerateReport} disabled={loading || !startDate || !endDate} size="lg">
-                {loading ? 'Generating...' : 'Generate Report'}
+        <div>
+            <Button onClick={handleGenerateReport} disabled={loading || shiftsLoading || !selectedUserEmail || !startDate || !endDate} size="lg">
+                {loading ? 'Generating...' : 'Generate'}
             </Button>
         </div>
       </div>

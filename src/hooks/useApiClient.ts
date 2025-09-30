@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useCallback } from 'react';
-import { ShiftState, ShiftRecord, Product, Supplier, LowStockReport, HoursWorkedReport } from '../types';
+import { ShiftState, ShiftRecord, Product, Supplier, LowStockReport, DetailedHoursWorkedReport } from '../types';
 
 const API_BASE_URL = '/.netlify/functions';
 
@@ -19,7 +19,7 @@ type ApiClient = {
   updateSupplier: (supplier: Supplier) => Promise<Supplier>;
   deactivateSupplier: (supplierId: string) => Promise<{ id: string }>;
   getLowStockReport: (shiftId: string) => Promise<LowStockReport>;
-  getHoursWorkedReport: (startDate: string, endDate: string) => Promise<HoursWorkedReport>;
+  getHoursWorkedReport: (userEmail: string, startDate: string, endDate: string) => Promise<DetailedHoursWorkedReport>;
   loading: boolean;
   error: Error | null;
 };
@@ -120,8 +120,8 @@ export function useApiClient(): ApiClient {
     makeRequest<LowStockReport>(`get-low-stock-report?shiftId=${shiftId}`), 
   [makeRequest]);
 
-  const getHoursWorkedReport = useCallback((startDate: string, endDate: string) =>
-    makeRequest<HoursWorkedReport>(`get-hours-worked-report?startDate=${startDate}&endDate=${endDate}`),
+  const getHoursWorkedReport = useCallback((userEmail: string, startDate: string, endDate: string) =>
+    makeRequest<DetailedHoursWorkedReport>(`get-hours-worked-report?userEmail=${encodeURIComponent(userEmail)}&startDate=${startDate}&endDate=${endDate}`),
   [makeRequest]);
 
 
