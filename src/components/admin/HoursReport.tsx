@@ -43,14 +43,19 @@ const HoursReport: React.FC<HoursReportProps> = ({ users, shiftsLoading }) => {
 
   const handleDownloadCsv = () => {
     if (report) {
-      const headers = ['Date', 'Clock In Time', 'Clock Out Time', 'Daily Hours'];
-      const rows = report.shifts.map(shift => [
-        new Date(shift.startTime).toLocaleDateString(),
-        new Date(shift.startTime).toLocaleTimeString(),
-        new Date(shift.endTime).toLocaleTimeString(),
-        shift.hours.toFixed(2)
-      ]);
-      const totalsRow = ['', '', 'Total Hours:', report.totalHours.toFixed(2)];
+      const headers = ['Date', 'Day', 'Clock In Time', 'Clock Out Time', 'Daily Hours'];
+      const rows = report.shifts.map(shift => {
+        const startDate = new Date(shift.startTime);
+        const dayOfWeek = startDate.toLocaleDateString(undefined, { weekday: 'long' });
+        return [
+          startDate.toLocaleDateString(),
+          dayOfWeek,
+          startDate.toLocaleTimeString(),
+          new Date(shift.endTime).toLocaleTimeString(),
+          shift.hours.toFixed(2)
+        ];
+      });
+      const totalsRow = ['', '', '', 'Total Hours:', report.totalHours.toFixed(2)];
       const csvContent = [
         `Report for: ${report.userName}`,
         `Period: ${startDate} to ${endDate}`,
@@ -115,24 +120,30 @@ const HoursReport: React.FC<HoursReportProps> = ({ users, shiftsLoading }) => {
                     <thead className="bg-gray-800">
                         <tr>
                             <th className="p-3 font-semibold text-gray-200">Date</th>
+                            <th className="p-3 font-semibold text-gray-200">Day</th>
                             <th className="p-3 font-semibold text-gray-200">Clock In</th>
                             <th className="p-3 font-semibold text-gray-200">Clock Out</th>
                             <th className="p-3 font-semibold text-gray-200 text-right">Hours</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-600">
-                        {report.shifts.map(shift => (
-                            <tr key={shift.id} className="hover:bg-gray-600">
-                                <td className="p-3 text-gray-100">{new Date(shift.startTime).toLocaleDateString()}</td>
-                                <td className="p-3 text-gray-100">{new Date(shift.startTime).toLocaleTimeString()}</td>
-                                <td className="p-3 text-gray-100">{new Date(shift.endTime).toLocaleTimeString()}</td>
-                                <td className="p-3 text-gray-100 text-right">{shift.hours.toFixed(2)}</td>
-                            </tr>
-                        ))}
+                        {report.shifts.map(shift => {
+                            const startDate = new Date(shift.startTime);
+                            const dayOfWeek = startDate.toLocaleDateString(undefined, { weekday: 'long' });
+                            return (
+                                <tr key={shift.id} className="hover:bg-gray-600">
+                                    <td className="p-3 text-gray-100">{startDate.toLocaleDateString()}</td>
+                                    <td className="p-3 text-gray-100">{dayOfWeek}</td>
+                                    <td className="p-3 text-gray-100">{startDate.toLocaleTimeString()}</td>
+                                    <td className="p-3 text-gray-100">{new Date(shift.endTime).toLocaleTimeString()}</td>
+                                    <td className="p-3 text-gray-100 text-right">{shift.hours.toFixed(2)}</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                     <tfoot className="bg-gray-800">
                         <tr>
-                            <td colSpan={3} className="p-3 text-right font-bold text-gray-200">Total Hours for Period:</td>
+                            <td colSpan={4} className="p-3 text-right font-bold text-gray-200">Total Hours for Period:</td>
                             <td className="p-3 text-right font-bold text-lg text-emerald-400">{report.totalHours.toFixed(2)}</td>
                         </tr>
                     </tfoot>
