@@ -130,6 +130,15 @@ export type LowStockReport = {
     orders: SupplierOrder[];
 };
 
+// Types for the BULK hours worked report
+export type UserHoursSummary = {
+  userName: string;
+  userEmail: string;
+  totalHours: number;
+};
+export type BulkHoursWorkedReport = UserHoursSummary[];
+
+
 // Types for the DETAILED hours worked report
 export type ShiftDetailRecord = {
   id: string;

@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useCallback } from 'react';
-import { ShiftState, ShiftRecord, Product, Supplier, LowStockReport, DetailedHoursWorkedReport } from '../types';
+import { ShiftState, ShiftRecord, Product, Supplier, LowStockReport, DetailedHoursWorkedReport, BulkHoursWorkedReport } from '../types';
 
 const API_BASE_URL = '/.netlify/functions';
 
@@ -20,6 +20,7 @@ type ApiClient = {
   deactivateSupplier: (supplierId: string) => Promise<{ id: string }>;
   getLowStockReport: (shiftId: string) => Promise<LowStockReport>;
   getHoursWorkedReport: (userEmail: string, startDate: string, endDate: string) => Promise<DetailedHoursWorkedReport>;
+  getBulkHoursWorkedReport: (startDate: string, endDate: string) => Promise<BulkHoursWorkedReport>;
   loading: boolean;
   error: Error | null;
 };
@@ -127,6 +128,10 @@ export function useApiClient(): ApiClient {
     makeRequest<DetailedHoursWorkedReport>(`get-hours-worked-report?userEmail=${encodeURIComponent(userEmail)}&startDate=${startDate}&endDate=${endDate}`),
   [makeRequest]);
 
+  const getBulkHoursWorkedReport = useCallback((startDate: string, endDate: string) =>
+    makeRequest<BulkHoursWorkedReport>(`get-bulk-hours-report?startDate=${startDate}&endDate=${endDate}`),
+  [makeRequest]);
 
-  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, activateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, getHoursWorkedReport, loading, error };
+
+  return { submitShift, getShifts, getProducts, addProduct, updateProduct, deactivateProduct, activateProduct, deleteProduct, seedProducts, getSuppliers, addSupplier, updateSupplier, deactivateSupplier, getLowStockReport, getHoursWorkedReport, getBulkHoursWorkedReport, loading, error };
 }
