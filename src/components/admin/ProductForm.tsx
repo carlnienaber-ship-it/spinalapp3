@@ -123,7 +123,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
     }
   };
 
-  const parseNumber = (value: string) => parseFloat(value) || undefined;
+  const parseNumber = (value: string): number | undefined => {
+    if (value.trim() === '') return undefined;
+    const num = parseFloat(value);
+    return isNaN(num) ? undefined : num;
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -162,7 +166,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
                 <label htmlFor="full-bottle-weight" className="block text-sm font-medium text-gray-300">Full Bottle Weight (g)</label>
                 <NumericInput
                   id="full-bottle-weight"
-                  value={fullBottleWeight || ''}
+                  value={fullBottleWeight ?? ''}
                   onChange={(e) => setFullBottleWeight(parseNumber(e.target.value))}
                   placeholder="e.g., 1250"
                   className="mt-1"
@@ -185,11 +189,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
                      <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="price" className="block text-sm font-medium text-gray-300">Price (R)</label>
-                            <NumericInput id="price" value={price || ''} onChange={(e) => setPrice(parseNumber(e.target.value))} placeholder="e.g., 45.50" step="0.01" className="mt-1"/>
+                            <NumericInput id="price" value={price ?? ''} onChange={(e) => setPrice(parseNumber(e.target.value))} placeholder="e.g., 45.50" step="0.01" className="mt-1"/>
                         </div>
                         <div>
                             <label htmlFor="abv" className="block text-sm font-medium text-gray-300">ABV (%)</label>
-                            <NumericInput id="abv" value={abv || ''} onChange={(e) => setAbv(parseNumber(e.target.value))} placeholder="e.g., 5.5" step="0.1" className="mt-1"/>
+                            <NumericInput id="abv" value={abv ?? ''} onChange={(e) => setAbv(parseNumber(e.target.value))} placeholder="e.g., 5.5" step="0.1" className="mt-1"/>
                         </div>
                     </div>
                     <div>
@@ -235,25 +239,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="par-level" className="block text-sm font-medium text-gray-300">PAR Level</label>
-                <NumericInput id="par-level" value={parLevel || ''} onChange={(e) => setParLevel(parseNumber(e.target.value))} placeholder="e.g., 6" className="mt-1"/>
+                <NumericInput id="par-level" value={parLevel ?? ''} onChange={(e) => setParLevel(parseNumber(e.target.value))} placeholder="e.g., 6" className="mt-1"/>
               </div>
                <div>
                 <label htmlFor="reorderQuantity" className="block text-sm font-medium text-gray-300">Reorder Quantity</label>
-                <NumericInput id="reorderQuantity" value={reorderQuantity || ''} onChange={(e) => setReorderQuantity(parseNumber(e.target.value))} placeholder="e.g., 12" className="mt-1"/>
+                <NumericInput id="reorderQuantity" value={reorderQuantity ?? ''} onChange={(e) => setReorderQuantity(parseNumber(e.target.value))} placeholder="e.g., 12" className="mt-1"/>
               </div>
               <div>
                 <label htmlFor="order-unit-size" className="block text-sm font-medium text-gray-300">
                   Order Unit Size
                   <InfoTooltip text="The number of individual items in a single orderable unit. E.g., a case of Coke has a size of 24, a single bottle of whiskey has a size of 1." />
                 </label>
-                <NumericInput id="order-unit-size" value={orderUnitSize || ''} onChange={(e) => setOrderUnitSize(parseNumber(e.target.value))} placeholder="e.g., 24" className="mt-1"/>
+                <NumericInput id="order-unit-size" value={orderUnitSize ?? ''} onChange={(e) => setOrderUnitSize(parseNumber(e.target.value))} placeholder="e.g., 24" className="mt-1"/>
               </div>
               <div>
                 <label htmlFor="minOrderQuantity" className="block text-sm font-medium text-gray-300">
                   Minimum Order Quantity (MOQ)
                   <InfoTooltip text="The minimum quantity of order units (e.g., cases, single bottles) that must be placed in a single order. E.g., if you must order by the case, the minimum is 1." />
                 </label>
-                <NumericInput id="minOrderQuantity" value={minOrderQuantity || ''} onChange={(e) => setMinOrderQuantity(parseNumber(e.target.value))} placeholder="e.g., 1" className="mt-1"/>
+                <NumericInput id="minOrderQuantity" value={minOrderQuantity ?? ''} onChange={(e) => setMinOrderQuantity(parseNumber(e.target.value))} placeholder="e.g., 1" className="mt-1"/>
               </div>
             </div>
           </div>

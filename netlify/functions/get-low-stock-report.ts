@@ -112,8 +112,11 @@ const handler: Handler = async (event) => {
         const productInfo = productsMap.get(item.productName);
         if (!productInfo || !productInfo.primarySupplierId) return;
 
-        const supplier = suppliersMap.get(productInfo.primarySupplierId);
-        if (!supplier) return;
+        const supplierData = suppliersMap.get(productInfo.primarySupplierId);
+        if (!supplierData) return;
+
+        // FIX: Cast supplierData from 'unknown' to 'Supplier' to resolve TypeScript errors.
+        const supplier = supplierData as Supplier;
 
         if (!ordersBySupplier.has(supplier.id)) {
             ordersBySupplier.set(supplier.id, {
