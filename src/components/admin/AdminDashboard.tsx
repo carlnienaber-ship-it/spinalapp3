@@ -32,6 +32,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
   const [selectedShift, setSelectedShift] = useState<ShiftRecord | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [currentView, setCurrentView] = useState<View>('shifts');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { getShifts, getSuppliers, loading, error } = useApiClient();
 
   const fetchShifts = useCallback(async () => {
@@ -61,6 +62,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
       fetchSuppliers();
     }
   }, [currentView, fetchShifts, fetchSuppliers]);
+  
+  const handleNavigate = (view: View) => {
+    setCurrentView(view);
+    setIsSidebarOpen(false); // Close sidebar on navigation
+  };
 
   const filteredShifts = useMemo(() => {
     if (selectedDate) {
@@ -187,15 +193,33 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)]">
+    <div className="relative md:flex min-h-[calc(100vh-200px)]">
       <AdminSidebar
         currentView={currentView}
-        onNavigate={setCurrentView}
+        onNavigate={handleNavigate}
         onBack={onBack}
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
       />
-      <div className="flex-grow p-8 bg-gray-900">
-         <Header title={viewTitles[currentView]} />
-         {renderContent()}
+      <div className="flex-grow bg-gray-900">
+         <header className="md:hidden bg-gray-800 p-4 flex items-center border-b border-gray-700">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              aria-label="Open sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-white ml-4">{viewTitles[currentView]}</h1>
+         </header>
+         <main className="p-4 sm:p-8">
+            <div className="hidden md:block">
+              <Header title={viewTitles[currentView]} />
+            </div>
+            {renderContent()}
+         </main>
       </div>
     </div>
   );

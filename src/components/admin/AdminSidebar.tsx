@@ -7,6 +7,8 @@ type AdminSidebarProps = {
   currentView: View;
   onNavigate: (view: View) => void;
   onBack: () => void;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 };
 
 const NavLink: React.FC<{
@@ -36,7 +38,7 @@ const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
     <h3 className="px-4 mt-6 mb-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">{title}</h3>
 );
 
-const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentView, onNavigate, onBack }) => {
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentView, onNavigate, onBack, isOpen, setIsOpen }) => {
   const navItems: { view: View; label: string; icon: React.ReactElement; section: string }[] = [
     { view: 'shifts', label: 'Shift Reports', icon: <ChartBarIcon />, section: 'Reports' },
     { view: 'hours', label: 'Hours Report', icon: <ClockIcon />, section: 'Reports' },
@@ -45,46 +47,74 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentView, onNavigate, on
     { view: 'suppliers', label: 'Manage Suppliers', icon: <UsersIcon />, section: 'Management' },
   ];
 
+  const sidebarClasses = `
+    w-64 bg-gray-800 p-4 flex flex-col flex-shrink-0 border-r border-gray-700
+    transform transition-transform duration-300 ease-in-out
+    md:relative md:translate-x-0
+    fixed inset-y-0 left-0 z-40
+    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+  `;
+
   return (
-    <aside className="w-64 bg-gray-800 p-4 flex flex-col flex-shrink-0 border-r border-gray-700">
-      <div className="flex-grow">
-        <nav>
-          <SectionHeader title="Reports" />
-          <ul className="space-y-1">
-            {navItems.filter(item => item.section === 'Reports').map(item => (
-              <NavLink
-                key={item.view}
-                label={item.label}
-                icon={item.icon}
-                isActive={currentView === item.view}
-                onClick={() => onNavigate(item.view)}
-              />
-            ))}
-          </ul>
-          
-          <SectionHeader title="Management" />
-          <ul className="space-y-1">
-             {navItems.filter(item => item.section === 'Management').map(item => (
-              <NavLink
-                key={item.view}
-                label={item.label}
-                icon={item.icon}
-                isActive={currentView === item.view}
-                onClick={() => onNavigate(item.view)}
-              />
-            ))}
-          </ul>
-        </nav>
-      </div>
-      <div className="mt-auto">
-        <Button onClick={onBack} variant="secondary" className="w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Back to Welcome
-        </Button>
-      </div>
-    </aside>
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        ></div>
+      )}
+
+      <aside className={sidebarClasses}>
+        <div className="flex justify-between items-center mb-4 md:hidden">
+            <h2 className="text-lg font-bold text-white">Admin Menu</h2>
+            <button onClick={() => setIsOpen(false)} className="p-1 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div className="flex-grow">
+          <nav>
+            <SectionHeader title="Reports" />
+            <ul className="space-y-1">
+              {navItems.filter(item => item.section === 'Reports').map(item => (
+                <NavLink
+                  key={item.view}
+                  label={item.label}
+                  icon={item.icon}
+                  isActive={currentView === item.view}
+                  onClick={() => onNavigate(item.view)}
+                />
+              ))}
+            </ul>
+            
+            <SectionHeader title="Management" />
+            <ul className="space-y-1">
+              {navItems.filter(item => item.section === 'Management').map(item => (
+                <NavLink
+                  key={item.view}
+                  label={item.label}
+                  icon={item.icon}
+                  isActive={currentView === item.view}
+                  onClick={() => onNavigate(item.view)}
+                />
+              ))}
+            </ul>
+          </nav>
+        </div>
+        <div className="mt-auto">
+          <Button onClick={onBack} variant="secondary" className="w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Back to Welcome
+          </Button>
+        </div>
+      </aside>
+    </>
   );
 };
 

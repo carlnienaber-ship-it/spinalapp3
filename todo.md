@@ -228,14 +228,14 @@
 - **(Completed)** Task 21.1: Update CSV Button Style.
 - **(Completed)** Task 21.2: Refactor CSV Data Structure.
 - **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
-- Task AD.1: Refactor Admin Dashboard Navigation to a Vertical Sidebar.
-  - **Objective:** Replace the horizontal button navigation with a more scalable and user-friendly vertical sidebar menu.
+- **(Completed)** Task AD.1: Refactor Admin Dashboard Navigation to a Vertical Sidebar.
+- Task AD.2: Make Admin Sidebar Responsive for Mobile.
+  - **Objective:** The new sidebar layout must be usable on mobile devices.
   - **Implementation:**
-    - Create a new `AdminSidebar` component.
-    - Refactor `AdminDashboard` to use a two-column layout (sidebar + main content).
-    - Group navigation links logically (e.g., Reports, Management) with icons.
-    - Dynamically update the main content area's header based on the selected view.
-    - Relocate the "Back to Welcome" button to the bottom of the sidebar.
+    - The sidebar will be hidden by default on small screens.
+    - A "hamburger" menu icon will be added to the header to toggle the sidebar's visibility.
+    - When opened on mobile, the sidebar will slide in from the left as an overlay.
+    - On medium screens and larger, the sidebar will remain permanently visible as it is now.
 
 ### General Polish
 - **(Completed)** Task UP.1: Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
