@@ -228,6 +228,14 @@
 - **(Completed)** Task 21.1: Update CSV Button Style.
 - **(Completed)** Task 21.2: Refactor CSV Data Structure.
 - **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
+- Task AD.1: Refactor Admin Dashboard Navigation to a Vertical Sidebar.
+  - **Objective:** Replace the horizontal button navigation with a more scalable and user-friendly vertical sidebar menu.
+  - **Implementation:**
+    - Create a new `AdminSidebar` component.
+    - Refactor `AdminDashboard` to use a two-column layout (sidebar + main content).
+    - Group navigation links logically (e.g., Reports, Management) with icons.
+    - Dynamically update the main content area's header based on the selected view.
+    - Relocate the "Back to Welcome" button to the bottom of the sidebar.
 
 ### General Polish
 - **(Completed)** Task UP.1: Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
@@ -243,6 +251,7 @@
   - **Implementation:**
     - In `ProductForm.tsx`, implement logic so that pressing the `Enter` key triggers the "Save Product" action.
     - Implement logic so that pressing the `Escape` key triggers the "Cancel" action, closing the modal.
+- Task UP.5: Remove Admin Dashboard Subtitle. Remove the "Review submitted shift handovers" subtitle from the admin dashboard header.
 
 ---
 

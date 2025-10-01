@@ -9,6 +9,7 @@ import ProductManager from './ProductManager';
 import SupplierManager from './SupplierManager';
 import StockOrdering from './StockOrdering';
 import HoursReport from './HoursReport';
+import AdminSidebar, { View } from './AdminSidebar';
 
 type AdminDashboardProps = {
   products: Product[];
@@ -17,7 +18,13 @@ type AdminDashboardProps = {
   onBack: () => void;
 };
 
-type View = 'shifts' | 'products' | 'suppliers' | 'ordering' | 'hours';
+const viewTitles: Record<View, string> = {
+  shifts: 'Shift Reports',
+  products: 'Product Management',
+  suppliers: 'Supplier Management',
+  ordering: 'Stock Ordering Report',
+  hours: 'Hours Worked Report',
+};
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoading, onProductsChange, onBack }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
@@ -46,6 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
   }, [getSuppliers]);
 
   useEffect(() => {
+    // Fetch data based on the current view to be efficient
     if (currentView === 'shifts' || currentView === 'ordering' || currentView === 'hours') {
       fetchShifts();
     }
@@ -62,7 +70,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
         return shiftDate === selectedDate;
       });
     }
-    return shifts.slice(0, 10); // Show more recent shifts by default
+    return shifts.slice(0, 20); // Show more recent shifts by default
   }, [shifts, selectedDate]);
 
   const uniqueUsers = useMemo(() => {
@@ -86,23 +94,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
     }
   }, [filteredShifts]);
 
-  if (loading && currentView === 'shifts' && shifts.length === 0) {
-    return <div className="text-center p-8"><p>Loading shift reports...</p></div>;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-8 bg-red-900 text-red-100 rounded-lg">
-        <p className="font-bold">Error:</p>
-        <p>{error.message}</p>
-        <Button onClick={onBack} className="mt-4">Back to Welcome Screen</Button>
-      </div>
-    );
-  }
-
   const renderShiftsView = () => (
     <>
-      {shifts.length === 0 && !loading ? (
+      {loading && shifts.length === 0 ? (
+         <div className="text-center p-8"><p>Loading shift reports...</p></div>
+      ) : shifts.length === 0 ? (
         <div className="text-center p-8 bg-gray-800 rounded-lg">
            <p className="text-gray-400 mb-6">No shift reports have been submitted yet.</p>
         </div>
@@ -110,7 +106,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
         <div className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-1/3 lg:w-1/4">
             <div className="bg-gray-800 p-4 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold text-gray-50 mb-4 px-2">Shifts</h2>
+              <h2 className="text-xl font-bold text-gray-50 mb-4 px-2">Recent Shifts</h2>
                <div className="mb-4 px-2">
                  <label htmlFor="date-picker" className="block text-sm font-medium text-gray-400 mb-1">Filter by date</label>
                  <input 
@@ -133,7 +129,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
             {selectedShift ? (
               <ShiftDetail shift={selectedShift} />
             ) : (
-              <div className="bg-gray-800 p-8 rounded-lg text-center">
+              <div className="bg-gray-800 p-8 rounded-lg text-center h-full flex items-center justify-center">
                 <p className="text-gray-300">
                   {selectedDate ? 'No shifts found for the selected date.' : 'Select a shift to view its details.'}
                 </p>
@@ -145,55 +141,62 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
     </>
   );
 
-  return (
-    <div>
-      <Header title="Admin Dashboard" subtitle={`Review submitted shift handovers`} />
-      
-      <div className="flex justify-center flex-wrap gap-4 mb-8 border-b border-gray-700 pb-6">
-        <Button onClick={() => setCurrentView('shifts')} variant={currentView === 'shifts' ? 'primary' : 'secondary'}>
-          View Shifts
-        </Button>
-        <Button onClick={() => setCurrentView('products')} variant={currentView === 'products' ? 'primary' : 'secondary'}>
-          Manage Products
-        </Button>
-        <Button onClick={() => setCurrentView('suppliers')} variant={currentView === 'suppliers' ? 'primary' : 'secondary'}>
-          Manage Suppliers
-        </Button>
-        <Button onClick={() => setCurrentView('ordering')} variant={currentView === 'ordering' ? 'primary' : 'secondary'}>
-          Stock Ordering
-        </Button>
-        <Button onClick={() => setCurrentView('hours')} variant={currentView === 'hours' ? 'primary' : 'secondary'}>
-          Hours Report
-        </Button>
-        <Button onClick={onBack} variant="secondary">
-          Back to Welcome
-        </Button>
-      </div>
+  const renderContent = () => {
+    if (error) {
+        return (
+          <div className="text-center p-8 bg-red-900 text-red-100 rounded-lg">
+            <p className="font-bold">Error:</p>
+            <p>{error.message}</p>
+          </div>
+        );
+    }
 
-      {currentView === 'shifts' && renderShiftsView()}
-      {currentView === 'products' && (
-        <ProductManager 
-          products={products}
-          suppliers={suppliers}
-          isLoading={productsLoading || (loading && suppliers.length === 0)}
-          onProductsChange={onProductsChange}
-        />
-      )}
-      {currentView === 'suppliers' && (
-        <SupplierManager 
-          products={products}
-          suppliers={suppliers}
-          isLoading={loading && suppliers.length === 0}
-          onSuppliersChange={fetchSuppliers}
-        />
-      )}
-      {currentView === 'ordering' && (
-        <StockOrdering 
-          shifts={shifts}
-          shiftsLoading={loading && shifts.length === 0}
-        />
-      )}
-      {currentView === 'hours' && <HoursReport users={uniqueUsers} shiftsLoading={loading && shifts.length === 0}/>}
+    switch(currentView) {
+        case 'shifts':
+            return renderShiftsView();
+        case 'products':
+            return (
+              <ProductManager 
+                products={products}
+                suppliers={suppliers}
+                isLoading={productsLoading || (loading && suppliers.length === 0)}
+                onProductsChange={onProductsChange}
+              />
+            );
+        case 'suppliers':
+            return (
+              <SupplierManager 
+                products={products}
+                suppliers={suppliers}
+                isLoading={loading && suppliers.length === 0}
+                onSuppliersChange={fetchSuppliers}
+              />
+            );
+        case 'ordering':
+            return (
+              <StockOrdering 
+                shifts={shifts}
+                shiftsLoading={loading && shifts.length === 0}
+              />
+            );
+        case 'hours':
+            return <HoursReport users={uniqueUsers} shiftsLoading={loading && shifts.length === 0}/>;
+        default:
+            return <p>Select a view</p>;
+    }
+  };
+
+  return (
+    <div className="flex min-h-[calc(100vh-200px)]">
+      <AdminSidebar
+        currentView={currentView}
+        onNavigate={setCurrentView}
+        onBack={onBack}
+      />
+      <div className="flex-grow p-8 bg-gray-900">
+         <Header title={viewTitles[currentView]} />
+         {renderContent()}
+      </div>
     </div>
   );
 };
