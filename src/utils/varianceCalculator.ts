@@ -1,4 +1,4 @@
-import { ShiftRecord } from '../types';
+import { ShiftRecord, Product } from '../types';
 
 export type StockOnHand = {
   bottles?: number;
@@ -22,8 +22,9 @@ export type VarianceCategory = {
 const SHOT_WEIGHT_GRAMS = 23.5;
 const WEIGHT_TOLERANCE_GRAMS = 7;
 
-export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
+export function calculateShiftVariance(shift: ShiftRecord, allProducts: Product[]): VarianceCategory[] {
   const varianceReport: VarianceCategory[] = [];
+  const productsMap = new Map(allProducts.map(p => [p.name, p]));
 
   shift.openingStock.forEach((openingCategory, categoryIndex) => {
     const closingCategory = shift.closingStock[categoryIndex];
@@ -35,7 +36,8 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
     openingCategory.items.forEach((openingItem) => {
       const closingItem = closingCategory.items.find(item => item.name === openingItem.name);
       if (!closingItem) return;
-
+      
+      const productInfo = productsMap.get(openingItem.name);
       const delivery = shift.newStockDeliveries.find(d => d.name === openingItem.name);
       const deliveryQty = delivery ? delivery.quantity : 0;
 
@@ -47,11 +49,12 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
       // Logic for Spirits (liquid mass-based calculation)
       if (openingCategory.title === 'Spirits') {
         unit = 'shots';
-        const { emptyBottleWeight, grossWeight } = openingItem;
+        // Get weights from the live product data for accuracy, not the historical shift record
+        const { emptyBottleWeight, grossWeight } = productInfo || {};
 
-        // If essential weight data is missing, we cannot calculate accurately.
+        // If essential weight data is missing from the current product data, we cannot calculate accurately.
         if (typeof emptyBottleWeight !== 'number' || typeof grossWeight !== 'number') {
-            variance = 0; // Skip calculation to avoid errors
+            variance = 0; // Skip calculation to avoid errors, defaults to 0
         } else {
             const liquidWeightPerBottle = grossWeight - emptyBottleWeight;
 

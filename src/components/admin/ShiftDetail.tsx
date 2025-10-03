@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ShiftRecord } from '../../types';
+import { ShiftRecord, Product } from '../../types';
 import TaskList from '../tasks/TaskList';
 import NewStockDelivery from '../stock/NewStockDelivery';
 import AdminStockDisplay from './AdminStockDisplay';
@@ -10,6 +10,7 @@ import VarianceReport from './VarianceReport';
 
 type ShiftDetailProps = {
   shift: ShiftRecord;
+  products: Product[];
 };
 
 const ratingEmojis = {
@@ -18,9 +19,9 @@ const ratingEmojis = {
   Bad: '😞 Bad',
 };
 
-const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift }) => {
+const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift, products }) => {
   const [showVariance, setShowVariance] = useState(false);
-  const varianceReportData = useMemo(() => calculateShiftVariance(shift), [shift]);
+  const varianceReportData = useMemo(() => calculateShiftVariance(shift, products), [shift, products]);
   const allStockItems = Array.from(new Set(shift.openingStock.flatMap(cat => cat.items.map(item => item.name)))).sort();
 
   return (

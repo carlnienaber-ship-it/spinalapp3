@@ -133,7 +133,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ products, productsLoadi
           </div>
           <div className="w-full md:w-2/3 lg:w-3/4">
             {selectedShift ? (
-              <ShiftDetail shift={selectedShift} />
+              <ShiftDetail shift={selectedShift} products={products} />
             ) : (
               <div className="bg-gray-800 p-8 rounded-lg text-center h-full flex items-center justify-center">
                 <p className="text-gray-300">
