@@ -21,7 +21,6 @@ export type VarianceCategory = {
 
 const SHOT_WEIGHT_GRAMS = 23.5;
 const WEIGHT_TOLERANCE_GRAMS = 7;
-const LIQUID_WEIGHT_PER_BOTTLE = 705; // Standardized liquid weight in grams
 
 export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
   const varianceReport: VarianceCategory[] = [];
@@ -48,23 +47,25 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
       // Logic for Spirits (liquid mass-based calculation)
       if (openingCategory.title === 'Spirits') {
         unit = 'shots';
-        const { emptyBottleWeight } = openingItem;
+        const { emptyBottleWeight, grossWeight } = openingItem;
 
         // If essential weight data is missing, we cannot calculate accurately.
-        if (typeof emptyBottleWeight !== 'number') {
+        if (typeof emptyBottleWeight !== 'number' || typeof grossWeight !== 'number') {
             variance = 0; // Skip calculation to avoid errors
         } else {
+            const liquidWeightPerBottle = grossWeight - emptyBottleWeight;
+
             const openingFullBottles = (openingItem.foh || 0) + (openingItem.storeRoom || 0);
             const openingOpenLiquid = (openingItem.openBottleWeight || 0) > emptyBottleWeight 
                 ? (openingItem.openBottleWeight || 0) - emptyBottleWeight
                 : 0;
-            const openingTotalLiquid = (openingFullBottles * LIQUID_WEIGHT_PER_BOTTLE) + openingOpenLiquid + (deliveryQty * LIQUID_WEIGHT_PER_BOTTLE);
+            const openingTotalLiquid = (openingFullBottles * liquidWeightPerBottle) + openingOpenLiquid + (deliveryQty * liquidWeightPerBottle);
 
             const closingFullBottles = (closingItem.foh || 0) + (closingItem.storeRoom || 0);
             const closingOpenLiquid = (closingItem.openBottleWeight || 0) > emptyBottleWeight
                 ? (closingItem.openBottleWeight || 0) - emptyBottleWeight
                 : 0;
-            const closingTotalLiquid = (closingFullBottles * LIQUID_WEIGHT_PER_BOTTLE) + closingOpenLiquid;
+            const closingTotalLiquid = (closingFullBottles * liquidWeightPerBottle) + closingOpenLiquid;
 
             const varianceInGrams = openingTotalLiquid - closingTotalLiquid;
             
