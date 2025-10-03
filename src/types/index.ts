@@ -19,7 +19,8 @@ export type StockItem = {
   storeRoom?: number;
   openBottleWeight?: number;
   quantity?: number;
-  fullBottleWeight?: number;
+  grossWeight?: number;
+  emptyBottleWeight?: number; // Added for spirits variance calculation
 };
 
 export type StockCategory = {
@@ -78,7 +79,8 @@ export type Product = {
   id: string;
   name: string;
   category: 'Spirits' | 'Cans and Bottles' | 'Food' | "Brewer's Reserve";
-  fullBottleWeight?: number;
+  grossWeight?: number;
+  emptyBottleWeight?: number; // Added for spirits
   isActive: boolean;
   parLevel?: number;
   orderUnitSize?: number;

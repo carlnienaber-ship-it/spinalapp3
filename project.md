@@ -63,9 +63,11 @@ To develop a robust, secure, and intuitive web application that assists staff in
 
 ### 7.2. Stock Variance Calculation
 - **Simple Stock (Cans, Food):** `Variance = (Opening Count + Deliveries) - Closing Count`.
-- **Spirits (Liquid Mass Method):** To accurately account for partially used bottles, variance is calculated based on total mass.
-    - **Required Data:** A static `fullBottleWeight` must be defined for each spirit.
-    - **Formula:** `Variance (grams) = ((Opening Full Bottles * fullBottleWeight) + Opening Open Bottle Weight + (Deliveries * fullBottleWeight)) - ((Closing Full Bottles * fullBottleWeight) + Closing Open Bottle Weight)`.
+- **Spirits (Liquid Mass Method):** To accurately account for partially used bottles and the process of finishing one bottle and opening another, variance is calculated based on the change in **total liquid mass**.
+    - **Required Data:** Each spirit must have an `emptyBottleWeight` defined. The liquid content of a full bottle is standardized at **705g**.
+    - **Formula:** The variance is the difference between the total opening liquid mass and the total closing liquid mass.
+        - `Total Opening Liquid = (Opening Full Bottles * 705g) + (Opening Open Bottle Weight - emptyBottleWeight) + (Deliveries * 705g)`
+        - `Total Closing Liquid = (Closing Full Bottles * 705g) + (Closing Open Bottle Weight - emptyBottleWeight)`
     - **Tolerance Rule:** To account for minor scale inaccuracies, any final calculated variance between **-7g and +7g** (inclusive) will be treated as a variance of **0g**.
     - **Shots Calculation:** The final gram variance will be converted into the number of shots poured using the formula: `NumberOfShots = VarianceInGrams / 23.5`. This will be the primary metric displayed.
 - **Yoco API Integration (Future):** The calculated variance will eventually be compared against sales data fetched from the Yoco POS API to identify discrepancies.

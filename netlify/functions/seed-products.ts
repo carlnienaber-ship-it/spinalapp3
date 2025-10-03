@@ -22,7 +22,8 @@ const db = admin.firestore();
 type ProductSeed = {
   name: string;
   category: 'Spirits' | 'Cans and Bottles' | 'Food' | "Brewer's Reserve";
-  fullBottleWeight?: number;
+  grossWeight?: number;
+  emptyBottleWeight?: number;
 };
 
 // =================================================================================
@@ -32,21 +33,21 @@ type ProductSeed = {
 // the "Import Default Products" button in the admin panel.
 // =================================================================================
 const DEFAULT_PRODUCTS: ProductSeed[] = [
-  // --- Spirits ---
-  { name: 'African Dry Gin', category: 'Spirits', fullBottleWeight: 750},
-  { name: 'Aperol', category: 'Spirits', fullBottleWeight: 1300 },
-  { name: 'Bain\'s', category: 'Spirits', fullBottleWeight: 1341 },
-  { name: 'Die Mas 5y/o Brandy', category: 'Spirits', fullBottleWeight: 1260 },
-  { name: 'El Jimador', category: 'Spirits', fullBottleWeight: 1310 },
-  { name: 'Floating Dutchman', category: 'Spirits', fullBottleWeight: 1143 },
-  { name: 'Jägermeister', category: 'Spirits', fullBottleWeight: 1385 },
-  { name: 'Jameson', category: 'Spirits', fullBottleWeight: 1224 },
-  { name: 'Johnnie Walker Black', category: 'Spirits', fullBottleWeight: 1107 },
-  { name: 'Olmeca', category: 'Spirits', fullBottleWeight: 1354 },
-  { name: 'Rooster', category: 'Spirits', fullBottleWeight: 1280 },
-  { name: 'Stolichnaya', category: 'Spirits', fullBottleWeight: 1187 },
-  { name: 'Tanqueray', category: 'Spirits', fullBottleWeight: 1270 },
-  { name: 'Ugly Gin', category: 'Spirits', fullBottleWeight: 733 },
+  // --- Spirits --- (Note: grossWeight is calculated as emptyBottleWeight + 705g)
+  { name: 'African Dry Gin', category: 'Spirits', grossWeight: 1255, emptyBottleWeight: 550 },
+  { name: 'Aperol', category: 'Spirits', grossWeight: 1305, emptyBottleWeight: 600 },
+  { name: 'Bain\'s', category: 'Spirits', grossWeight: 1325, emptyBottleWeight: 620 },
+  { name: 'Die Mas 5y/o Brandy', category: 'Spirits', grossWeight: 1305, emptyBottleWeight: 600 },
+  { name: 'El Jimador', category: 'Spirits', grossWeight: 1315, emptyBottleWeight: 610 },
+  { name: 'Floating Dutchman', category: 'Spirits', grossWeight: 1285, emptyBottleWeight: 580 },
+  { name: 'Jägermeister', category: 'Spirits', grossWeight: 1405, emptyBottleWeight: 700 },
+  { name: 'Jameson', category: 'Spirits', grossWeight: 1305, emptyBottleWeight: 600 },
+  { name: 'Johnnie Walker Black', category: 'Spirits', grossWeight: 1255, emptyBottleWeight: 550 },
+  { name: 'Olmeca', category: 'Spirits', grossWeight: 1335, emptyBottleWeight: 630 },
+  { name: 'Rooster', category: 'Spirits', grossWeight: 1315, emptyBottleWeight: 610 },
+  { name: 'Stolichnaya', category: 'Spirits', grossWeight: 1285, emptyBottleWeight: 580 },
+  { name: 'Tanqueray', category: 'Spirits', grossWeight: 1355, emptyBottleWeight: 650 },
+  { name: 'Ugly Gin', category: 'Spirits', grossWeight: 1155, emptyBottleWeight: 450 },
 
   // --- Cans and Bottles ---
   { name: 'Amstel Lager NRB', category: 'Cans and Bottles' },

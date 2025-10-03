@@ -40,8 +40,11 @@ export const generateInitialShiftState = (products: Product[]): ShiftState => {
     const category = stockCategories.find(c => c.title === product.category);
     if (category) {
       const stockItem: any = { name: product.name };
-      if (product.fullBottleWeight) {
-        stockItem.fullBottleWeight = product.fullBottleWeight;
+      if (product.grossWeight) {
+        stockItem.grossWeight = product.grossWeight;
+      }
+      if (product.emptyBottleWeight) {
+        stockItem.emptyBottleWeight = product.emptyBottleWeight;
       }
       category.items.push(stockItem);
     }

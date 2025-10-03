@@ -229,7 +229,7 @@
 - **(Completed)** Task 21.2: Refactor CSV Data Structure.
 - **(Completed)** Task 27.1: Relocate 'Back to Welcome' Button.
 - **(Completed)** Task AD.1: Refactor Admin Dashboard Navigation to a Vertical Sidebar.
-- Task AD.2: Make Admin Sidebar Responsive for Mobile.
+- **(Completed)** Task AD.2: Make Admin Sidebar Responsive for Mobile.
   - **Objective:** The new sidebar layout must be usable on mobile devices.
   - **Implementation:**
     - The sidebar will be hidden by default on small screens.
@@ -251,7 +251,7 @@
   - **Implementation:**
     - In `ProductForm.tsx`, implement logic so that pressing the `Enter` key triggers the "Save Product" action.
     - Implement logic so that pressing the `Escape` key triggers the "Cancel" action, closing the modal.
-- Task UP.5: Remove Admin Dashboard Subtitle. Remove the "Review submitted shift handovers" subtitle from the admin dashboard header.
+- **(Completed)** Task UP.5: Remove Admin Dashboard Subtitle. Remove the "Review submitted shift handovers" subtitle from the admin dashboard header.
 
 ---
 

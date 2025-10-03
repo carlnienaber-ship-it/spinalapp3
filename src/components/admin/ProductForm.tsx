@@ -28,7 +28,8 @@ const InfoTooltip: React.FC<{ text: string }> = ({ text }) => (
 const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, onSuccess }) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Product['category']>('Cans and Bottles');
-  const [fullBottleWeight, setFullBottleWeight] = useState<number | undefined>(undefined);
+  const [grossWeight, setGrossWeight] = useState<number | undefined>(undefined);
+  const [emptyBottleWeight, setEmptyBottleWeight] = useState<number | undefined>(undefined);
   const [parLevel, setParLevel] = useState<number | undefined>(undefined);
   const [orderUnitSize, setOrderUnitSize] = useState<number | undefined>(undefined);
   const [minOrderQuantity, setMinOrderQuantity] = useState<number | undefined>(undefined);
@@ -47,7 +48,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
     if (product) {
       setName(product.name);
       setCategory(product.category);
-      setFullBottleWeight(product.fullBottleWeight);
+      setGrossWeight(product.grossWeight);
+      setEmptyBottleWeight(product.emptyBottleWeight);
       setParLevel(product.parLevel);
       setOrderUnitSize(product.orderUnitSize);
       setMinOrderQuantity(product.minOrderQuantity);
@@ -63,7 +65,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       // Reset form for new product
       setName('');
       setCategory('Cans and Bottles');
-      setFullBottleWeight(undefined);
+      setGrossWeight(undefined);
+      setEmptyBottleWeight(undefined);
       setParLevel(undefined);
       setOrderUnitSize(undefined);
       setMinOrderQuantity(undefined);
@@ -99,7 +102,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
       const productData = { 
         name, 
         category, 
-        fullBottleWeight: category === 'Spirits' ? fullBottleWeight : undefined,
+        grossWeight,
+        emptyBottleWeight: category === 'Spirits' ? emptyBottleWeight : undefined,
         parLevel,
         orderUnitSize,
         minOrderQuantity,
@@ -161,16 +165,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, suppliers, onClose, 
                 {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
             </div>
-            {category === 'Spirits' && (
-              <div className="mt-4">
-                <label htmlFor="full-bottle-weight" className="block text-sm font-medium text-gray-300">Full Bottle Weight (g)</label>
+            <div className="mt-4">
+                <label htmlFor="gross-weight" className="block text-sm font-medium text-gray-300">
+                    Gross Weight (g)
+                    <InfoTooltip text="The total weight of the product including packaging (e.g., full bottle, can of coke)." />
+                </label>
                 <NumericInput
-                  id="full-bottle-weight"
-                  value={fullBottleWeight ?? ''}
-                  onChange={(e) => setFullBottleWeight(parseNumber(e.target.value))}
-                  placeholder="e.g., 1250"
-                  className="mt-1"
+                id="gross-weight"
+                value={grossWeight ?? ''}
+                onChange={(e) => setGrossWeight(parseNumber(e.target.value))}
+                placeholder="e.g., 1315"
+                className="mt-1"
                 />
+            </div>
+            {category === 'Spirits' && (
+              <div className="mt-4 pt-4 border-t border-gray-600">
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">Spirits Specific</h4>
+                <div>
+                    <label htmlFor="empty-bottle-weight" className="block text-sm font-medium text-gray-300">Empty Bottle Weight (g)</label>
+                    <NumericInput
+                    id="empty-bottle-weight"
+                    value={emptyBottleWeight ?? ''}
+                    onChange={(e) => setEmptyBottleWeight(parseNumber(e.target.value))}
+                    placeholder="e.g., 600"
+                    className="mt-1"
+                    />
+                </div>
               </div>
             )}
           </div>

@@ -39,7 +39,8 @@ const handler: Handler = async (event) => {
     const newProduct = {
         name: productData.name,
         category: productData.category,
-        fullBottleWeight: productData.fullBottleWeight ?? null,
+        grossWeight: productData.grossWeight ?? null,
+        emptyBottleWeight: productData.emptyBottleWeight ?? null,
         isActive: true,
         parLevel: productData.parLevel ?? null,
         orderUnitSize: productData.orderUnitSize ?? null,

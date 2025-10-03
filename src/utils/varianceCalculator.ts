@@ -21,6 +21,7 @@ export type VarianceCategory = {
 
 const SHOT_WEIGHT_GRAMS = 23.5;
 const WEIGHT_TOLERANCE_GRAMS = 7;
+const LIQUID_WEIGHT_PER_BOTTLE = 705; // Standardized liquid weight in grams
 
 export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
   const varianceReport: VarianceCategory[] = [];
@@ -44,28 +45,39 @@ export function calculateShiftVariance(shift: ShiftRecord): VarianceCategory[] {
       const openingSOH: StockOnHand = {};
       const closingSOH: StockOnHand = {};
 
-      // Logic for Spirits (mass-based calculation)
+      // Logic for Spirits (liquid mass-based calculation)
       if (openingCategory.title === 'Spirits') {
         unit = 'shots';
-        const fullBottleWeight = openingItem.fullBottleWeight || 0;
+        const { emptyBottleWeight } = openingItem;
 
-        const openingFullBottles = (openingItem.foh || 0) + (openingItem.storeRoom || 0);
-        const openingMass = (openingFullBottles * fullBottleWeight) + (openingItem.openBottleWeight || 0) + (deliveryQty * fullBottleWeight);
-        
-        const closingFullBottles = (closingItem.foh || 0) + (closingItem.storeRoom || 0);
-        const closingMass = (closingFullBottles * fullBottleWeight) + (closingItem.openBottleWeight || 0);
+        // If essential weight data is missing, we cannot calculate accurately.
+        if (typeof emptyBottleWeight !== 'number') {
+            variance = 0; // Skip calculation to avoid errors
+        } else {
+            const openingFullBottles = (openingItem.foh || 0) + (openingItem.storeRoom || 0);
+            const openingOpenLiquid = (openingItem.openBottleWeight || 0) > emptyBottleWeight 
+                ? (openingItem.openBottleWeight || 0) - emptyBottleWeight
+                : 0;
+            const openingTotalLiquid = (openingFullBottles * LIQUID_WEIGHT_PER_BOTTLE) + openingOpenLiquid + (deliveryQty * LIQUID_WEIGHT_PER_BOTTLE);
 
-        const varianceInGrams = openingMass - closingMass;
-        
-        // Apply the tolerance rule
-        const finalVarianceInGrams = Math.abs(varianceInGrams) <= WEIGHT_TOLERANCE_GRAMS ? 0 : varianceInGrams;
-        
-        variance = finalVarianceInGrams / SHOT_WEIGHT_GRAMS;
+            const closingFullBottles = (closingItem.foh || 0) + (closingItem.storeRoom || 0);
+            const closingOpenLiquid = (closingItem.openBottleWeight || 0) > emptyBottleWeight
+                ? (closingItem.openBottleWeight || 0) - emptyBottleWeight
+                : 0;
+            const closingTotalLiquid = (closingFullBottles * LIQUID_WEIGHT_PER_BOTTLE) + closingOpenLiquid;
 
-        // Capture SOH details
-        openingSOH.bottles = openingFullBottles;
+            const varianceInGrams = openingTotalLiquid - closingTotalLiquid;
+            
+            // Apply the tolerance rule
+            const finalVarianceInGrams = Math.abs(varianceInGrams) <= WEIGHT_TOLERANCE_GRAMS ? 0 : varianceInGrams;
+            
+            variance = finalVarianceInGrams / SHOT_WEIGHT_GRAMS;
+        }
+
+        // Capture SOH details for display
+        openingSOH.bottles = (openingItem.foh || 0) + (openingItem.storeRoom || 0);
         openingSOH.weight = openingItem.openBottleWeight || 0;
-        closingSOH.bottles = closingFullBottles;
+        closingSOH.bottles = (closingItem.foh || 0) + (closingItem.storeRoom || 0);
         closingSOH.weight = closingItem.openBottleWeight || 0;
 
       } else { // Logic for simple items (unit-based calculation)

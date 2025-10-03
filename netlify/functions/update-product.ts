@@ -44,7 +44,8 @@ const handler: Handler = async (event) => {
     const updatePayload = {
       name: productData.name,
       category: productData.category,
-      fullBottleWeight: productData.fullBottleWeight ?? null,
+      grossWeight: productData.grossWeight ?? null,
+      emptyBottleWeight: productData.emptyBottleWeight ?? null,
       parLevel: productData.parLevel ?? null,
       orderUnitSize: productData.orderUnitSize ?? null,
       minOrderQuantity: productData.minOrderQuantity ?? null,
@@ -54,7 +55,6 @@ const handler: Handler = async (event) => {
       tertiarySupplierId: productData.tertiarySupplierId ?? null,
       isBrewersReserve: productData.isBrewersReserve ?? false,
       tastingNotes: productData.tastingNotes ?? null,
-      // FIX: Corrected typo from productDara to productData.
       abv: productData.abv ?? null,
       price: productData.price ?? null,
     };
