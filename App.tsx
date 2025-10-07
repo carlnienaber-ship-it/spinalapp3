@@ -17,7 +17,7 @@ import GeoStatus from './src/components/ui/GeoStatus';
 import AdminGeoOverrideIndicator from './src/components/ui/AdminGeoOverrideIndicator';
 import { useGeolocation } from './src/hooks/useGeolocation';
 import ProgressIndicator from './src/components/ui/ProgressIndicator';
-import MotivationalScreen from './src/components/ui/MotivationalScreen';
+import ProductUsageTracker from './src/components/ui/MotivationalScreen';
 import NewStockDelivery from './src/components/stock/NewStockDelivery';
 import CompletionScreen from './src/components/ui/CompletionScreen';
 import AdminDashboard from './src/components/admin/AdminDashboard';
@@ -38,6 +38,7 @@ const App: React.FC = () => {
     openingStock: [],
     closingStock: [],
     newStockDeliveries: [],
+    servedProducts: {},
     shiftFeedback: { rating: null, comment: '' },
   });
 
@@ -158,6 +159,48 @@ const App: React.FC = () => {
     }));
   }, [setShiftState]);
 
+  const handleServedProductToggle = useCallback((productName: string, isServed: boolean) => {
+    setShiftState(prev => {
+      const newServedProducts = { ...prev.servedProducts };
+      if (isServed) {
+        newServedProducts[productName] = true;
+      } else {
+        delete newServedProducts[productName];
+      }
+      return {
+        ...prev,
+        servedProducts: newServedProducts,
+      };
+    });
+  }, [setShiftState]);
+
+  const handleProceedToClosing = useCallback(() => {
+    setShiftState(prev => {
+      // Deep copy to prevent direct state mutation
+      const newClosingStock = JSON.parse(JSON.stringify(prev.closingStock));
+      const served = prev.servedProducts || {};
+
+      prev.openingStock.forEach((openingCategory, categoryIndex) => {
+        openingCategory.items.forEach((openingItem, itemIndex) => {
+          // If the product was NOT served, copy opening stock to closing stock
+          if (!served[openingItem.name]) {
+            const closingItem = newClosingStock[categoryIndex]?.items[itemIndex];
+            // Safety check: ensure we're updating the correct item
+            if (closingItem && closingItem.name === openingItem.name) {
+              closingItem.foh = openingItem.foh;
+              closingItem.storeRoom = openingItem.storeRoom;
+              closingItem.openBottleWeight = openingItem.openBottleWeight;
+              closingItem.quantity = openingItem.quantity;
+            }
+          }
+        });
+      });
+
+      return { ...prev, closingStock: newClosingStock, currentStep: 'closingStock' };
+    });
+    window.scrollTo(0, 0);
+  }, [setShiftState]);
+
   const handleSubmit = async () => {
     if (shiftState.shiftFeedback.rating && (shiftState.shiftFeedback.rating !== 'Normal' && !shiftState.shiftFeedback.comment)) {
       alert("Please add a comment for 'Great' or 'Bad' feedback.");
@@ -255,12 +298,12 @@ const App: React.FC = () => {
       
       case 'midShift':
         return (
-          <MotivationalScreen
+          <ProductUsageTracker
+            stockData={shiftState.openingStock}
+            servedProducts={shiftState.servedProducts}
+            onProductToggle={handleServedProductToggle}
             onNewDelivery={() => setShowNewDelivery(true)}
-            onProceed={() => {
-              setShowNewDelivery(false);
-              handleNextStep('closingStock');
-            }}
+            onProceed={handleProceedToClosing}
           />
         );
 

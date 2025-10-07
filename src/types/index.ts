@@ -58,6 +58,7 @@ export type ShiftState = {
   openingStock: StockCategory[];
   closingStock: StockCategory[];
   newStockDeliveries: NewStockDeliveryItem[];
+  servedProducts: { [productName: string]: boolean };
   shiftFeedback: {
     rating: 'Great' | 'Normal' | 'Bad' | null;
     comment: string;

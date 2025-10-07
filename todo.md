@@ -127,20 +127,20 @@
 - **(Completed)** Task 36.2 (UI Update): Overhaul the `VarianceReport.tsx` component to display this new, detailed information. Each item should clearly show its Opening SOH, Closing SOH, and the final Variance in a structured, easy-to-read format.
 - **(Completed)** Task 36.3 (CSV Export Update): Enhance the CSV download functionality to include new columns for the raw opening and closing stock data, matching the updated UI.
 
-### Detailed User Hours Worked Report (Phase 39 - In Progress)
+### Detailed User Hours Worked Report (Phase 39 - Completed)
 - **Objective:** Overhaul the hours report to follow a new, user-centric workflow: select a user, then a date range, to generate a detailed report.
-- **Task 39.1 (Backend):** Update the `get-hours-worked-report` serverless function to accept a `userEmail` in addition to `startDate` and `endDate`. The Firestore query must be updated to filter by this email for efficiency.
-- **Task 39.2 (Backend):** Change the function's return data. Instead of an aggregated summary of all users, it must return a detailed object for the selected user, containing their `totalHours` and a chronological list of every `shift` they worked, including the precise `startTime`, `endTime`, and calculated `hours` for each shift.
-- **Task 39.3 (Frontend):** Update the `useApiClient` hook. The `getHoursWorkedReport` function signature must be changed to accept `userEmail`, `startDate`, and `endDate`, and its return type must be updated to match the new detailed report structure.
-- **Task 39.4 (Frontend):** In `AdminDashboard.tsx`, derive a list of unique users from the fetched shifts data and pass it as a prop to the `HoursReport` component.
-- **Task 39.5 (Frontend):** Overhaul the `HoursReport.tsx` component UI.
+- **(Completed)** Task 39.1 (Backend): Update the `get-hours-worked-report` serverless function to accept a `userEmail` in addition to `startDate` and `endDate`. The Firestore query must be updated to filter by this email for efficiency.
+- **(Completed)** Task 39.2 (Backend): Change the function's return data. Instead of an aggregated summary of all users, it must return a detailed object for the selected user, containing their `totalHours` and a chronological list of every `shift` they worked, including the precise `startTime`, `endTime`, and calculated `hours` for each shift.
+- **(Completed)** Task 39.3 (Frontend): Update the `useApiClient` hook. The `getHoursWorkedReport` function signature must be changed to accept `userEmail`, `startDate`, and `endDate`, and its return type must be updated to match the new detailed report structure.
+- **(Completed)** Task 39.4 (Frontend): In `AdminDashboard.tsx`, derive a list of unique users from the fetched shifts data and pass it as a prop to the `HoursReport` component.
+- **(Completed)** Task 39.5 (Frontend): Overhaul the `HoursReport.tsx` component UI.
   - Replace the matrix view with a new workflow:
     1. A dropdown to select a user from the new prop.
     2. Start and end date pickers.
     3. A "Generate Report" button, disabled until all three fields are selected.
   - The report display will be a table with columns: `Date`, `Clock In Time`, `Clock Out Time`, `Daily Hours`.
   - A summary of `Total Hours` for the period will be displayed below the table.
-- **Task 39.6 (Frontend):** Update the "Download CSV" function in `HoursReport.tsx` to export the new, detailed, single-user data format.
+- **(Completed)** Task 39.6 (Frontend): Update the "Download CSV" function in `HoursReport.tsx` to export the new, detailed, single-user data format.
 
 ### Public Menu (Phase 25 - Completed)
 - **(Completed)** Task 25.1: Update Product Data Model. Added new optional fields to the `products` collection for `tastingNotes` (string), `abv` (number), and a boolean `isBrewersReserve`.
@@ -148,6 +148,20 @@
 - **(Completed)** Task 25.3: Update Product Management UI. Enhanced the Add/Edit Product form in the admin panel to include a toggle for `isBrewersReserve` and conditional fields for `tastingNotes` and `abv`.
 - **(Completed)** Task 25.4: Implement Routing for Public Page. Set up a new route in the React application (e.g., `/brewers-reserve`) that can be accessed without logging in.
 - **(Completed)** Task 25.5: Build Public Menu Page Component. Created a new, visually distinct component to display the Brewer's Reserve beers and their tasting notes, fetched from the new public function.
+
+### Smart Stocktake Workflow (Phase 40 - Not Started)
+- **Objective:** To streamline the closing stocktake process by only requiring manual counts for products that were actively used during a shift, saving significant time for staff.
+- **Task 40.1 (Data Model):** Add a new `servedProducts` map (e.g., `{ [productName: string]: boolean }`) to the `ShiftState` type to track which products have been used.
+- **Task 40.2 (UI Overhaul - Mid-Shift Hub):**
+  - Remove the motivational messages and company values from the `MotivationalScreen` component.
+  - Replace it with a new "Product Usage Tracker" interface. This will display a list of all active products, grouped by category, each with a toggle switch.
+  - The state of these toggles will update the new `servedProducts` map in the `ShiftState`.
+- **Task 40.3 (Core Logic):** Implement the pre-population logic. When the user clicks "Proceed to Closing":
+  - The application will iterate through all products.
+  - For any product where `servedProducts[productName]` is `false` (or not set), its `openingStock` values will be automatically copied to the corresponding `closingStock` fields in the `shiftState`.
+- **Task 40.4 (UI Update - Closing Stocktake):**
+  - The `StocktakeForm` for the closing stocktake will now render with the pre-populated values for unused items.
+  - **Enhancement:** Make the auto-filled input fields read-only or visually distinct to clearly indicate that they do not require a manual count, while still allowing for override if needed.
 
 ### Yoco Integration - Setup & Authentication (Phase 37 - Not Started)
 - **Objective:** Create a secure, one-time setup process for connecting the app to the Yoco POS API via OAuth 2.0.

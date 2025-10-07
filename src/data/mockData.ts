@@ -64,6 +64,7 @@ export const generateInitialShiftState = (products: Product[]): ShiftState => {
     openingStock: deepCopyStock(stockCategories),
     closingStock: deepCopyStock(stockCategories),
     newStockDeliveries: [],
+    servedProducts: {},
     shiftFeedback: {
       rating: null,
       comment: '',
