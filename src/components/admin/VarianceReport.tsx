@@ -1,9 +1,11 @@
 import React from 'react';
 import { VarianceCategory, StockOnHand } from '../../utils/varianceCalculator';
 import Button from '../ui/Button';
+import { ShiftRecord } from '../../types';
 
 type VarianceReportProps = {
   reportData: VarianceCategory[];
+  shift: ShiftRecord;
 };
 
 const formatSOH = (soh: StockOnHand): string => {
@@ -16,7 +18,7 @@ const formatSOH = (soh: StockOnHand): string => {
     return 'N/A';
 };
 
-const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
+const VarianceReport: React.FC<VarianceReportProps> = ({ reportData, shift }) => {
   const handleDownloadCsv = () => {
     const headers = [
       'Category', 
@@ -62,9 +64,9 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ reportData }) => {
     if (link.href) {
       URL.revokeObjectURL(link.href);
     }
-    const date = new Date().toISOString().split('T')[0];
+    const shiftDate = shift.startTime ? new Date(shift.startTime).toISOString().split('T')[0] : 'unknown_date';
     link.href = URL.createObjectURL(blob);
-    link.download = `variance_report_${date}.csv`;
+    link.download = `variance_report_${shiftDate}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

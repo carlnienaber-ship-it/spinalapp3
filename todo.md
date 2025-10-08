@@ -254,18 +254,14 @@
 ### General Polish
 - **(Completed)** Task UP.1: Change main header title from "Spinäl Äpp Handover" to "Spinäl Äpp".
 - **(Completed)** Task UP.2: Refine Inventory Terminology & Add Reorder Field.
-  - **Objective:** Update product management fields for clarity and add the `Reorder Quantity` field.
-  - **Implementation:**
-    - Rename `minOrderUnits` to `minOrderQuantity` in the `Product` type, Firestore model, and backend functions.
-    - Add a new field: `reorderQuantity` (number) to represent the ideal order amount.
-    - Update the `ProductForm` UI to reflect these changes, labeling the MOQ field as "Minimum Order Quantity (MOQ)".
 - **(Completed)** Task UP.3: Change browser tab title to "Spinäl Ǎpp".
 - **(Completed)** Task UP.4: Add Keyboard Shortcuts to Product Form.
-  - **Objective:** Enhance the user experience in the "Add/Edit Product" modal.
-  - **Implementation:**
-    - In `ProductForm.tsx`, implement logic so that pressing the `Enter` key triggers the "Save Product" action.
-    - Implement logic so that pressing the `Escape` key triggers the "Cancel" action, closing the modal.
 - **(Completed)** Task UP.5: Remove Admin Dashboard Subtitle. Remove the "Review submitted shift handovers" subtitle from the admin dashboard header.
+- **(Completed)** Task UP.6: Change Variance Report CSV Filename.
+  - **Objective:** The downloaded CSV file for the variance report should be named using the date of the shift, not the date of the download.
+  - **Implementation:**
+    - Pass the full `shift` object from `ShiftDetail.tsx` as a prop to the `VarianceReport.tsx` component.
+    - In `VarianceReport.tsx`, modify the `handleDownloadCsv` function to extract the date from the shift's `startTime` and use it to format the filename (e.g., `variance_report_YYYY-MM-DD.csv`).
 
 ---
 

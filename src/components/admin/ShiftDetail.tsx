@@ -57,7 +57,7 @@ const ShiftDetail: React.FC<ShiftDetailProps> = ({ shift, products }) => {
         <Button onClick={() => setShowVariance(!showVariance)} className="w-full">
             {showVariance ? 'Hide Variance Report' : 'Calculate & View Variance Report'}
         </Button>
-        {showVariance && <VarianceReport reportData={varianceReportData} />}
+        {showVariance && <VarianceReport reportData={varianceReportData} shift={shift} />}
       </div>
 
       <AdminStockDisplay
