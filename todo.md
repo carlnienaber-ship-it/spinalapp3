@@ -273,6 +273,7 @@
 
 ### State Management Fixes (Phase 28)
 - **(Completed)** Task 28.1: Fix Product State Synchronization.
+- **(Completed)** Task SM.2: Implement Proactive State Hydration. Added logic to `App.tsx` to automatically update stale `shiftState` data loaded from `localStorage`. This prevents crashes when new code expects properties that are missing from old, saved shift data.
 
 ### Layout Fixes
 - **(Completed)** Task BF.1: Fix Mobile Horizontal Scroll.

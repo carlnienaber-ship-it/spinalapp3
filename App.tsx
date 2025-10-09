@@ -76,6 +76,23 @@ const App: React.FC = () => {
     }
   }, [products, shiftState.currentStep, shiftState.startTime, setShiftState]);
 
+  // Effect 3: State Hydration. This robustly handles cases where a user has stale
+  // data in localStorage from before a deployment. It checks for missing properties
+  // and adds them with default values to prevent crashes.
+  useEffect(() => {
+    if (shiftState && !shiftState.servedProducts) {
+      console.log("Hydrating old shift state: adding 'servedProducts' property.");
+      setShiftState(prev => ({
+        ...prev,
+        servedProducts: {},
+      }));
+    }
+    // Future state migrations can be added here. For example:
+    // if (shiftState && typeof shiftState.someNewProperty === 'undefined') {
+    //   setShiftState(prev => ({ ...prev, someNewProperty: 'defaultValue' }));
+    // }
+  }, [shiftState, setShiftState]);
+
 
   const isAdmin = useMemo(() => {
     const roles = user?.['https://spinalapp.com/roles'] as string[] | undefined;
