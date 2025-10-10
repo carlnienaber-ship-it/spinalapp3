@@ -201,6 +201,12 @@
     - Update every Netlify serverless function (`submit-shift`, `get-shifts`, `add-product`, etc.) to validate the Auth0 JWT included in the `Authorization` header.
     - For admin-only functions, ensure the token's payload contains the `Admin` role.
     - The function must return an "Unauthorized" error if the token is invalid or lacks the required permissions.
+- **(Completed)** Task SH.2: Implement Firestore Security Rules.
+  - **Objective:** Lock down direct client-side access to the Firestore database to prevent unauthorized reads or writes, ensuring all data modification goes through the secure serverless functions.
+  - **Implementation:**
+    - In the Firebase console, write security rules for the `shifts`, `products`, and `suppliers` collections.
+    - The rules should `allow read, write: if false;` for all client-side requests by default.
+    - This forces all database interactions to originate from the server-side environment (Netlify Functions) where the Firebase Admin SDK is used, which bypasses these rules and has full access.
 
 ---
 
